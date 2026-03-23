@@ -469,18 +469,21 @@
   <!-- TAB: TAMBAH -->
   <div class="tab-pane active" id="tab-add">
     <div class="admin-form" autocomplete="off">
+        <!-- dummy fields to prevent browser autofill -->
+        <input type="text" style="display:none" aria-hidden="true">
+        <input type="password" style="display:none" aria-hidden="true">
       <div class="form-row">
         <label>YouTube URL atau Video ID</label>
-        <input type="text" id="inp-url" autocomplete="off" placeholder="Paste link YT → judul otomatis terisi" oninput="onUrlInput(this.value)">
+        <input type="text" id="inp-url" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly')" placeholder="Paste link YT → judul otomatis terisi" oninput="onUrlInput(this.value)">
         <span class="fetch-status" id="fetch-status"></span>
       </div>
       <div class="form-row">
         <label>Judul <span style="color:var(--accent);font-size:9px">(otomatis dari YT, bisa diedit)</span></label>
-        <input type="text" id="inp-title" autocomplete="off" placeholder="Judul lagu / MV">
+        <input type="text" id="inp-title" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly')" placeholder="Judul lagu / MV">
       </div>
       <div>
         <label>Artis / Channel <span style="color:var(--accent);font-size:9px">(otomatis dari YT)</span></label>
-        <input type="text" id="inp-artist" autocomplete="off" placeholder="Nama artis">
+        <input type="text" id="inp-artist" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly')" placeholder="Nama artis">
       </div>
       <div>
         <label>Tags <span style="color:var(--muted);font-size:9px">(klik preset atau ketik manual)</span></label>
@@ -491,11 +494,11 @@
           <button type="button" class="tag-preset-btn" onclick="togglePresetTag('inp-tags','Debut',this)">Debut</button>
           <button type="button" class="tag-preset-btn" onclick="togglePresetTag('inp-tags','Trailer',this)">Trailer</button>
         </div>
-        <input type="text" id="inp-tags" autocomplete="off" placeholder="Atau ketik tag custom..." oninput="syncPresetHighlight('inp-tags','add-tag-presets')">
+        <input type="text" id="inp-tags" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly')" placeholder="Atau ketik tag custom..." oninput="syncPresetHighlight('inp-tags','add-tag-presets')">
       </div>
       <div>
         <label>Custom Thumbnail URL <span style="color:var(--muted);font-size:9px">(opsional)</span></label>
-        <input type="text" id="inp-thumb" autocomplete="off" placeholder="Kosongkan = thumbnail YT otomatis">
+        <input type="text" id="inp-thumb" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly')" placeholder="Kosongkan = thumbnail YT otomatis">
       </div>
       <div class="checkbox-row">
         <input type="checkbox" id="inp-featured">
