@@ -840,7 +840,7 @@ function syncAllPresets() {
 
 function buildShowcase() {
   const thumbs = cards
-    .map(c => c.thumb || (c.ytId ? `https://img.youtube.com/vi/${c.ytId}/maxresdefault.jpg` : null))
+    .map(c => c.thumb || (c.ytId ? ytThumbFallback(c.ytId) : null))
     .filter(Boolean);
 
   if (thumbs.length < 2) return; // not enough cards
@@ -876,12 +876,20 @@ function buildShowcase() {
 }
 
 
+function ytThumb(ytId) {
+  return `https://img.youtube.com/vi/${ytId}/maxresdefault.jpg`;
+}
+function ytThumbFallback(ytId) {
+  return `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
+}
+
 function cardHTML(c) {
-  const thumb = c.thumb || (c.ytId ? `https://img.youtube.com/vi/${c.ytId}/maxresdefault.jpg` : '');
+  const thumb = c.thumb || (c.ytId ? ytThumb(c.ytId) : '');
+  const fallback = c.ytId ? ytThumbFallback(c.ytId) : '';
   const tags  = (c.tags||[]).map(t=>`<span class="mv-tag">${esc(t)}</span>`).join('');
   return `
     <div class="mv-card${c.featured?' featured':''}" onclick="openModal('${c.id}')">
-      ${thumb ? `<img class="mv-thumb" src="${thumb}" alt="${esc(c.title)}" loading="lazy" onerror="this.style.display='none'">` : ''}
+      ${thumb ? `<img class="mv-thumb" src="${thumb}" alt="${esc(c.title)}" loading="lazy" onerror="this.src='${fallback}';this.onerror=null;">` : ''}
       <div class="mv-placeholder" style="${thumb?'display:none':''}">
         <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
       </div>
@@ -986,12 +994,13 @@ function renderExistingList() {
   }
 
   listEl.innerHTML = cards.map(c => {
-    const thumb = c.thumb || (c.ytId ? `https://img.youtube.com/vi/${c.ytId}/mqdefault.jpg` : '');
+    const thumb = c.thumb || (c.ytId ? ytThumb(c.ytId) : '');
+    const fallback = c.ytId ? ytThumbFallback(c.ytId) : '';
     return `
     <div class="existing-item" id="item-${c.id}" data-id="${c.id}">
       <div class="existing-item-header">
         <span class="drag-handle" title="Geser untuk urutkan">⠿</span>
-        ${thumb ? `<img class="existing-item-thumb" src="${thumb}" onerror="this.style.display='none'">` : ''}
+        ${thumb ? `<img class="existing-item-thumb" src="${thumb}" onerror="this.src='${fallback}';this.onerror=null;">` : ''}
         <span class="existing-item-title">${esc(c.title)}</span>
         <div class="existing-item-actions">
           <button class="edit-btn" onclick="toggleEdit('${c.id}')">✏</button>
@@ -1111,7 +1120,7 @@ async function addCard() {
   const ytId = ytExtract(url);
   const tags  = tRaw ? tRaw.split(',').map(t=>t.trim()).filter(Boolean) : [];
   const btn = el('add-btn'); btn.disabled=true; btn.textContent='Menyimpan...';
-  const { error } = await sb.from('mv_works').insert([{ ytId, title, artist, tags, thumb: thumb||null, featured: feat, sort_order: cards.length }]);
+  const { error } = await sb.from('mv_works').insert([{ ytId, title, artist, tags, thumb: thumb||null, featured: feat, sort_order: -1 }]);
   btn.disabled=false; btn.textContent='+ Tambah ke Portofolio';
   if (error) { toast('Gagal: '+error.message,'error'); return; }
   toast('Karya berhasil ditambahkan! ✓','success');
