@@ -270,7 +270,7 @@
   <div class="loading-bar-wrap">
     <div class="loading-bar" id="loading-bar"></div>
   </div>
-  <div class="loading-text" id="loading-text">Memuat portofolio...</div>
+  <div class="loading-text" id="loading-text">Loading portfolio...</div>
 </div>
 
 <!-- NAV -->
@@ -518,25 +518,24 @@ function hideLoading() {
 
 async function init() {
   document.body.classList.add('loading');
-  setLoadProgress(15, 'Menghubungkan ke server...');
+  setLoadProgress(15, 'Connecting...');
 
   sb = window.supabase.createClient(SB_URL, SB_KEY);
-  setLoadProgress(35, 'Memuat info site...');
+  setLoadProgress(35, 'Loading site info...');
 
   await loadSiteInfo();
-  setLoadProgress(65, 'Memuat karya...');
+  setLoadProgress(65, 'Loading works...');
 
   await loadCards();
-  setLoadProgress(90, 'Hampir selesai...');
+  setLoadProgress(90, 'Almost there...');
 
   sb.channel('mv_realtime')
     .on('postgres_changes', { event:'*', schema:'public', table:'mv_works' }, loadCards)
     .on('postgres_changes', { event:'*', schema:'public', table:'mv_site'  }, loadSiteInfo)
     .subscribe();
 
-  // small delay so the 100% bar is visible briefly
   setTimeout(() => {
-    setLoadProgress(100, 'Selesai!');
+    setLoadProgress(100, 'Ready!');
     setTimeout(hideLoading, 300);
   }, 200);
 }
