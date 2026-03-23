@@ -1,1 +1,750 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MV Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&family=Space+Mono&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --bg: #080810; --surface: #10101c;
+      --accent: #c8ff00; --accent2: #ff3cac;
+      --text: #f0f0f0; --muted: #666; --grid-gap: 3px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; overflow-x: hidden; }
+
+    /* NAV */
+    nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 18px 40px; background: rgba(8,8,16,0.88); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(200,255,0,0.08); }
+    .nav-links { display: flex; gap: 32px; list-style: none; }
+    .nav-links a { text-decoration: none; color: var(--muted); font-family: 'Space Mono', monospace; font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--accent); }
+    .nav-brand { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 0.1em; }
+    .nav-brand span { color: var(--accent); }
+    .nav-actions { display: flex; gap: 10px; align-items: center; }
+
+    /* HERO */
+    .hero { min-height: 100vh; display: flex; flex-direction: column; justify-content: flex-end; padding: 0 40px 60px; position: relative; overflow: hidden; }
+    .hero-bg { position: absolute; inset: 0; background: radial-gradient(ellipse 60% 50% at 70% 40%, rgba(200,255,0,0.06), transparent 60%), radial-gradient(ellipse 40% 40% at 30% 60%, rgba(255,60,172,0.08), transparent 60%); }
+    .hero-grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(200,255,0,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(200,255,0,0.03) 1px, transparent 1px); background-size: 60px 60px; }
+    .hero-label { font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 0.3em; color: var(--accent); text-transform: uppercase; margin-bottom: 16px; opacity: 0; animation: fadeUp .6s ease .3s forwards; }
+    .hero-title { font-family: 'Bebas Neue', sans-serif; font-size: clamp(72px, 14vw, 180px); line-height: 0.9; color: var(--text); opacity: 0; animation: fadeUp .7s ease .5s forwards; }
+    .hero-title .accent { color: var(--accent); }
+    .hero-title .stroke { -webkit-text-stroke: 2px var(--text); color: transparent; }
+    .hero-sub { margin-top: 24px; max-width: 400px; color: var(--muted); font-size: 14px; line-height: 1.7; opacity: 0; animation: fadeUp .7s ease .7s forwards; }
+    .hero-cta { margin-top: 36px; display: flex; gap: 16px; flex-wrap: wrap; opacity: 0; animation: fadeUp .7s ease .9s forwards; }
+
+    /* BUTTONS */
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 28px; font-family: 'Space Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; text-decoration: none; border: none; cursor: pointer; transition: all 0.2s; }
+    .btn-primary { background: var(--accent); color: #000; }
+    .btn-primary:hover { background: #d4ff1a; transform: translateY(-2px); }
+    .btn-ghost { background: transparent; color: var(--text); border: 1px solid rgba(240,240,240,0.2); }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* SECTIONS */
+    section { padding: 80px 40px; }
+    .section-header { display: flex; align-items: baseline; gap: 20px; margin-bottom: 40px; }
+    .section-title { font-family: 'Bebas Neue', sans-serif; font-size: 48px; letter-spacing: 0.05em; }
+    .section-count { font-family: 'Space Mono', monospace; font-size: 12px; color: var(--accent); }
+    .section-line { flex: 1; height: 1px; background: rgba(240,240,240,0.08); }
+
+    /* FILTERS */
+    .filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 32px; }
+    .filter-btn { padding: 6px 18px; background: transparent; border: 1px solid rgba(240,240,240,0.12); color: var(--muted); font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; transition: all 0.2s; }
+    .filter-btn:hover, .filter-btn.active { background: var(--accent); border-color: var(--accent); color: #000; }
+
+    /* GRID */
+    .mv-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: var(--grid-gap); }
+    @media (max-width:1100px) { .mv-grid { grid-template-columns: repeat(3,1fr); } }
+    @media (max-width:768px)  { .mv-grid { grid-template-columns: repeat(2,1fr); } }
+    @media (max-width:480px)  { .mv-grid { grid-template-columns: 1fr; } }
+
+    .mv-card { position: relative; aspect-ratio: 16/9; overflow: hidden; cursor: pointer; background: var(--surface); }
+    .mv-card.featured { grid-column: span 2; grid-row: span 2; }
+    .mv-thumb { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .5s cubic-bezier(.25,.46,.45,.94); }
+    .mv-card:hover .mv-thumb { transform: scale(1.06); }
+    .mv-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,.9) 0%, rgba(0,0,0,.2) 50%, transparent 100%); opacity: 0; transition: opacity .3s; display: flex; flex-direction: column; justify-content: flex-end; padding: 20px; }
+    .mv-card:hover .mv-overlay { opacity: 1; }
+    .mv-play { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%) scale(.7); width: 52px; height: 52px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; opacity: 0; transition: all .3s; }
+    .mv-play svg { margin-left: 3px; }
+    .mv-card:hover .mv-play { opacity: 1; transform: translate(-50%,-50%) scale(1); }
+    .mv-title { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: .06em; line-height: 1.2; }
+    .mv-card.featured .mv-title { font-size: 28px; }
+    .mv-artist { font-size: 12px; color: var(--muted); margin-top: 4px; font-family: 'Space Mono', monospace; }
+    .mv-tag { display: inline-block; padding: 2px 10px; background: var(--accent); color: #000; font-size: 10px; font-family: 'Space Mono', monospace; letter-spacing: .1em; text-transform: uppercase; margin: 0 4px 8px 0; }
+    .mv-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: var(--surface); color: var(--muted); font-family: 'Space Mono', monospace; font-size: 12px; flex-direction: column; gap: 8px; }
+
+    /* SKELETON */
+    .skeleton { background: linear-gradient(90deg, var(--surface) 25%, #1a1a2e 50%, var(--surface) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
+    @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+    /* MODAL */
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.92); z-index: 200; display: none; align-items: center; justify-content: center; padding: 20px; }
+    .modal-backdrop.open { display: flex; }
+    .modal { width: 100%; max-width: 900px; background: var(--surface); border: 1px solid rgba(200,255,0,.12); }
+    .modal-video { width: 100%; aspect-ratio: 16/9; }
+    .modal-video iframe { width: 100%; height: 100%; border: none; display: block; }
+    .modal-meta { padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; }
+    .modal-title { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: .05em; }
+    .modal-artist { color: var(--muted); font-size: 13px; margin-top: 2px; }
+    .modal-close { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 24px; padding: 8px; transition: color .2s; }
+    .modal-close:hover { color: var(--accent2); }
+
+    /* ABOUT */
+    #about { background: var(--surface); border-top: 1px solid rgba(200,255,0,.06); }
+    .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+    @media(max-width:768px){.about-grid{grid-template-columns:1fr;}}
+    .about-text p { color: rgba(240,240,240,.7); line-height: 1.8; margin-bottom: 16px; }
+    .stats-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 2px; }
+    .stat-box { background: var(--bg); padding: 28px; }
+    .stat-num { font-family: 'Bebas Neue', sans-serif; font-size: 56px; color: var(--accent); line-height: 1; }
+    .stat-label { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: .12em; text-transform: uppercase; margin-top: 6px; }
+
+    /* FOOTER */
+    footer { border-top: 1px solid rgba(240,240,240,.06); padding: 32px 40px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+    .footer-brand { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: .1em; }
+    .footer-brand span { color: var(--accent); }
+    .footer-copy { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--muted); }
+    .social-links { display: flex; gap: 16px; }
+    .social-links a { color: var(--muted); text-decoration: none; font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; transition: color .2s; }
+    .social-links a:hover { color: var(--accent); }
+
+    /* ADMIN TOGGLE */
+    .admin-toggle { position: fixed; bottom: 24px; right: 24px; z-index: 150; width: 48px; height: 48px; background: var(--accent); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background .2s; }
+    .admin-toggle:hover { background: #d4ff1a; }
+
+    /* ADMIN PANEL */
+    .admin-panel { position: fixed; bottom: 84px; right: 24px; z-index: 150; width: 380px; background: var(--surface); border: 1px solid rgba(200,255,0,.2); padding: 24px; display: none; max-height: 82vh; overflow-y: auto; }
+    .admin-panel.open { display: block; }
+    .admin-title { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: .08em; margin-bottom: 16px; color: var(--accent); }
+    .admin-form { display: flex; flex-direction: column; gap: 10px; }
+    .admin-form label { font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: .15em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 4px; }
+    .admin-form input { width: 100%; background: var(--bg); border: 1px solid rgba(240,240,240,.1); color: var(--text); padding: 10px 12px; font-family: 'DM Sans', sans-serif; font-size: 13px; outline: none; transition: border-color .2s; }
+    .admin-form input:focus { border-color: var(--accent); }
+    .admin-form .checkbox-row { display: flex; align-items: center; gap: 10px; }
+    .admin-form input[type="checkbox"] { width: auto; }
+    .admin-add-btn { background: var(--accent); color: #000; border: none; padding: 12px; font-family: 'Space Mono', monospace; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; cursor: pointer; margin-top: 4px; transition: all .2s; width: 100%; }
+    .admin-add-btn:hover:not(:disabled) { background: #d4ff1a; }
+    .admin-add-btn:disabled { opacity: .5; cursor: not-allowed; }
+    .admin-divider { border: none; border-top: 1px solid rgba(240,240,240,.08); margin: 16px 0; }
+    .existing-list { display: flex; flex-direction: column; gap: 6px; }
+    .existing-item { display: flex; align-items: center; justify-content: space-between; background: var(--bg); padding: 10px 12px; font-size: 12px; }
+    .existing-item-title { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-right: 8px; }
+    .del-btn { background: none; border: none; color: var(--accent2); cursor: pointer; font-size: 16px; line-height: 1; }
+    .del-btn:disabled { opacity: .3; cursor: not-allowed; }
+
+    /* SETUP BANNER */
+    .setup-banner { position: fixed; inset: 0; z-index: 500; background: rgba(8,8,16,.98); display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .setup-inner { background: var(--surface); border: 1px solid rgba(200,255,0,.25); padding: 40px; width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto; }
+    .setup-inner h2 { font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: .08em; color: var(--accent); margin-bottom: 8px; }
+    .setup-inner > p { color: var(--muted); font-size: 13px; line-height: 1.7; margin-bottom: 20px; }
+    .setup-steps { background: var(--bg); border: 1px solid rgba(200,255,0,.1); padding: 20px; margin-bottom: 20px; }
+    .step { display: flex; gap: 14px; margin-bottom: 14px; }
+    .step:last-child { margin-bottom: 0; }
+    .step-num { font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: var(--accent); line-height: 1; flex-shrink: 0; width: 24px; }
+    .step-text { font-size: 13px; color: rgba(240,240,240,.8); line-height: 1.6; }
+    .step-text code { background: rgba(200,255,0,.1); color: var(--accent); padding: 1px 6px; font-family: 'Space Mono', monospace; font-size: 11px; }
+    .sql-block { background: var(--bg); border: 1px solid rgba(200,255,0,.12); padding: 16px; font-family: 'Space Mono', monospace; font-size: 11px; color: rgba(200,255,0,.8); line-height: 1.8; overflow-x: auto; margin: 12px 0 20px; white-space: pre; }
+    .setup-inner label { font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: .15em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 6px; margin-top: 14px; }
+    .setup-inner input { width: 100%; background: var(--bg); border: 1px solid rgba(240,240,240,.15); color: var(--text); padding: 12px; font-family: 'Space Mono', monospace; font-size: 12px; outline: none; margin-bottom: 4px; }
+    .setup-inner input:focus { border-color: var(--accent); }
+    .setup-save-btn { width: 100%; margin-top: 20px; background: var(--accent); color: #000; border: none; padding: 14px; font-family: 'Space Mono', monospace; font-size: 12px; letter-spacing: .15em; text-transform: uppercase; cursor: pointer; transition: background .2s; }
+    .setup-save-btn:hover { background: #d4ff1a; }
+    .setup-note { margin-top: 12px; font-size: 11px; color: var(--muted); font-family: 'Space Mono', monospace; line-height: 1.6; }
+
+    /* PASSWORD MODAL */
+    .pw-modal { position: fixed; inset: 0; z-index: 400; background: rgba(0,0,0,.92); display: none; align-items: center; justify-content: center; }
+    .pw-modal.open { display: flex; }
+    .pw-inner { background: var(--surface); border: 1px solid rgba(200,255,0,.2); padding: 36px; width: 100%; max-width: 340px; }
+    .pw-inner h3 { font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: .08em; color: var(--accent); margin-bottom: 8px; }
+    .pw-inner p { color: var(--muted); font-size: 13px; margin-bottom: 16px; }
+    .pw-inner input { width: 100%; background: var(--bg); border: 1px solid rgba(240,240,240,.15); color: var(--text); padding: 12px; font-family: 'Space Mono', monospace; font-size: 13px; outline: none; margin-bottom: 12px; }
+    .pw-inner input:focus { border-color: var(--accent); }
+    .pw-btn { width: 100%; background: var(--accent); color: #000; border: none; padding: 12px; font-family: 'Space Mono', monospace; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; cursor: pointer; }
+    .pw-error { color: var(--accent2); font-size: 12px; font-family: 'Space Mono', monospace; display: none; margin-bottom: 10px; }
+
+    /* SITE EDIT */
+    .site-edit-panel { position: fixed; inset: 0; z-index: 300; background: rgba(0,0,0,.95); display: none; align-items: center; justify-content: center; padding: 20px; }
+    .site-edit-panel.open { display: flex; }
+    .site-edit-inner { background: var(--surface); border: 1px solid rgba(200,255,0,.2); padding: 32px; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; }
+    .site-edit-inner h2 { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: .08em; color: var(--accent); margin-bottom: 20px; }
+    .site-edit-inner label { font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: .15em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 4px; margin-top: 12px; }
+    .site-edit-inner input, .site-edit-inner textarea { width: 100%; background: var(--bg); border: 1px solid rgba(240,240,240,.1); color: var(--text); padding: 10px 12px; font-family: 'DM Sans', sans-serif; font-size: 13px; outline: none; }
+    .site-edit-inner input:focus, .site-edit-inner textarea:focus { border-color: var(--accent); }
+    .site-edit-actions { display: flex; gap: 10px; margin-top: 20px; }
+    .site-edit-actions button { flex: 1; padding: 12px; font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; border: none; cursor: pointer; }
+    .btn-save { background: var(--accent); color: #000; }
+    .btn-cancel { background: transparent; color: var(--muted); border: 1px solid rgba(240,240,240,.15) !important; }
+
+    /* TOAST */
+    .toast { position: fixed; bottom: 84px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--surface); border: 1px solid rgba(200,255,0,.3); color: var(--text); padding: 12px 24px; font-family: 'Space Mono', monospace; font-size: 12px; letter-spacing: .1em; z-index: 999; opacity: 0; transition: all .3s; pointer-events: none; white-space: nowrap; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.error { border-color: var(--accent2); color: var(--accent2); }
+    .toast.success { border-color: var(--accent); color: var(--accent); }
+
+    @keyframes fadeUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+    ::-webkit-scrollbar{width:6px} ::-webkit-scrollbar-track{background:var(--bg)} ::-webkit-scrollbar-thumb{background:rgba(200,255,0,.3)}
+    @media(max-width:600px){nav{padding:14px 20px}section{padding:60px 20px}.hero{padding:0 20px 40px}.admin-panel{width:calc(100vw - 32px);right:16px}}
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════
+     SETUP BANNER
+═══════════════════════════════════ -->
+<div class="setup-banner" id="setup-banner" style="display:none">
+  <div class="setup-inner">
+    <h2>⚙ Setup Supabase</h2>
+    <p>Ikuti langkah di bawah agar data portofolio tersimpan di cloud — bisa diakses siapapun, realtime.</p>
+
+    <div class="setup-steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-text">Buka <strong>supabase.com</strong> → klik <strong>Start your project</strong> → daftar gratis pakai email atau GitHub.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-text">Klik <strong>New Project</strong> → isi nama project & password database → klik <strong>Create new project</strong>. Tunggu ~1 menit.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-text">Di sidebar kiri klik <strong>SQL Editor</strong> → klik <strong>New query</strong> → paste SQL di bawah ini → klik <strong>Run</strong>.</div>
+      </div>
+    </div>
+
+    <div class="sql-block">create table if not exists mv_works (
+  id uuid default gen_random_uuid() primary key,
+  "ytId" text,
+  title text not null,
+  artist text,
+  tags text[],
+  thumb text,
+  featured boolean default false,
+  sort_order int default 0,
+  created_at timestamptz default now()
+);
+
+create table if not exists mv_site (
+  id int primary key default 1,
+  data jsonb not null default '{}'::jsonb
+);
+
+alter table mv_works enable row level security;
+alter table mv_site enable row level security;
+create policy "public read works" on mv_works for select using (true);
+create policy "public write works" on mv_works for all using (true);
+create policy "public read site" on mv_site for select using (true);
+create policy "public write site" on mv_site for all using (true);</div>
+
+    <div class="setup-steps">
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-text">Masuk ke <strong>Project Settings</strong> (ikon gear di sidebar) → klik tab <strong>API</strong> → copy <code>Project URL</code> dan <code>anon public</code> key.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-text">Paste di bawah ini lalu klik <strong>Simpan & Mulai</strong>.</div>
+      </div>
+    </div>
+
+    <label>Project URL</label>
+    <input type="text" id="setup-url" placeholder="https://xxxxxxxxxxxx.supabase.co">
+    <label>Anon Public Key</label>
+    <input type="text" id="setup-key" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
+    <label>Password Admin (untuk proteksi panel tambah/hapus karya)</label>
+    <input type="password" id="setup-pw" placeholder="Buat password sesukamu">
+
+    <button class="setup-save-btn" onclick="saveSetup()">Simpan &amp; Mulai →</button>
+    <p class="setup-note">💡 URL dan Key disimpan di browser kamu. Data karya disimpan di Supabase cloud — semua pengunjung melihat data yang sama.</p>
+    <p class="setup-note" style="margin-top:6px">🔒 Password admin hanya tersimpan di browser kamu. Orang lain bisa <em>melihat</em> portofolio tapi tidak bisa menambah/menghapus karya.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ NAV ═══════════════════════════════════ -->
+<nav>
+  <ul class="nav-links">
+    <li><a href="#works">Works</a></li>
+    <li><a href="#about">About</a></li>
+  </ul>
+  <div class="nav-brand" id="nav-brand">MV<span>.</span>PORTFOLIO</div>
+  <div class="nav-actions">
+    <button class="btn btn-ghost" style="padding:8px 14px;font-size:11px" onclick="openSiteEdit()">Edit Site</button>
+    <button class="btn btn-ghost" style="padding:8px 14px;font-size:11px;color:var(--muted)" title="Setup Supabase" onclick="openSetup()">⚙</button>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════ HERO ═══════════════════════════════════ -->
+<section class="hero" id="home">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div style="position:relative;z-index:1">
+    <p class="hero-label" id="hero-label">Music Video Director</p>
+    <h1 class="hero-title" id="hero-title">
+      YOUR<br><span class="accent">WORK</span><br><span class="stroke">HERE</span>
+    </h1>
+    <p class="hero-sub" id="hero-sub">Crafting visual stories that move. Music video direction & animation, turning sound into unforgettable imagery.</p>
+    <div class="hero-cta">
+      <a href="#works" class="btn btn-primary">View Works</a>
+      <a href="#about" class="btn btn-ghost">About</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════ WORKS ═══════════════════════════════════ -->
+<section id="works">
+  <div class="section-header">
+    <h2 class="section-title">Works</h2>
+    <span class="section-count" id="works-count">00</span>
+    <div class="section-line"></div>
+  </div>
+  <div class="filters" id="filter-bar">
+    <button class="filter-btn active" onclick="filterCards('all',this)">All</button>
+  </div>
+  <div class="mv-grid" id="mv-grid">
+    <div class="mv-card skeleton"></div>
+    <div class="mv-card skeleton"></div>
+    <div class="mv-card skeleton"></div>
+    <div class="mv-card skeleton"></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════ ABOUT ═══════════════════════════════════ -->
+<section id="about">
+  <div class="about-grid">
+    <div class="about-text">
+      <div class="section-header" style="margin-bottom:24px">
+        <h2 class="section-title">About</h2>
+        <div class="section-line"></div>
+      </div>
+      <p id="about-p1">Hi! I'm a music video director & animator creating vibrant visual worlds for artists. Every project starts with the music and ends with something that makes people feel.</p>
+      <p id="about-p2">Specializing in anime-style illustration, motion graphics, and lyric video production. Open for commissions and collaboration.</p>
+      <div style="margin-top:28px;display:flex;gap:12px;flex-wrap:wrap">
+        <a href="#" target="_blank" class="btn btn-primary" id="about-yt-link">YouTube Channel</a>
+        <a href="#" target="_blank" class="btn btn-ghost" id="about-tw-link">Twitter / X</a>
+      </div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-box"><div class="stat-num" id="stat-mvs">—</div><div class="stat-label">Music Videos</div></div>
+      <div class="stat-box"><div class="stat-num" id="stat-year">—</div><div class="stat-label">Since</div></div>
+      <div class="stat-box"><div class="stat-num" id="stat-clients">—</div><div class="stat-label">Artists</div></div>
+      <div class="stat-box"><div class="stat-num" id="stat-tags">—</div><div class="stat-label">Genres</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════ FOOTER ═══════════════════════════════════ -->
+<footer>
+  <div class="footer-brand" id="footer-brand">MV<span>.</span>PORTFOLIO</div>
+  <div class="social-links">
+    <a href="#" target="_blank" id="footer-yt">YouTube</a>
+    <a href="#" target="_blank" id="footer-tw">Twitter</a>
+  </div>
+  <span class="footer-copy" id="footer-copy">© 2024 — All Rights Reserved</span>
+</footer>
+
+<!-- ═══════════════════════════════════ VIDEO MODAL ═══════════════════════════════════ -->
+<div class="modal-backdrop" id="modal" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-video" id="modal-video-wrap"></div>
+    <div class="modal-meta">
+      <div>
+        <div class="modal-title" id="modal-title"></div>
+        <div class="modal-artist" id="modal-artist"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ PASSWORD MODAL ═══════════════════════════════════ -->
+<div class="pw-modal" id="pw-modal">
+  <div class="pw-inner">
+    <h3>🔒 Admin Access</h3>
+    <p>Masukkan password untuk membuka panel admin.</p>
+    <p class="pw-error" id="pw-error">❌ Password salah!</p>
+    <input type="password" id="pw-input" placeholder="Password..." onkeydown="if(event.key==='Enter')checkPw()">
+    <button class="pw-btn" onclick="checkPw()">Masuk →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ ADMIN TOGGLE ═══════════════════════════════════ -->
+<button class="admin-toggle" onclick="requestAdmin()" title="Tambah / Kelola Karya">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5">
+    <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+  </svg>
+</button>
+
+<!-- ═══════════════════════════════════ ADMIN PANEL ═══════════════════════════════════ -->
+<div class="admin-panel" id="admin-panel">
+  <div class="admin-title">Tambah Karya</div>
+  <div class="admin-form">
+    <div>
+      <label>YouTube URL atau Video ID</label>
+      <input type="text" id="inp-url" placeholder="https://youtube.com/watch?v=... atau ID saja">
+    </div>
+    <div>
+      <label>Judul</label>
+      <input type="text" id="inp-title" placeholder="Judul lagu / MV">
+    </div>
+    <div>
+      <label>Artis / Channel</label>
+      <input type="text" id="inp-artist" placeholder="Nama artis">
+    </div>
+    <div>
+      <label>Tags (pisah dengan koma)</label>
+      <input type="text" id="inp-tags" placeholder="animation, vocaloid, jpop">
+    </div>
+    <div>
+      <label>Custom Thumbnail URL (opsional)</label>
+      <input type="text" id="inp-thumb" placeholder="Kosongkan = thumbnail YT otomatis">
+    </div>
+    <div class="checkbox-row">
+      <input type="checkbox" id="inp-featured">
+      <label for="inp-featured" style="margin:0;font-size:11px">Featured (tampil 2x lebih besar)</label>
+    </div>
+    <button class="admin-add-btn" id="add-btn" onclick="addCard()">+ Tambah ke Portofolio</button>
+
+    <hr class="admin-divider">
+    <div style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Karya yang ada</div>
+    <div class="existing-list" id="existing-list"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ SITE EDIT PANEL ═══════════════════════════════════ -->
+<div class="site-edit-panel" id="site-edit-panel">
+  <div class="site-edit-inner">
+    <h2>Edit Info Site</h2>
+    <label>Nama / Brand</label>
+    <input type="text" id="edit-brand" placeholder="e.g. YORU.MV">
+    <label>Tagline (di atas judul hero)</label>
+    <input type="text" id="edit-label" placeholder="Music Video Director">
+    <label>Judul Hero (gunakan | untuk baris baru)</label>
+    <input type="text" id="edit-htitle" placeholder="YOUR|WORK|HERE">
+    <label>Subjudul Hero</label>
+    <textarea id="edit-hsub" rows="3" placeholder="Deskripsi singkat..."></textarea>
+    <label>About — Paragraf 1</label>
+    <textarea id="edit-about1" rows="3"></textarea>
+    <label>About — Paragraf 2</label>
+    <textarea id="edit-about2" rows="3"></textarea>
+    <label>Link YouTube</label>
+    <input type="text" id="edit-yt" placeholder="https://youtube.com/@namakamu">
+    <label>Link Twitter / X</label>
+    <input type="text" id="edit-tw" placeholder="https://twitter.com/namakamu">
+    <label>Footer Copyright</label>
+    <input type="text" id="edit-copy" placeholder="© 2024 Nama Kamu">
+    <label>Mulai Berkarya (tahun)</label>
+    <input type="text" id="edit-year" placeholder="2022">
+    <div class="site-edit-actions">
+      <button class="btn-cancel" onclick="closeSiteEdit()">Batal</button>
+      <button class="btn-save" id="site-save-btn" onclick="saveSiteEdit()">Simpan →</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ─────────────────────────────────────────────────────────
+// CONFIG
+// ─────────────────────────────────────────────────────────
+const CONFIG_KEY = 'mvp_config_v2';
+let sb = null, cards = [], siteInfo = {}, activeFilter = 'all', adminUnlocked = false;
+
+function getCfg()       { try { return JSON.parse(localStorage.getItem(CONFIG_KEY)||'{}'); } catch { return {}; } }
+function saveCfg(c)     { localStorage.setItem(CONFIG_KEY, JSON.stringify(c)); }
+
+// ─────────────────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────────────────
+async function init() {
+  const cfg = getCfg();
+  if (!cfg.url || !cfg.key) { show('setup-banner'); return; }
+  try {
+    sb = window.supabase.createClient(cfg.url, cfg.key);
+    await loadSiteInfo();
+    await loadCards();
+    // realtime
+    sb.channel('mv')
+      .on('postgres_changes', { event:'*', schema:'public', table:'mv_works' }, loadCards)
+      .on('postgres_changes', { event:'*', schema:'public', table:'mv_site'  }, loadSiteInfo)
+      .subscribe();
+  } catch(e) {
+    toast('Koneksi Supabase gagal. Cek Setup ⚙', 'error');
+    show('setup-banner');
+  }
+}
+
+// ─────────────────────────────────────────────────────────
+// SETUP
+// ─────────────────────────────────────────────────────────
+function openSetup() {
+  const c = getCfg();
+  el('setup-url').value = c.url || '';
+  el('setup-key').value = c.key || '';
+  el('setup-pw').value  = '';
+  show('setup-banner');
+}
+
+async function saveSetup() {
+  const url = el('setup-url').value.trim();
+  const key = el('setup-key').value.trim();
+  const pw  = el('setup-pw').value.trim();
+  if (!url || !key) { toast('URL dan Key wajib diisi!', 'error'); return; }
+  saveCfg({ url, key, pw });
+  hide('setup-banner');
+  await init();
+}
+
+// ─────────────────────────────────────────────────────────
+// PASSWORD
+// ─────────────────────────────────────────────────────────
+function requestAdmin() {
+  if (adminUnlocked) { el('admin-panel').classList.toggle('open'); return; }
+  const pw = getCfg().pw;
+  if (!pw) { adminUnlocked = true; el('admin-panel').classList.add('open'); return; }
+  el('pw-error').style.display = 'none';
+  el('pw-input').value = '';
+  show('pw-modal');
+  setTimeout(() => el('pw-input').focus(), 100);
+}
+
+function checkPw() {
+  if (el('pw-input').value === getCfg().pw) {
+    adminUnlocked = true;
+    hide('pw-modal');
+    el('admin-panel').classList.add('open');
+  } else {
+    el('pw-error').style.display = 'block';
+    el('pw-input').value = '';
+    el('pw-input').focus();
+  }
+}
+
+// ─────────────────────────────────────────────────────────
+// LOAD DATA
+// ─────────────────────────────────────────────────────────
+async function loadCards() {
+  if (!sb) return;
+  const { data, error } = await sb.from('mv_works').select('*').order('sort_order').order('created_at');
+  if (error) { toast('Gagal load karya: ' + error.message, 'error'); return; }
+  cards = data || [];
+  renderGrid(); renderFilters(); renderExistingList(); updateStats();
+}
+
+async function loadSiteInfo() {
+  if (!sb) return;
+  const { data } = await sb.from('mv_site').select('data').eq('id',1).single();
+  if (data?.data) { siteInfo = data.data; applySiteInfo(); updateStats(); }
+}
+
+// ─────────────────────────────────────────────────────────
+// RENDER
+// ─────────────────────────────────────────────────────────
+function renderGrid() {
+  const grid = el('mv-grid');
+  const list = activeFilter === 'all' ? cards : cards.filter(c => (c.tags||[]).includes(activeFilter));
+  el('works-count').textContent = String(list.length).padStart(2,'0');
+
+  if (!list.length) {
+    grid.innerHTML = `<div style="grid-column:1/-1;padding:80px;text-align:center;color:var(--muted);font-family:'Space Mono',monospace;font-size:13px">
+      Belum ada karya. Klik <strong style="color:var(--accent)">+</strong> di pojok kanan bawah untuk mulai menambahkan MV.
+    </div>`; return;
+  }
+
+  grid.innerHTML = list.map(c => {
+    const thumb = c.thumb || (c.ytId ? `https://img.youtube.com/vi/${c.ytId}/maxresdefault.jpg` : '');
+    const tags  = (c.tags||[]).map(t=>`<span class="mv-tag">${esc(t)}</span>`).join('');
+    return `
+      <div class="mv-card${c.featured?' featured':''}" onclick="openModal('${c.id}')">
+        ${thumb
+          ? `<img class="mv-thumb" src="${thumb}" alt="${esc(c.title)}" loading="lazy" onerror="this.parentElement.querySelector('.mv-placeholder').style.display='flex';this.style.display='none'">`
+          : ''}
+        <div class="mv-placeholder" style="${thumb?'display:none':''}">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          <span>No thumbnail</span>
+        </div>
+        <div class="mv-play"><svg width="18" height="18" viewBox="0 0 24 24" fill="#000"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
+        <div class="mv-overlay">
+          <div>${tags}<div class="mv-title">${esc(c.title)}</div><div class="mv-artist">${esc(c.artist||'')}</div></div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function renderFilters() {
+  const tags = new Set();
+  cards.forEach(c => (c.tags||[]).forEach(t => tags.add(t)));
+  el('filter-bar').innerHTML =
+    `<button class="filter-btn${activeFilter==='all'?' active':''}" onclick="filterCards('all',this)">All</button>` +
+    [...tags].map(t=>`<button class="filter-btn${activeFilter===t?' active':''}" onclick="filterCards('${t}',this)">${esc(t)}</button>`).join('');
+}
+
+function filterCards(tag, btn) {
+  activeFilter = tag;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderGrid();
+}
+
+function renderExistingList() {
+  const list = el('existing-list');
+  if (!cards.length) { list.innerHTML = '<div style="color:var(--muted);font-size:12px">Belum ada karya</div>'; return; }
+  list.innerHTML = cards.map(c=>`
+    <div class="existing-item">
+      <span class="existing-item-title">${esc(c.title)}</span>
+      <button class="del-btn" onclick="deleteCard('${c.id}')">✕</button>
+    </div>`).join('');
+}
+
+function updateStats() {
+  el('stat-mvs').textContent = cards.length || '0';
+  const artists = new Set(cards.map(c=>c.artist).filter(Boolean));
+  el('stat-clients').textContent = artists.size || '0';
+  const tags = new Set(); cards.forEach(c=>(c.tags||[]).forEach(t=>tags.add(t)));
+  el('stat-tags').textContent = tags.size || '0';
+  el('stat-year').textContent = siteInfo.year || new Date().getFullYear();
+}
+
+// ─────────────────────────────────────────────────────────
+// ADD / DELETE
+// ─────────────────────────────────────────────────────────
+async function addCard() {
+  const url    = el('inp-url').value.trim();
+  const title  = el('inp-title').value.trim();
+  const artist = el('inp-artist').value.trim();
+  const tRaw   = el('inp-tags').value.trim();
+  const thumb  = el('inp-thumb').value.trim();
+  const feat   = el('inp-featured').checked;
+
+  if (!title) { toast('Judul wajib diisi!', 'error'); return; }
+
+  const ytId = ytExtract(url);
+  const tags  = tRaw ? tRaw.split(',').map(t=>t.trim()).filter(Boolean) : [];
+
+  const btn = el('add-btn'); btn.disabled = true; btn.textContent = 'Menyimpan...';
+  const { error } = await sb.from('mv_works').insert([{ ytId, title, artist, tags, thumb: thumb||null, featured: feat, sort_order: cards.length }]);
+  btn.disabled = false; btn.textContent = '+ Tambah ke Portofolio';
+
+  if (error) { toast('Gagal: ' + error.message, 'error'); return; }
+  toast('Karya berhasil ditambahkan! ✓', 'success');
+  ['inp-url','inp-title','inp-artist','inp-tags','inp-thumb'].forEach(id => el(id).value='');
+  el('inp-featured').checked = false;
+}
+
+async function deleteCard(id) {
+  if (!confirm('Hapus karya ini?')) return;
+  const { error } = await sb.from('mv_works').delete().eq('id', id);
+  if (error) { toast('Gagal hapus: ' + error.message, 'error'); return; }
+  toast('Karya dihapus', 'success');
+}
+
+// ─────────────────────────────────────────────────────────
+// MODAL
+// ─────────────────────────────────────────────────────────
+function openModal(id) {
+  const c = cards.find(x => x.id === id); if (!c) return;
+  el('modal-title').textContent  = c.title;
+  el('modal-artist').textContent = c.artist || '';
+  el('modal-video-wrap').innerHTML = c.ytId
+    ? `<iframe src="https://www.youtube.com/embed/${c.ytId}?autoplay=1&rel=0" allow="autoplay;encrypted-media" allowfullscreen></iframe>`
+    : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--bg);color:var(--muted);font-family:'Space Mono',monospace">No video</div>`;
+  el('modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal(e) {
+  if (e && e.target !== el('modal')) return;
+  el('modal').classList.remove('open');
+  el('modal-video-wrap').innerHTML = '';
+  document.body.style.overflow = '';
+}
+
+// ─────────────────────────────────────────────────────────
+// SITE INFO
+// ─────────────────────────────────────────────────────────
+function applySiteInfo() {
+  const s = siteInfo; if (!s || !Object.keys(s).length) return;
+  if (s.brand) {
+    el('nav-brand').innerHTML    = s.brand.replace('.','<span>.</span>');
+    el('footer-brand').innerHTML = s.brand.replace('.','<span>.</span>');
+  }
+  setText('hero-label', s.label);
+  if (s.htitle) {
+    const lines = s.htitle.split('|');
+    el('hero-title').innerHTML = lines.map((l,i) =>
+      i===0 ? l : i===1 ? `<span class="accent">${l}</span>` : `<span class="stroke">${l}</span>`
+    ).join('<br>');
+  }
+  setText('hero-sub',    s.hsub);
+  setText('about-p1',   s.about1);
+  setText('about-p2',   s.about2);
+  setText('footer-copy', s.copy);
+  if (s.yt) { el('about-yt-link').href = s.yt; el('footer-yt').href = s.yt; }
+  if (s.tw) { el('about-tw-link').href = s.tw; el('footer-tw').href = s.tw; }
+}
+
+function openSiteEdit() {
+  const s = siteInfo;
+  el('edit-brand').value  = s.brand  || '';  el('edit-label').value  = s.label  || '';
+  el('edit-htitle').value = s.htitle || '';  el('edit-hsub').value   = s.hsub   || '';
+  el('edit-about1').value = s.about1 || '';  el('edit-about2').value = s.about2 || '';
+  el('edit-yt').value     = s.yt     || '';  el('edit-tw').value     = s.tw     || '';
+  el('edit-copy').value   = s.copy   || '';  el('edit-year').value   = s.year   || '';
+  show('site-edit-panel');
+}
+
+function closeSiteEdit() { hide('site-edit-panel'); }
+
+async function saveSiteEdit() {
+  siteInfo = {
+    brand:  el('edit-brand').value,  label:  el('edit-label').value,
+    htitle: el('edit-htitle').value, hsub:   el('edit-hsub').value,
+    about1: el('edit-about1').value, about2: el('edit-about2').value,
+    yt:     el('edit-yt').value,     tw:     el('edit-tw').value,
+    copy:   el('edit-copy').value,   year:   el('edit-year').value,
+  };
+  const btn = el('site-save-btn'); btn.textContent = 'Menyimpan...'; btn.disabled = true;
+  const { error } = await sb.from('mv_site').upsert({ id:1, data: siteInfo });
+  btn.textContent = 'Simpan →'; btn.disabled = false;
+  if (error) { toast('Gagal simpan: ' + error.message, 'error'); return; }
+  applySiteInfo(); updateStats(); closeSiteEdit();
+  toast('Info site tersimpan! ✓', 'success');
+}
+
+// ─────────────────────────────────────────────────────────
+// UTILS
+// ─────────────────────────────────────────────────────────
+function el(id)         { return document.getElementById(id); }
+function show(id)       { el(id).style.display = 'flex'; }
+function hide(id)       { el(id).style.display = 'none'; }
+function setText(id, v) { if (v && el(id)) el(id).textContent = v; }
+function esc(s)         { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function ytExtract(s) {
+  if (!s) return null;
+  const m = s.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/) || s.match(/^([a-zA-Z0-9_-]{11})$/);
+  return m ? m[1] : null;
+}
+
+let _toastT;
+function toast(msg, type='') {
+  const t = el('toast'); t.textContent = msg; t.className = `toast ${type} show`;
+  clearTimeout(_toastT); _toastT = setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    closeModal(); closeSiteEdit();
+    hide('pw-modal');
+    el('admin-panel').classList.remove('open');
+  }
+});
+
+init();
+</script>
+</body>
+</html>
