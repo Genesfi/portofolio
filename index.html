@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -25,7 +24,6 @@
     .nav-links a:hover { color: var(--accent); }
     .nav-brand { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 0.1em; }
     .nav-brand span { color: var(--accent); }
-    .nav-actions { display: flex; gap: 10px; align-items: center; }
 
     /* HERO */
     .hero { min-height: 100vh; display: flex; flex-direction: column; justify-content: flex-end; padding: 0 40px 60px; position: relative; overflow: hidden; }
@@ -113,14 +111,13 @@
     .social-links a { color: var(--muted); text-decoration: none; font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; transition: color .2s; }
     .social-links a:hover { color: var(--accent); }
 
-    /* ADMIN TOGGLE */
-    .admin-toggle { position: fixed; bottom: 24px; right: 24px; z-index: 150; width: 48px; height: 48px; background: var(--accent); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background .2s; }
-    .admin-toggle:hover { background: #d4ff1a; }
-
-    /* ADMIN PANEL */
-    .admin-panel { position: fixed; bottom: 84px; right: 24px; z-index: 150; width: 380px; background: var(--surface); border: 1px solid rgba(200,255,0,.2); padding: 24px; display: none; max-height: 82vh; overflow-y: auto; }
+    /* ADMIN PANEL — tersembunyi, dibuka via shortcut */
+    .admin-panel { position: fixed; bottom: 24px; right: 24px; z-index: 150; width: 380px; background: var(--surface); border: 1px solid rgba(200,255,0,.2); padding: 24px; display: none; max-height: 82vh; overflow-y: auto; }
     .admin-panel.open { display: block; }
-    .admin-title { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: .08em; margin-bottom: 16px; color: var(--accent); }
+    .admin-title { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: .08em; margin-bottom: 4px; color: var(--accent); display: flex; align-items: center; justify-content: space-between; }
+    .admin-close-btn { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 20px; padding: 0; }
+    .admin-close-btn:hover { color: var(--accent2); }
+    .admin-hint { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--muted); margin-bottom: 16px; letter-spacing: .05em; }
     .admin-form { display: flex; flex-direction: column; gap: 10px; }
     .admin-form label { font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: .15em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 4px; }
     .admin-form input { width: 100%; background: var(--bg); border: 1px solid rgba(240,240,240,.1); color: var(--text); padding: 10px 12px; font-family: 'DM Sans', sans-serif; font-size: 13px; outline: none; transition: border-color .2s; }
@@ -135,26 +132,6 @@
     .existing-item { display: flex; align-items: center; justify-content: space-between; background: var(--bg); padding: 10px 12px; font-size: 12px; }
     .existing-item-title { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-right: 8px; }
     .del-btn { background: none; border: none; color: var(--accent2); cursor: pointer; font-size: 16px; line-height: 1; }
-    .del-btn:disabled { opacity: .3; cursor: not-allowed; }
-
-    /* SETUP BANNER */
-    .setup-banner { position: fixed; inset: 0; z-index: 500; background: rgba(8,8,16,.98); display: flex; align-items: center; justify-content: center; padding: 20px; }
-    .setup-inner { background: var(--surface); border: 1px solid rgba(200,255,0,.25); padding: 40px; width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto; }
-    .setup-inner h2 { font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: .08em; color: var(--accent); margin-bottom: 8px; }
-    .setup-inner > p { color: var(--muted); font-size: 13px; line-height: 1.7; margin-bottom: 20px; }
-    .setup-steps { background: var(--bg); border: 1px solid rgba(200,255,0,.1); padding: 20px; margin-bottom: 20px; }
-    .step { display: flex; gap: 14px; margin-bottom: 14px; }
-    .step:last-child { margin-bottom: 0; }
-    .step-num { font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: var(--accent); line-height: 1; flex-shrink: 0; width: 24px; }
-    .step-text { font-size: 13px; color: rgba(240,240,240,.8); line-height: 1.6; }
-    .step-text code { background: rgba(200,255,0,.1); color: var(--accent); padding: 1px 6px; font-family: 'Space Mono', monospace; font-size: 11px; }
-    .sql-block { background: var(--bg); border: 1px solid rgba(200,255,0,.12); padding: 16px; font-family: 'Space Mono', monospace; font-size: 11px; color: rgba(200,255,0,.8); line-height: 1.8; overflow-x: auto; margin: 12px 0 20px; white-space: pre; }
-    .setup-inner label { font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: .15em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 6px; margin-top: 14px; }
-    .setup-inner input { width: 100%; background: var(--bg); border: 1px solid rgba(240,240,240,.15); color: var(--text); padding: 12px; font-family: 'Space Mono', monospace; font-size: 12px; outline: none; margin-bottom: 4px; }
-    .setup-inner input:focus { border-color: var(--accent); }
-    .setup-save-btn { width: 100%; margin-top: 20px; background: var(--accent); color: #000; border: none; padding: 14px; font-family: 'Space Mono', monospace; font-size: 12px; letter-spacing: .15em; text-transform: uppercase; cursor: pointer; transition: background .2s; }
-    .setup-save-btn:hover { background: #d4ff1a; }
-    .setup-note { margin-top: 12px; font-size: 11px; color: var(--muted); font-family: 'Space Mono', monospace; line-height: 1.6; }
 
     /* PASSWORD MODAL */
     .pw-modal { position: fixed; inset: 0; z-index: 400; background: rgba(0,0,0,.92); display: none; align-items: center; justify-content: center; }
@@ -181,7 +158,7 @@
     .btn-cancel { background: transparent; color: var(--muted); border: 1px solid rgba(240,240,240,.15) !important; }
 
     /* TOAST */
-    .toast { position: fixed; bottom: 84px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--surface); border: 1px solid rgba(200,255,0,.3); color: var(--text); padding: 12px 24px; font-family: 'Space Mono', monospace; font-size: 12px; letter-spacing: .1em; z-index: 999; opacity: 0; transition: all .3s; pointer-events: none; white-space: nowrap; }
+    .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--surface); border: 1px solid rgba(200,255,0,.3); color: var(--text); padding: 12px 24px; font-family: 'Space Mono', monospace; font-size: 12px; letter-spacing: .1em; z-index: 999; opacity: 0; transition: all .3s; pointer-events: none; white-space: nowrap; }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
     .toast.error { border-color: var(--accent2); color: var(--accent2); }
     .toast.success { border-color: var(--accent); color: var(--accent); }
@@ -193,91 +170,17 @@
 </head>
 <body>
 
-<!-- ═══════════════════════════════════
-     SETUP BANNER
-═══════════════════════════════════ -->
-<div class="setup-banner" id="setup-banner" style="display:none">
-  <div class="setup-inner">
-    <h2>⚙ Setup Supabase</h2>
-    <p>Ikuti langkah di bawah agar data portofolio tersimpan di cloud — bisa diakses siapapun, realtime.</p>
-
-    <div class="setup-steps">
-      <div class="step">
-        <div class="step-num">1</div>
-        <div class="step-text">Buka <strong>supabase.com</strong> → klik <strong>Start your project</strong> → daftar gratis pakai email atau GitHub.</div>
-      </div>
-      <div class="step">
-        <div class="step-num">2</div>
-        <div class="step-text">Klik <strong>New Project</strong> → isi nama project & password database → klik <strong>Create new project</strong>. Tunggu ~1 menit.</div>
-      </div>
-      <div class="step">
-        <div class="step-num">3</div>
-        <div class="step-text">Di sidebar kiri klik <strong>SQL Editor</strong> → klik <strong>New query</strong> → paste SQL di bawah ini → klik <strong>Run</strong>.</div>
-      </div>
-    </div>
-
-    <div class="sql-block">create table if not exists mv_works (
-  id uuid default gen_random_uuid() primary key,
-  "ytId" text,
-  title text not null,
-  artist text,
-  tags text[],
-  thumb text,
-  featured boolean default false,
-  sort_order int default 0,
-  created_at timestamptz default now()
-);
-
-create table if not exists mv_site (
-  id int primary key default 1,
-  data jsonb not null default '{}'::jsonb
-);
-
-alter table mv_works enable row level security;
-alter table mv_site enable row level security;
-create policy "public read works" on mv_works for select using (true);
-create policy "public write works" on mv_works for all using (true);
-create policy "public read site" on mv_site for select using (true);
-create policy "public write site" on mv_site for all using (true);</div>
-
-    <div class="setup-steps">
-      <div class="step">
-        <div class="step-num">4</div>
-        <div class="step-text">Masuk ke <strong>Project Settings</strong> (ikon gear di sidebar) → klik tab <strong>API</strong> → copy <code>Project URL</code> dan <code>anon public</code> key.</div>
-      </div>
-      <div class="step">
-        <div class="step-num">5</div>
-        <div class="step-text">Paste di bawah ini lalu klik <strong>Simpan & Mulai</strong>.</div>
-      </div>
-    </div>
-
-    <label>Project URL</label>
-    <input type="text" id="setup-url" placeholder="https://xxxxxxxxxxxx.supabase.co">
-    <label>Anon Public Key</label>
-    <input type="text" id="setup-key" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
-    <label>Password Admin (untuk proteksi panel tambah/hapus karya)</label>
-    <input type="password" id="setup-pw" placeholder="Buat password sesukamu">
-
-    <button class="setup-save-btn" onclick="saveSetup()">Simpan &amp; Mulai →</button>
-    <p class="setup-note">💡 URL dan Key disimpan di browser kamu. Data karya disimpan di Supabase cloud — semua pengunjung melihat data yang sama.</p>
-    <p class="setup-note" style="margin-top:6px">🔒 Password admin hanya tersimpan di browser kamu. Orang lain bisa <em>melihat</em> portofolio tapi tidak bisa menambah/menghapus karya.</p>
-  </div>
-</div>
-
-<!-- ═══════════════════════════════════ NAV ═══════════════════════════════════ -->
+<!-- NAV — bersih, tidak ada tombol admin -->
 <nav>
   <ul class="nav-links">
     <li><a href="#works">Works</a></li>
     <li><a href="#about">About</a></li>
   </ul>
   <div class="nav-brand" id="nav-brand">MV<span>.</span>PORTFOLIO</div>
-  <div class="nav-actions">
-    <button class="btn btn-ghost" style="padding:8px 14px;font-size:11px" onclick="openSiteEdit()">Edit Site</button>
-    <button class="btn btn-ghost" style="padding:8px 14px;font-size:11px;color:var(--muted)" title="Setup Supabase" onclick="openSetup()">⚙</button>
-  </div>
+  <div></div>
 </nav>
 
-<!-- ═══════════════════════════════════ HERO ═══════════════════════════════════ -->
+<!-- HERO -->
 <section class="hero" id="home">
   <div class="hero-bg"></div>
   <div class="hero-grid"></div>
@@ -294,7 +197,7 @@ create policy "public write site" on mv_site for all using (true);</div>
   </div>
 </section>
 
-<!-- ═══════════════════════════════════ WORKS ═══════════════════════════════════ -->
+<!-- WORKS -->
 <section id="works">
   <div class="section-header">
     <h2 class="section-title">Works</h2>
@@ -312,7 +215,7 @@ create policy "public write site" on mv_site for all using (true);</div>
   </div>
 </section>
 
-<!-- ═══════════════════════════════════ ABOUT ═══════════════════════════════════ -->
+<!-- ABOUT -->
 <section id="about">
   <div class="about-grid">
     <div class="about-text">
@@ -336,7 +239,7 @@ create policy "public write site" on mv_site for all using (true);</div>
   </div>
 </section>
 
-<!-- ═══════════════════════════════════ FOOTER ═══════════════════════════════════ -->
+<!-- FOOTER -->
 <footer>
   <div class="footer-brand" id="footer-brand">MV<span>.</span>PORTFOLIO</div>
   <div class="social-links">
@@ -346,7 +249,7 @@ create policy "public write site" on mv_site for all using (true);</div>
   <span class="footer-copy" id="footer-copy">© 2024 — All Rights Reserved</span>
 </footer>
 
-<!-- ═══════════════════════════════════ VIDEO MODAL ═══════════════════════════════════ -->
+<!-- VIDEO MODAL -->
 <div class="modal-backdrop" id="modal" onclick="closeModal(event)">
   <div class="modal">
     <div class="modal-video" id="modal-video-wrap"></div>
@@ -360,31 +263,28 @@ create policy "public write site" on mv_site for all using (true);</div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════ PASSWORD MODAL ═══════════════════════════════════ -->
+<!-- PASSWORD MODAL -->
 <div class="pw-modal" id="pw-modal">
   <div class="pw-inner">
-    <h3>🔒 Admin Access</h3>
-    <p>Masukkan password untuk membuka panel admin.</p>
+    <h3>🔒 Admin</h3>
+    <p>Masukkan password untuk lanjut.</p>
     <p class="pw-error" id="pw-error">❌ Password salah!</p>
     <input type="password" id="pw-input" placeholder="Password..." onkeydown="if(event.key==='Enter')checkPw()">
     <button class="pw-btn" onclick="checkPw()">Masuk →</button>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════ ADMIN TOGGLE ═══════════════════════════════════ -->
-<button class="admin-toggle" onclick="requestAdmin()" title="Tambah / Kelola Karya">
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5">
-    <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-  </svg>
-</button>
-
-<!-- ═══════════════════════════════════ ADMIN PANEL ═══════════════════════════════════ -->
+<!-- ADMIN PANEL — tersembunyi -->
 <div class="admin-panel" id="admin-panel">
-  <div class="admin-title">Tambah Karya</div>
+  <div class="admin-title">
+    Tambah Karya
+    <button class="admin-close-btn" onclick="el('admin-panel').classList.remove('open')">✕</button>
+  </div>
+  <div class="admin-hint">Tekan ESC atau ✕ untuk tutup</div>
   <div class="admin-form">
     <div>
       <label>YouTube URL atau Video ID</label>
-      <input type="text" id="inp-url" placeholder="https://youtube.com/watch?v=... atau ID saja">
+      <input type="text" id="inp-url" placeholder="https://youtube.com/watch?v=... atau ID">
     </div>
     <div>
       <label>Judul</label>
@@ -395,7 +295,7 @@ create policy "public write site" on mv_site for all using (true);</div>
       <input type="text" id="inp-artist" placeholder="Nama artis">
     </div>
     <div>
-      <label>Tags (pisah dengan koma)</label>
+      <label>Tags (pisah koma)</label>
       <input type="text" id="inp-tags" placeholder="animation, vocaloid, jpop">
     </div>
     <div>
@@ -411,32 +311,36 @@ create policy "public write site" on mv_site for all using (true);</div>
     <hr class="admin-divider">
     <div style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Karya yang ada</div>
     <div class="existing-list" id="existing-list"></div>
+
+    <hr class="admin-divider">
+    <!-- Edit Site tersembunyi di dalam admin panel -->
+    <button onclick="openSiteEdit()" style="width:100%;background:transparent;border:1px solid rgba(200,255,0,.2);color:var(--accent);padding:10px;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;">✏ Edit Info Site</button>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════ SITE EDIT PANEL ═══════════════════════════════════ -->
+<!-- SITE EDIT PANEL -->
 <div class="site-edit-panel" id="site-edit-panel">
   <div class="site-edit-inner">
     <h2>Edit Info Site</h2>
     <label>Nama / Brand</label>
     <input type="text" id="edit-brand" placeholder="e.g. YORU.MV">
-    <label>Tagline (di atas judul hero)</label>
+    <label>Tagline</label>
     <input type="text" id="edit-label" placeholder="Music Video Director">
-    <label>Judul Hero (gunakan | untuk baris baru)</label>
+    <label>Judul Hero (| untuk baris baru)</label>
     <input type="text" id="edit-htitle" placeholder="YOUR|WORK|HERE">
     <label>Subjudul Hero</label>
-    <textarea id="edit-hsub" rows="3" placeholder="Deskripsi singkat..."></textarea>
+    <textarea id="edit-hsub" rows="3"></textarea>
     <label>About — Paragraf 1</label>
     <textarea id="edit-about1" rows="3"></textarea>
     <label>About — Paragraf 2</label>
     <textarea id="edit-about2" rows="3"></textarea>
     <label>Link YouTube</label>
-    <input type="text" id="edit-yt" placeholder="https://youtube.com/@namakamu">
+    <input type="text" id="edit-yt" placeholder="https://youtube.com/@...">
     <label>Link Twitter / X</label>
-    <input type="text" id="edit-tw" placeholder="https://twitter.com/namakamu">
+    <input type="text" id="edit-tw" placeholder="https://twitter.com/...">
     <label>Footer Copyright</label>
     <input type="text" id="edit-copy" placeholder="© 2024 Nama Kamu">
-    <label>Mulai Berkarya (tahun)</label>
+    <label>Tahun Mulai</label>
     <input type="text" id="edit-year" placeholder="2022">
     <div class="site-edit-actions">
       <button class="btn-cancel" onclick="closeSiteEdit()">Batal</button>
@@ -449,74 +353,71 @@ create policy "public write site" on mv_site for all using (true);</div>
 <div class="toast" id="toast"></div>
 
 <script>
-// ─────────────────────────────────────────────────────────
-// CONFIG
-// ─────────────────────────────────────────────────────────
-const CONFIG_KEY = 'mvp_config_v2';
-let sb = null, cards = [], siteInfo = {}, activeFilter = 'all', adminUnlocked = false;
+// ─────────────────────────────────────────────
+// HARDCODED CONFIG — tidak perlu setup lagi
+// ─────────────────────────────────────────────
+const SB_URL  = 'https://vidoandolyawczirdifu.supabase.co';
+const SB_KEY  = 'sb_publishable_jsJ962BsXTJJAVR7xYTcOg_qlcbnljz';
+const ADMIN_PW = '@Sera63271611';
+// Shortcut: ketik "adm" di keyboard saat tidak sedang focus di input
+const SHORTCUT = 'adm';
 
-function getCfg()       { try { return JSON.parse(localStorage.getItem(CONFIG_KEY)||'{}'); } catch { return {}; } }
-function saveCfg(c)     { localStorage.setItem(CONFIG_KEY, JSON.stringify(c)); }
+let sb, cards = [], siteInfo = {}, activeFilter = 'all', adminUnlocked = false;
 
-// ─────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────
 // INIT
-// ─────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────
 async function init() {
-  const cfg = getCfg();
-  if (!cfg.url || !cfg.key) { show('setup-banner'); return; }
-  try {
-    sb = window.supabase.createClient(cfg.url, cfg.key);
-    await loadSiteInfo();
-    await loadCards();
-    // realtime
-    sb.channel('mv')
-      .on('postgres_changes', { event:'*', schema:'public', table:'mv_works' }, loadCards)
-      .on('postgres_changes', { event:'*', schema:'public', table:'mv_site'  }, loadSiteInfo)
-      .subscribe();
-  } catch(e) {
-    toast('Koneksi Supabase gagal. Cek Setup ⚙', 'error');
-    show('setup-banner');
+  sb = window.supabase.createClient(SB_URL, SB_KEY);
+  await loadSiteInfo();
+  await loadCards();
+  sb.channel('mv')
+    .on('postgres_changes', { event:'*', schema:'public', table:'mv_works' }, loadCards)
+    .on('postgres_changes', { event:'*', schema:'public', table:'mv_site'  }, loadSiteInfo)
+    .subscribe();
+}
+
+// ─────────────────────────────────────────────
+// SECRET SHORTCUT — ketik "adm"
+// ─────────────────────────────────────────────
+let keyBuffer = '';
+document.addEventListener('keydown', e => {
+  // Jangan trigger saat sedang ngetik di input/textarea
+  if (['INPUT','TEXTAREA'].includes(e.target.tagName)) return;
+
+  if (e.key === 'Escape') {
+    closeModal(); closeSiteEdit();
+    el('admin-panel').classList.remove('open');
+    el('pw-modal').style.display = 'none';
+    return;
   }
-}
 
-// ─────────────────────────────────────────────────────────
-// SETUP
-// ─────────────────────────────────────────────────────────
-function openSetup() {
-  const c = getCfg();
-  el('setup-url').value = c.url || '';
-  el('setup-key').value = c.key || '';
-  el('setup-pw').value  = '';
-  show('setup-banner');
-}
+  keyBuffer += e.key.toLowerCase();
+  if (keyBuffer.length > SHORTCUT.length) keyBuffer = keyBuffer.slice(-SHORTCUT.length);
+  if (keyBuffer === SHORTCUT) {
+    keyBuffer = '';
+    requestAdmin();
+  }
+});
 
-async function saveSetup() {
-  const url = el('setup-url').value.trim();
-  const key = el('setup-key').value.trim();
-  const pw  = el('setup-pw').value.trim();
-  if (!url || !key) { toast('URL dan Key wajib diisi!', 'error'); return; }
-  saveCfg({ url, key, pw });
-  hide('setup-banner');
-  await init();
-}
-
-// ─────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────
 // PASSWORD
-// ─────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────
 function requestAdmin() {
-  if (adminUnlocked) { el('admin-panel').classList.toggle('open'); return; }
-  const pw = getCfg().pw;
-  if (!pw) { adminUnlocked = true; el('admin-panel').classList.add('open'); return; }
+  if (adminUnlocked) {
+    el('admin-panel').classList.toggle('open');
+    return;
+  }
   el('pw-error').style.display = 'none';
   el('pw-input').value = '';
-  show('pw-modal');
+  el('pw-modal').style.display = 'flex';
   setTimeout(() => el('pw-input').focus(), 100);
 }
 
 function checkPw() {
-  if (el('pw-input').value === getCfg().pw) {
+  if (el('pw-input').value === ADMIN_PW) {
     adminUnlocked = true;
-    hide('pw-modal');
+    el('pw-modal').style.display = 'none';
     el('admin-panel').classList.add('open');
   } else {
     el('pw-error').style.display = 'block';
@@ -525,48 +426,40 @@ function checkPw() {
   }
 }
 
-// ─────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────
 // LOAD DATA
-// ─────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────
 async function loadCards() {
-  if (!sb) return;
   const { data, error } = await sb.from('mv_works').select('*').order('sort_order').order('created_at');
-  if (error) { toast('Gagal load karya: ' + error.message, 'error'); return; }
+  if (error) { toast('Gagal load: ' + error.message, 'error'); return; }
   cards = data || [];
   renderGrid(); renderFilters(); renderExistingList(); updateStats();
 }
 
 async function loadSiteInfo() {
-  if (!sb) return;
   const { data } = await sb.from('mv_site').select('data').eq('id',1).single();
   if (data?.data) { siteInfo = data.data; applySiteInfo(); updateStats(); }
 }
 
-// ─────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────
 // RENDER
-// ─────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────
 function renderGrid() {
   const grid = el('mv-grid');
   const list = activeFilter === 'all' ? cards : cards.filter(c => (c.tags||[]).includes(activeFilter));
   el('works-count').textContent = String(list.length).padStart(2,'0');
-
   if (!list.length) {
-    grid.innerHTML = `<div style="grid-column:1/-1;padding:80px;text-align:center;color:var(--muted);font-family:'Space Mono',monospace;font-size:13px">
-      Belum ada karya. Klik <strong style="color:var(--accent)">+</strong> di pojok kanan bawah untuk mulai menambahkan MV.
-    </div>`; return;
+    grid.innerHTML = `<div style="grid-column:1/-1;padding:80px;text-align:center;color:var(--muted);font-family:'Space Mono',monospace;font-size:13px">Belum ada karya.</div>`;
+    return;
   }
-
   grid.innerHTML = list.map(c => {
     const thumb = c.thumb || (c.ytId ? `https://img.youtube.com/vi/${c.ytId}/maxresdefault.jpg` : '');
     const tags  = (c.tags||[]).map(t=>`<span class="mv-tag">${esc(t)}</span>`).join('');
     return `
       <div class="mv-card${c.featured?' featured':''}" onclick="openModal('${c.id}')">
-        ${thumb
-          ? `<img class="mv-thumb" src="${thumb}" alt="${esc(c.title)}" loading="lazy" onerror="this.parentElement.querySelector('.mv-placeholder').style.display='flex';this.style.display='none'">`
-          : ''}
+        ${thumb ? `<img class="mv-thumb" src="${thumb}" alt="${esc(c.title)}" loading="lazy" onerror="this.style.display='none'">` : ''}
         <div class="mv-placeholder" style="${thumb?'display:none':''}">
           <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-          <span>No thumbnail</span>
         </div>
         <div class="mv-play"><svg width="18" height="18" viewBox="0 0 24 24" fill="#000"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
         <div class="mv-overlay">
@@ -581,7 +474,7 @@ function renderFilters() {
   cards.forEach(c => (c.tags||[]).forEach(t => tags.add(t)));
   el('filter-bar').innerHTML =
     `<button class="filter-btn${activeFilter==='all'?' active':''}" onclick="filterCards('all',this)">All</button>` +
-    [...tags].map(t=>`<button class="filter-btn${activeFilter===t?' active':''}" onclick="filterCards('${t}',this)">${esc(t)}</button>`).join('');
+    [...tags].map(t=>`<button class="filter-btn${activeFilter===t?' active':''}" onclick="filterCards('${esc(t)}',this)">${esc(t)}</button>`).join('');
 }
 
 function filterCards(tag, btn) {
@@ -610,9 +503,9 @@ function updateStats() {
   el('stat-year').textContent = siteInfo.year || new Date().getFullYear();
 }
 
-// ─────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────
 // ADD / DELETE
-// ─────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────
 async function addCard() {
   const url    = el('inp-url').value.trim();
   const title  = el('inp-title').value.trim();
@@ -620,129 +513,86 @@ async function addCard() {
   const tRaw   = el('inp-tags').value.trim();
   const thumb  = el('inp-thumb').value.trim();
   const feat   = el('inp-featured').checked;
-
   if (!title) { toast('Judul wajib diisi!', 'error'); return; }
-
   const ytId = ytExtract(url);
   const tags  = tRaw ? tRaw.split(',').map(t=>t.trim()).filter(Boolean) : [];
-
-  const btn = el('add-btn'); btn.disabled = true; btn.textContent = 'Menyimpan...';
+  const btn = el('add-btn'); btn.disabled=true; btn.textContent='Menyimpan...';
   const { error } = await sb.from('mv_works').insert([{ ytId, title, artist, tags, thumb: thumb||null, featured: feat, sort_order: cards.length }]);
-  btn.disabled = false; btn.textContent = '+ Tambah ke Portofolio';
-
-  if (error) { toast('Gagal: ' + error.message, 'error'); return; }
+  btn.disabled=false; btn.textContent='+ Tambah ke Portofolio';
+  if (error) { toast('Gagal: '+error.message, 'error'); return; }
   toast('Karya berhasil ditambahkan! ✓', 'success');
-  ['inp-url','inp-title','inp-artist','inp-tags','inp-thumb'].forEach(id => el(id).value='');
-  el('inp-featured').checked = false;
+  ['inp-url','inp-title','inp-artist','inp-tags','inp-thumb'].forEach(id=>el(id).value='');
+  el('inp-featured').checked=false;
 }
 
 async function deleteCard(id) {
   if (!confirm('Hapus karya ini?')) return;
-  const { error } = await sb.from('mv_works').delete().eq('id', id);
-  if (error) { toast('Gagal hapus: ' + error.message, 'error'); return; }
-  toast('Karya dihapus', 'success');
+  const { error } = await sb.from('mv_works').delete().eq('id',id);
+  if (error) { toast('Gagal hapus: '+error.message,'error'); return; }
+  toast('Karya dihapus','success');
 }
 
-// ─────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────
 // MODAL
-// ─────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────
 function openModal(id) {
-  const c = cards.find(x => x.id === id); if (!c) return;
+  const c = cards.find(x=>x.id===id); if(!c) return;
   el('modal-title').textContent  = c.title;
-  el('modal-artist').textContent = c.artist || '';
+  el('modal-artist').textContent = c.artist||'';
   el('modal-video-wrap').innerHTML = c.ytId
     ? `<iframe src="https://www.youtube.com/embed/${c.ytId}?autoplay=1&rel=0" allow="autoplay;encrypted-media" allowfullscreen></iframe>`
     : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--bg);color:var(--muted);font-family:'Space Mono',monospace">No video</div>`;
   el('modal').classList.add('open');
-  document.body.style.overflow = 'hidden';
+  document.body.style.overflow='hidden';
 }
 
 function closeModal(e) {
   if (e && e.target !== el('modal')) return;
   el('modal').classList.remove('open');
-  el('modal-video-wrap').innerHTML = '';
-  document.body.style.overflow = '';
+  el('modal-video-wrap').innerHTML='';
+  document.body.style.overflow='';
 }
 
-// ─────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────
 // SITE INFO
-// ─────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────
 function applySiteInfo() {
-  const s = siteInfo; if (!s || !Object.keys(s).length) return;
-  if (s.brand) {
-    el('nav-brand').innerHTML    = s.brand.replace('.','<span>.</span>');
-    el('footer-brand').innerHTML = s.brand.replace('.','<span>.</span>');
-  }
-  setText('hero-label', s.label);
-  if (s.htitle) {
-    const lines = s.htitle.split('|');
-    el('hero-title').innerHTML = lines.map((l,i) =>
-      i===0 ? l : i===1 ? `<span class="accent">${l}</span>` : `<span class="stroke">${l}</span>`
-    ).join('<br>');
-  }
-  setText('hero-sub',    s.hsub);
-  setText('about-p1',   s.about1);
-  setText('about-p2',   s.about2);
-  setText('footer-copy', s.copy);
-  if (s.yt) { el('about-yt-link').href = s.yt; el('footer-yt').href = s.yt; }
-  if (s.tw) { el('about-tw-link').href = s.tw; el('footer-tw').href = s.tw; }
+  const s = siteInfo; if(!s||!Object.keys(s).length) return;
+  if(s.brand){el('nav-brand').innerHTML=s.brand.replace('.','<span>.</span>');el('footer-brand').innerHTML=s.brand.replace('.','<span>.</span>');}
+  setText('hero-label',s.label); setText('hero-sub',s.hsub);
+  setText('about-p1',s.about1); setText('about-p2',s.about2);
+  setText('footer-copy',s.copy);
+  if(s.htitle){const lines=s.htitle.split('|');el('hero-title').innerHTML=lines.map((l,i)=>i===0?l:i===1?`<span class="accent">${l}</span>`:`<span class="stroke">${l}</span>`).join('<br>');}
+  if(s.yt){el('about-yt-link').href=s.yt;el('footer-yt').href=s.yt;}
+  if(s.tw){el('about-tw-link').href=s.tw;el('footer-tw').href=s.tw;}
 }
 
 function openSiteEdit() {
-  const s = siteInfo;
-  el('edit-brand').value  = s.brand  || '';  el('edit-label').value  = s.label  || '';
-  el('edit-htitle').value = s.htitle || '';  el('edit-hsub').value   = s.hsub   || '';
-  el('edit-about1').value = s.about1 || '';  el('edit-about2').value = s.about2 || '';
-  el('edit-yt').value     = s.yt     || '';  el('edit-tw').value     = s.tw     || '';
-  el('edit-copy').value   = s.copy   || '';  el('edit-year').value   = s.year   || '';
-  show('site-edit-panel');
+  const s=siteInfo;
+  ['brand','label','htitle','hsub','about1','about2','yt','tw','copy','year'].forEach(k=>{ if(el('edit-'+k)) el('edit-'+k).value=s[k]||''; });
+  el('site-edit-panel').classList.add('open');
 }
-
-function closeSiteEdit() { hide('site-edit-panel'); }
+function closeSiteEdit(){el('site-edit-panel').classList.remove('open');}
 
 async function saveSiteEdit() {
-  siteInfo = {
-    brand:  el('edit-brand').value,  label:  el('edit-label').value,
-    htitle: el('edit-htitle').value, hsub:   el('edit-hsub').value,
-    about1: el('edit-about1').value, about2: el('edit-about2').value,
-    yt:     el('edit-yt').value,     tw:     el('edit-tw').value,
-    copy:   el('edit-copy').value,   year:   el('edit-year').value,
-  };
-  const btn = el('site-save-btn'); btn.textContent = 'Menyimpan...'; btn.disabled = true;
-  const { error } = await sb.from('mv_site').upsert({ id:1, data: siteInfo });
-  btn.textContent = 'Simpan →'; btn.disabled = false;
-  if (error) { toast('Gagal simpan: ' + error.message, 'error'); return; }
+  siteInfo={brand:el('edit-brand').value,label:el('edit-label').value,htitle:el('edit-htitle').value,hsub:el('edit-hsub').value,about1:el('edit-about1').value,about2:el('edit-about2').value,yt:el('edit-yt').value,tw:el('edit-tw').value,copy:el('edit-copy').value,year:el('edit-year').value};
+  const btn=el('site-save-btn'); btn.textContent='Menyimpan...'; btn.disabled=true;
+  const{error}=await sb.from('mv_site').upsert({id:1,data:siteInfo});
+  btn.textContent='Simpan →'; btn.disabled=false;
+  if(error){toast('Gagal: '+error.message,'error');return;}
   applySiteInfo(); updateStats(); closeSiteEdit();
-  toast('Info site tersimpan! ✓', 'success');
+  toast('Info site tersimpan! ✓','success');
 }
 
-// ─────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────
 // UTILS
-// ─────────────────────────────────────────────────────────
-function el(id)         { return document.getElementById(id); }
-function show(id)       { el(id).style.display = 'flex'; }
-function hide(id)       { el(id).style.display = 'none'; }
-function setText(id, v) { if (v && el(id)) el(id).textContent = v; }
-function esc(s)         { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-function ytExtract(s) {
-  if (!s) return null;
-  const m = s.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/) || s.match(/^([a-zA-Z0-9_-]{11})$/);
-  return m ? m[1] : null;
-}
-
-let _toastT;
-function toast(msg, type='') {
-  const t = el('toast'); t.textContent = msg; t.className = `toast ${type} show`;
-  clearTimeout(_toastT); _toastT = setTimeout(() => t.classList.remove('show'), 3200);
-}
-
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') {
-    closeModal(); closeSiteEdit();
-    hide('pw-modal');
-    el('admin-panel').classList.remove('open');
-  }
-});
+// ─────────────────────────────────────────────
+function el(id){return document.getElementById(id);}
+function setText(id,v){if(v&&el(id))el(id).textContent=v;}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function ytExtract(s){if(!s)return null;const m=s.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/)||s.match(/^([a-zA-Z0-9_-]{11})$/);return m?m[1]:null;}
+let _tt;
+function toast(msg,type=''){const t=el('toast');t.textContent=msg;t.className=`toast ${type} show`;clearTimeout(_tt);_tt=setTimeout(()=>t.classList.remove('show'),3200);}
 
 init();
 </script>
