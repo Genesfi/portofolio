@@ -608,10 +608,67 @@ let keyBuf='';document.addEventListener('keydown',e=>{if (['INPUT','TEXTAREA'].i
 keyBuf+=e.key.toLowerCase();if (keyBuf.length>SHORTCUT.length) keyBuf=keyBuf.slice(-SHORTCUT.length);if (keyBuf===SHORTCUT){keyBuf='';requestAdmin();}
 });function switchTab(name,btn){document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));btn.classList.add('active');el('tab-'+name).classList.add('active');if (name==='list') renderExistingList();if (name==='site') fillSiteForm();}
 function requestAdmin(){if (isAdminActive()){renewAdminSession();el('admin-panel').classList.toggle('open');return;}
-el('pw-error').style.display='none';el('pw-email').value='';el('pw-input').value='';el('pw-modal').style.display='flex';setTimeout(()=>el('pw-email').focus(),100);}
-async function checkPw(){const email=el('pw-email').value.trim();const pass=el('pw-input').value;if (!email||!pass){el('pw-error').style.display='block';el('pw-error').textContent='❌ Please enter email and password.';return;}
-const btn=el('pw-btn');btn.textContent='Signing in...';btn.disabled=true;try{const{data,error}=await sb.auth.signInWithPassword({email,password:pass});if (error||!data.user) throw new Error(error?.message||'Auth failed');setAdminSession(true);el('pw-modal').style.display='none';el('admin-panel').classList.add('open');toast('Welcome back!✓','success');}catch(e){el('pw-error').style.display='block';el('pw-error').textContent='❌ Invalid email or password.';el('pw-input').value='';el('pw-input').focus();}
-btn.textContent='Sign In →';btn.disabled=false;}
+el('pw-error').style.display='none';el('pw-email').value='';el('pw-input').value='';el('pw-btn').disabled=false;
+// check existing lockout
+try{
+  const lock=JSON.parse(sessionStorage.getItem(_c('bG9ja291dA=='))||'null');
+  if(lock&&Date.now()<lock.until){
+    const mins=Math.ceil((lock.until-Date.now())/60000);
+    el('pw-error').style.display='block';
+    el('pw-error').textContent=`🔒 Too many attempts. Try again in ${mins} min.`;
+    el('pw-btn').disabled=true;
+  }
+}catch(e){}
+el('pw-modal').style.display='flex';setTimeout(()=>el('pw-email').focus(),100);}
+async function checkPw(){
+const MAX_ATTEMPTS=5;const LOCKOUT_MS=15*60*1000;
+const now=Date.now();
+const lockKey=_c('bG9ja291dA==');// 'lockout'
+const attKey=_c('YXR0ZW1wdHM=');// 'attempts'
+
+// check lockout
+try{
+  const lock=JSON.parse(sessionStorage.getItem(lockKey)||'null');
+  if(lock&&now<lock.until){
+    const mins=Math.ceil((lock.until-now)/60000);
+    el('pw-error').style.display='block';
+    el('pw-error').textContent=`🔒 Too many attempts. Try again in ${mins} min.`;
+    el('pw-btn').disabled=true;
+    return;
+  }
+}catch(e){}
+
+const email=el('pw-email').value.trim();const pass=el('pw-input').value;
+if(!email||!pass){el('pw-error').style.display='block';el('pw-error').textContent='❌ Please enter email and password.';return;}
+const btn=el('pw-btn');btn.textContent='Signing in...';btn.disabled=true;
+try{
+  const{data,error}=await sb.auth.signInWithPassword({email,password:pass});
+  if(error||!data.user) throw new Error(error?.message||'Auth failed');
+  // success — clear attempts
+  sessionStorage.removeItem(attKey);
+  sessionStorage.removeItem(lockKey);
+  setAdminSession(true);el('pw-modal').style.display='none';el('admin-panel').classList.add('open');toast('Welcome back! ✓','success');
+}catch(e){
+  // track failed attempts
+  let attempts=0;
+  try{attempts=parseInt(sessionStorage.getItem(attKey)||'0');}catch(e){}
+  attempts++;
+  sessionStorage.setItem(attKey,attempts);
+  const remaining=MAX_ATTEMPTS-attempts;
+  if(attempts>=MAX_ATTEMPTS){
+    sessionStorage.setItem(lockKey,JSON.stringify({until:now+LOCKOUT_MS}));
+    sessionStorage.removeItem(attKey);
+    el('pw-error').style.display='block';
+    el('pw-error').textContent='🔒 Too many attempts. Locked for 15 minutes.';
+    btn.disabled=true;
+  } else {
+    el('pw-error').style.display='block';
+    el('pw-error').textContent=`❌ Wrong credentials. ${remaining} attempt${remaining>1?'s':''} left.`;
+    btn.disabled=false;
+  }
+  el('pw-input').value='';el('pw-input').focus();
+}
+btn.textContent='Sign In →';}
 function onUrlInput(val){clearTimeout(fetchTimer);const ytId=ytExtract(val);if (!ytId){setFetchStatus('','');return;}
 setFetchStatus('loading','⟳ Mengambil info...');fetchTimer=setTimeout(()=>fetchYtInfo(ytId),800);}
 async function fetchYtInfo(ytId){try{const res=await fetch(`https://www.youtube.com/oembed?url=https://youtube.com/watch?v=${ytId}&format=json`);if (!res.ok) throw new Error('not found');const data=await res.json();if (!el('inp-title').value.trim()){el('inp-title').value=data.title||'';}
