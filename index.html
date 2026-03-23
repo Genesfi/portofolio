@@ -58,9 +58,10 @@
       will-change: transform;
       flex-shrink: 0;
     }
-    .hero-track.row-1 { animation: slideLeft 40s linear infinite; }
-    .hero-track.row-2 { animation: slideRight 50s linear infinite; }
-    .hero-track.row-3 { animation: slideLeft 35s linear infinite; }
+    /* duration set by JS based on actual track width */
+    .hero-track.row-1 { animation: slideLeft 60s linear infinite; }
+    .hero-track.row-2 { animation: slideRight 75s linear infinite; }
+    .hero-track.row-3 { animation: slideLeft 50s linear infinite; }
     .hero-slide {
       flex-shrink: 0;
       width: 280px; height: 158px;
@@ -686,117 +687,37 @@ function togglePresetTag(inputId,tag,btn){renewAdminSession();let tags=getTagsAr
 setTagsArray(inputId,tags);}
 function syncPresetHighlight(inputId,presetsId){const tags=getTagsArray(inputId);const wrap=el(presetsId);if (!wrap) return;wrap.querySelectorAll('.tag-preset-btn').forEach(btn=>{btn.classList.toggle('active',tags.includes(btn.textContent.trim()));});}
 function syncAllPresets(){cards.forEach(c=>{const presetsId=`edit-tag-presets-${c.id}`;if (el(presetsId)) syncPresetHighlight(`e-tags-${c.id}`,presetsId);});}
-function buildShowcase(){const thumbs=cards
-.map(c=>c.thumb||(c.ytId?ytThumbFallback(c.ytId):null))
-.filter(Boolean);if (thumbs.length<2) return;const fill=(arr,min)=>{let r=[...arr];while (r.length<min) r=[...r,...arr];return r;};const rows=[
-{id:'hero-row-1',items:fill(thumbs,16)},{id:'hero-row-2',items:fill([...thumbs].reverse(),16)},{id:'hero-row-3',items:fill(thumbs.slice(Math.floor(thumbs.length/2)).concat(thumbs.slice(0,Math.floor(thumbs.length/2))),16)},];rows.forEach(({id,items})=>{const row=el(id);if (!row) return;const doubled=[...items,...items];row.innerHTML=doubled.map(src=>
-`<div class="hero-slide"><img src="${src}" loading="lazy" onerror="this.parentElement.style.display='none'"></div>`
-).join('');});setTimeout(()=>{const wrap=el('hero-track-wrap');if (wrap) wrap.classList.add('visible');},400);}
-function ytThumb(ytId){return `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;}
-function ytThumbFallback(ytId){return `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;}
-function cardHTML(c){const thumb=c.thumb||(c.ytId?ytThumb(c.ytId):'');const fallback=c.ytId?ytThumbFallback(c.ytId):'';const tags=(c.tags||[]).map(t=>`<span class="mv-tag">${esc(t)}</span>`).join('');return `
-<div class="mv-card${c.featured?' featured':''}" onclick="openModal('${c.id}')">
-${thumb?`<img class="mv-thumb" src="${thumb}" alt="${esc(c.title)}" loading="lazy" onerror="this.src='${fallback}';this.onerror=null;">`:''}
-<div class="mv-placeholder" style="${thumb?'display:none':''}">
-<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-</div>
-<div class="mv-play"><svg width="18" height="18" viewBox="0 0 24 24" fill="#000"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
-<div class="mv-overlay">
-<div>${tags}<div class="mv-title">${esc(c.title)}</div><div class="mv-artist">${esc(c.artist||'')}</div></div>
-</div>
-</div>`;}
-function getDisplayMode(){return siteInfo.displayMode||'all';}
-function getPerPage(){return parseInt(siteInfo.perPage)||12;}
-function renderGrid(resetPage){if (resetPage){currentPage=1;loadedCount=0;}
-const grid=el('mv-grid');const mode=getDisplayMode();const perPage=getPerPage();const list=activeFilter==='all'?cards:cards.filter(c=>(c.tags||[]).includes(activeFilter));el('works-count').textContent=String(list.length).padStart(2,'0');['mv-pagination','mv-loadmore-btn'].forEach(id=>{const e=el(id);if(e) e.remove();});if (!list.length){grid.innerHTML=`<div style="grid-column:1/-1;padding:80px;text-align:center;color:var(--muted);font-family:'Space Mono',monospace;font-size:13px">Belum ada karya.</div>`;return;}
-if (mode==='pagination'){const totalPages=Math.ceil(list.length / perPage);currentPage=Math.min(currentPage,totalPages);const start=(currentPage-1)*perPage;const slice=list.slice(start,start+perPage);grid.innerHTML=slice.map(cardHTML).join('');if (totalPages>1){const bar=document.createElement('div');bar.id='mv-pagination';bar.style.cssText='grid-column:1/-1;display:flex;justify-content:center;gap:6px;padding:32px 0 8px;flex-wrap:wrap';for (let i=1;i<=totalPages;i++){const btn=document.createElement('button');btn.textContent=i;btn.style.cssText=`padding:8px 16px;font-family:'Space Mono',monospace;font-size:12px;border:1px solid rgba(240,240,240,.15);background:${i===currentPage?'var(--accent)':'transparent'};color:${i===currentPage?'#000':'var(--muted)'};cursor:pointer;transition:all .2s`;btn.onclick=()=>{currentPage=i;renderGrid(false);window.scrollTo({top:el('works').offsetTop-80,behavior:'smooth'});};bar.appendChild(btn);}
-grid.appendChild(bar);}
-}else if (mode==='loadmore'){if (resetPage) loadedCount=perPage;else loadedCount=Math.max(loadedCount,perPage);const slice=list.slice(0,loadedCount);grid.innerHTML=slice.map(cardHTML).join('');if (loadedCount<list.length){const remaining=list.length-loadedCount;const btn=document.createElement('button');btn.id='mv-loadmore-btn';btn.textContent=`Muat Lebih Banyak (${remaining}lagi)`;btn.style.cssText='grid-column:1/-1;margin:24px auto 0;display:block;padding:14px 40px;background:transparent;border:1px solid rgba(200,255,0,.3);color:var(--accent);font-family:"Space Mono",monospace;font-size:12px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:all .2s';btn.onmouseenter=()=>btn.style.background='rgba(200,255,0,.08)';btn.onmouseleave=()=>btn.style.background='transparent';btn.onclick=()=>{loadedCount+=perPage;renderGrid(false);};grid.appendChild(btn);}
-}else{grid.innerHTML=list.map(cardHTML).join('');}
+function buildShowcase(){
+const thumbs=cards.map(c=>c.thumb||(c.ytId?ytThumbFallback(c.ytId):null)).filter(Boolean);
+if(thumbs.length<2)return;
+
+// ensure at least 20 items so half-track always wider than viewport
+const fill=(arr,min)=>{let r=[...arr];while(r.length<min)r=[...r,...arr];return r;};
+const CARD_W=292;// 280px + 12px gap
+
+const configs=[
+  {id:'hero-row-1',items:fill(thumbs,20),dir:'left',speed:60},
+  {id:'hero-row-2',items:fill([...thumbs].reverse(),20),dir:'right',speed:75},
+  {id:'hero-row-3',items:fill(thumbs.slice(Math.floor(thumbs.length/2)).concat(thumbs.slice(0,Math.floor(thumbs.length/2))),20),dir:'left',speed:50},
+];
+
+configs.forEach(({id,items,dir,speed})=>{
+  const row=el(id);if(!row)return;
+  // double items — first half is "real", second half is clone for seamless loop
+  const all=[...items,...items];
+  row.innerHTML=all.map(src=>`<div class="hero-slide"><img src="${src}" loading="lazy" onerror="this.parentElement.style.display='none'"></div>`).join('');
+  // after render, measure actual half-width and set animation duration proportionally
+  requestAnimationFrame(()=>{
+    const halfW=items.length*CARD_W;
+    const dur=(halfW/CARD_W)*(speed/20);
+    row.style.animationDuration=`${dur}s`;
+    // for right-scrolling rows, start at -50% so it scrolls back to 0
+    if(dir==='right'){
+      row.style.animationName='slideRight';
+      row.style.transform='translateX(-50%)';
+    }
+  });
+});
+
+setTimeout(()=>{const wrap=el('hero-track-wrap');if(wrap)wrap.classList.add('visible');},400);
 }
-function renderFilters(){const tags=new Set();cards.forEach(c=>(c.tags||[]).forEach(t=>tags.add(t)));el('filter-bar').innerHTML=
-`<button class="filter-btn${activeFilter==='all'?' active':''}" onclick="filterCards('all',this)">All</button>`+
-[...tags].map(t=>`<button class="filter-btn${activeFilter===t?' active':''}" onclick="filterCards('${esc(t)}',this)">${esc(t)}</button>`).join('');}
-function filterCards(tag,btn){activeFilter=tag;document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderGrid(true);}
-let sortableInstance=null;function renderExistingList(){const listEl=el('existing-list');if (!cards.length){listEl.innerHTML='<div style="color:var(--muted);font-size:12px;font-family:\'Space Mono\',monospace">Belum ada karya</div>';if (sortableInstance){sortableInstance.destroy();sortableInstance=null;}
-return;}
-listEl.innerHTML=cards.map(c=>{const thumb=c.thumb||(c.ytId?ytThumb(c.ytId):'');const fallback=c.ytId?ytThumbFallback(c.ytId):'';return `
-<div class="existing-item" id="item-${c.id}" data-id="${c.id}">
-<div class="existing-item-header">
-<span class="drag-handle" title="Geser untuk urutkan">⠿</span>
-${thumb?`<img class="existing-item-thumb" src="${thumb}" onerror="this.src='${fallback}';this.onerror=null;">`:''}
-<span class="existing-item-title">${esc(c.title)}</span>
-<div class="existing-item-actions">
-<button class="edit-btn" onclick="toggleEdit('${c.id}')">✏</button>
-<button class="del-btn" onclick="deleteCard('${c.id}')">✕</button>
-</div>
-</div>
-<div class="inline-edit" id="edit-${c.id}">
-<label>YouTube URL / ID</label>
-<input type="text" id="e-url-${c.id}" value="${esc(c.ytId||'')}">
-<label>Judul</label>
-<input type="text" id="e-title-${c.id}" value="${esc(c.title)}">
-<label>Artis</label>
-<input type="text" id="e-artist-${c.id}" value="${esc(c.artist||'')}">
-<label>Tags<span style="color:var(--muted);font-size:9px">(klik preset atau ketik)</span></label>
-<div class="tag-presets" id="edit-tag-presets-${c.id}">
-<button type="button" class="tag-preset-btn" onclick="togglePresetTag('e-tags-${c.id}','Simple MV',this)">Simple MV</button>
-<button type="button" class="tag-preset-btn" onclick="togglePresetTag('e-tags-${c.id}','Semi Complex',this)">Semi Complex</button>
-<button type="button" class="tag-preset-btn" onclick="togglePresetTag('e-tags-${c.id}','Complex',this)">Complex</button>
-<button type="button" class="tag-preset-btn" onclick="togglePresetTag('e-tags-${c.id}','Debut',this)">Debut</button>
-<button type="button" class="tag-preset-btn" onclick="togglePresetTag('e-tags-${c.id}','Trailer',this)">Trailer</button>
-</div>
-<input type="text" id="e-tags-${c.id}" value="${esc((c.tags||[]).join(','))}" oninput="syncPresetHighlight('e-tags-${c.id}','edit-tag-presets-${c.id}')" onfocus="syncPresetHighlight('e-tags-${c.id}','edit-tag-presets-${c.id}')">
-<label>Custom Thumbnail URL</label>
-<input type="text" id="e-thumb-${c.id}" value="${esc(c.thumb||'')}">
-<div class="checkbox-row" style="margin:6px 0">
-<input type="checkbox" id="e-feat-${c.id}" ${c.featured?'checked':''}>
-<label for="e-feat-${c.id}" style="margin:0;font-size:11px;text-transform:none;letter-spacing:0">Featured (2x besar)</label>
-</div>
-<button class="inline-save-btn" onclick="saveEdit('${c.id}')">💾 Simpan Perubahan</button>
-<button class="inline-cancel-btn" onclick="toggleEdit('${c.id}')">Batal</button>
-</div>
-</div>`;}).join('');if (sortableInstance){sortableInstance.destroy();sortableInstance=null;}
-sortableInstance=Sortable.create(listEl,{handle:'.drag-handle',animation:180,ghostClass:'sortable-ghost',chosenClass:'sortable-chosen',onEnd:async (evt)=>{if (evt.oldIndex===evt.newIndex) return;const moved=cards.splice(evt.oldIndex,1)[0];cards.splice(evt.newIndex,0,moved);let note=el('sort-saving');if (!note){note=document.createElement('div');note.id='sort-saving';note.style.cssText='text-align:center;padding:8px;font-family:"Space Mono",monospace;font-size:11px;color:var(--accent);letter-spacing:.1em';listEl.insertAdjacentElement('afterend',note);}
-note.textContent='⟳ Menyimpan urutan...';await Promise.all(cards.map((c,i)=>sb.from('mv_works').update({sort_order:i}).eq('id',c.id)));note.remove();toast('Urutan berhasil disimpan!✓','success');renderGrid(true);}
-});}
-function toggleEdit(id){const pane=el('edit-'+id);document.querySelectorAll('.inline-edit.open').forEach(p=>{if (p.id!=='edit-'+id) p.classList.remove('open');});pane.classList.toggle('open');if (pane.classList.contains('open')){setTimeout(()=>syncPresetHighlight(`e-tags-${id}`,`edit-tag-presets-${id}`),50);}
-}
-async function saveEdit(id){const urlVal=el(`e-url-${id}`).value.trim();const title=el(`e-title-${id}`).value.trim();const artist=el(`e-artist-${id}`).value.trim();const tagsRaw=el(`e-tags-${id}`).value.trim();const thumb=el(`e-thumb-${id}`).value.trim();const feat=el(`e-feat-${id}`).checked;if (!title){toast('Title cannot be empty!','error');return;}
-renewAdminSession();const ytId=ytExtract(urlVal)||urlVal||null;const tags=tagsRaw?tagsRaw.split(',').map(t=>t.trim()).filter(Boolean):[];const btn=el(`edit-${id}`).querySelector('.inline-save-btn');btn.textContent='Menyimpan...';btn.disabled=true;const{error}=await sb.from('mv_works').update({ytId,title,artist,tags,thumb:thumb||null,featured:feat}).eq('id',id);btn.textContent='💾 Simpan Perubahan';btn.disabled=false;if (error){toast('Gagal simpan:'+error.message,'error');return;}
-toast('Karya berhasil diperbarui!✓','success');toggleEdit(id);}
-function updateStats(){el('stat-mvs').textContent=cards.length||'0';const artists=new Set(cards.map(c=>c.artist).filter(Boolean));el('stat-clients').textContent=artists.size||'0';const tags=new Set();cards.forEach(c=>(c.tags||[]).forEach(t=>tags.add(t)));el('stat-tags').textContent=tags.size||'0';el('stat-year').textContent=siteInfo.year||new Date().getFullYear();}
-async function addCard(){const url=el('inp-url').value.trim();const title=el('inp-title').value.trim();const artist=el('inp-artist').value.trim();const tRaw=el('inp-tags').value.trim();const thumb=el('inp-thumb').value.trim();const feat=el('inp-featured').checked;if (!title){toast('Title is required!','error');return;}
-renewAdminSession();const ytId=ytExtract(url);const tags=tRaw?tRaw.split(',').map(t=>t.trim()).filter(Boolean):[];const btn=el('add-btn');btn.disabled=true;btn.textContent='Menyimpan...';const{error}=await sb.from('mv_works').insert([{ytId,title,artist,tags,thumb:thumb||null,featured:feat,sort_order:-1}]);btn.disabled=false;btn.textContent='+Tambah ke Portofolio';if (error){toast('Gagal:'+error.message,'error');return;}
-toast('Karya berhasil ditambahkan!✓','success');['inp-url','inp-title','inp-artist','inp-tags','inp-thumb'].forEach(id=>el(id).value='');el('inp-featured').checked=false;document.querySelectorAll('#add-tag-presets .tag-preset-btn').forEach(b=>b.classList.remove('active'));setFetchStatus('','');}
-async function deleteCard(id){if (!confirm('Remove this work?')) return;renewAdminSession();const{error}=await sb.from('mv_works').delete().eq('id',id);if (error){toast('Gagal hapus:'+error.message,'error');return;}
-toast('Karya dihapus','success');}
-function openModal(id){const c=cards.find(x=>x.id===id);if(!c) return;el('modal-title').textContent=c.title;el('modal-artist').textContent=c.artist||'';el('modal-video-wrap').innerHTML=c.ytId
-?`<iframe src="https://www.youtube.com/embed/${c.ytId}?autoplay=1&rel=0" allow="autoplay;encrypted-media" allowfullscreen></iframe>`
-:`<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--bg);color:var(--muted);font-family:'Space Mono',monospace">No video</div>`;el('modal').classList.add('open');document.body.style.overflow='hidden';}
-function closeModal(e){if (e&&e.target!==el('modal')) return;el('modal').classList.remove('open');el('modal-video-wrap').innerHTML='';document.body.style.overflow='';}
-function applySiteInfo(){const s=siteInfo;if(!s||!Object.keys(s).length) return;const tabTitle=s.siteTitle||s.brand||'MV Portfolio';document.title=tabTitle;if(el('page-title')) el('page-title').textContent=tabTitle;if(s.brand){el('nav-brand').innerHTML=s.brand.replace('.','<span>.</span>');el('footer-brand').innerHTML=s.brand.replace('.','<span>.</span>');}
-setText('hero-label',s.label);setText('hero-sub',s.hsub);setText('about-p1',s.about1);setText('about-p2',s.about2);setText('footer-copy',s.copy);if(s.htitle){const lines=s.htitle.split('|');el('hero-title').innerHTML=lines.map((l,i)=>i===0?l:i===1?`<span class="accent">${l}</span>`:`<span class="stroke">${l}</span>`).join('<br>');}
-const socials=[
-{key:'yt',label:'YouTube',icon:`<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.7 15.5V8.5l6.3 3.5-6.3 3.5z"/></svg>`,primary:true},{key:'tw',label:'Twitter/X',icon:`<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>`,primary:false},{key:'discord',label:'Discord',icon:`<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057c.003.024.015.046.033.06a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>`,primary:false},{key:'vgen',label:'VGen',icon:`<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>`,primary:false},{key:'ig',label:'Instagram',icon:`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>`,primary:false},{key:'tiktok',label:'TikTok',icon:`<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.75a4.85 4.85 0 0 1-1.01-.06z"/></svg>`,primary:false},];const aboutWrap=el('about-social-btns');const footerWrap=el('footer-social-links');if (aboutWrap){aboutWrap.innerHTML=socials
-.filter(s2=>s[s2.key])
-.map(s2=>`<a href="${s[s2.key]}" target="_blank" class="btn ${s2.primary?'btn-primary':'btn-ghost'}" style="padding:10px 20px;font-size:11px;display:inline-flex;align-items:center;gap:7px">${s2.icon}${s2.label}</a>`)
-.join('');}
-if (footerWrap){footerWrap.innerHTML=socials
-.filter(s2=>s[s2.key])
-.map(s2=>`<a href="${s[s2.key]}" target="_blank">${s2.label}</a>`)
-.join('');}
-}
-function previewMode(mode){siteInfo.displayMode=mode;renderGrid(true);}
-function fillSiteForm(){const s=siteInfo;['brand','siteTitle','label','htitle','hsub','about1','about2','yt','tw','discord','vgen','ig','tiktok','copy','year'].forEach(k=>{if (el('s-'+k)) el('s-'+k).value=s[k]||'';});if (el('s-perpage')) el('s-perpage').value=s.perPage||12;const mode=s.displayMode||'all';const radio=el('dm-'+mode);if (radio) radio.checked=true;}
-async function saveSiteEdit(){const mode=document.querySelector('input[name="display-mode"]:checked');siteInfo={brand:el('s-brand').value,siteTitle:el('s-siteTitle').value,label:el('s-label').value,htitle:el('s-htitle').value,hsub:el('s-hsub').value,about1:el('s-about1').value,about2:el('s-about2').value,yt:el('s-yt').value,tw:el('s-tw').value,discord:el('s-discord').value,vgen:el('s-vgen').value,ig:el('s-ig').value,tiktok:el('s-tiktok').value,copy:el('s-copy').value,year:el('s-year').value,displayMode:mode?mode.value:'all',perPage:parseInt(el('s-perpage')?.value)||12,};const btn=el('site-save-btn');btn.textContent='Saving...';btn.disabled=true;renewAdminSession();const{error}=await sb.from('mv_site').upsert({id:1,data:siteInfo});btn.textContent='Simpan Info Site →';btn.disabled=false;if (error){toast('Gagal:'+error.message,'error');return;}
-applySiteInfo();updateStats();renderGrid(true);toast('Info site tersimpan!✓','success');}
-function closeSiteEdit(){el('site-edit-panel').classList.remove('open');}
-function el(id){return document.getElementById(id);}
-function setText(id,v){if(v&&el(id))el(id).textContent=v;}
-function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-function ytExtract(s){if(!s)return null;const m=s.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/)||s.match(/^([a-zA-Z0-9_-]{11})$/);return m?m[1]:null;}
-let _tt;function toast(msg,type=''){const t=el('toast');t.textContent=msg;t.className=`toast ${type}show`;clearTimeout(_tt);_tt=setTimeout(()=>t.classList.remove('show'),3200);}
-init();</script>
-</body>
-</html>
