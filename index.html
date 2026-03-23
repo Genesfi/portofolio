@@ -495,9 +495,43 @@ const SB_KEY   = 'sb_publishable_jsJ962BsXTJJAVR7xYTcOg_qlcbnljz';
 const ADMIN_PW = '@Sera63271611';
 const SHORTCUT = 'adm';
 
-let sb, cards = [], siteInfo = {}, activeFilter = 'all', adminUnlocked = false;
+const ADMIN_SESSION_KEY = 'mvp_admin_session';
+const ADMIN_TIMEOUT_MS  = 60 * 60 * 1000; // 1 jam
+
+let sb, cards = [], siteInfo = {}, activeFilter = 'all';
 let fetchTimer = null;
 let currentPage = 1, loadedCount = 0;
+
+// ── ADMIN SESSION ──────────────────────────────
+function isAdminActive() {
+  try {
+    const s = JSON.parse(sessionStorage.getItem(ADMIN_SESSION_KEY) || 'null');
+    if (!s) return false;
+    if (Date.now() - s.ts > ADMIN_TIMEOUT_MS) {
+      sessionStorage.removeItem(ADMIN_SESSION_KEY);
+      return false;
+    }
+    return true;
+  } catch { return false; }
+}
+
+function setAdminSession(active) {
+  if (active) sessionStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify({ ts: Date.now() }));
+  else sessionStorage.removeItem(ADMIN_SESSION_KEY);
+}
+
+// renew timestamp on any admin activity
+function renewAdminSession() {
+  if (isAdminActive()) setAdminSession(true);
+}
+
+// auto-expire check every minute
+setInterval(() => {
+  if (!isAdminActive() && el('admin-panel')?.classList.contains('open')) {
+    el('admin-panel').classList.remove('open');
+    toast('Admin session expired. Type "adm" to log in again.', 'error');
+  }
+}, 60 * 1000);
 
 // ─────────────────────────────────────────────
 // INIT
