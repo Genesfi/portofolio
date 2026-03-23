@@ -31,6 +31,56 @@
     .hero { min-height: 100vh; display: flex; flex-direction: column; justify-content: flex-end; padding: 0 40px 60px; position: relative; overflow: hidden; }
     .hero-bg { position: absolute; inset: 0; background: radial-gradient(ellipse 60% 50% at 70% 40%, rgba(200,255,0,0.06), transparent 60%), radial-gradient(ellipse 40% 40% at 30% 60%, rgba(255,60,172,0.08), transparent 60%); }
     .hero-grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(200,255,0,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(200,255,0,0.03) 1px, transparent 1px); background-size: 60px 60px; }
+
+    /* ── HERO SHOWCASE SLIDER ── */
+    .hero-showcase {
+      position: absolute; inset: 0; z-index: 0;
+      overflow: hidden; pointer-events: none;
+    }
+    .hero-showcase::after {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        linear-gradient(to bottom, rgba(8,8,16,.3) 0%, rgba(8,8,16,.1) 30%, rgba(8,8,16,.5) 70%, rgba(8,8,16,1) 100%),
+        linear-gradient(to right, rgba(8,8,16,.8) 0%, transparent 40%, transparent 60%, rgba(8,8,16,.8) 100%);
+      z-index: 2;
+    }
+    .hero-track-wrap {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column;
+      gap: 12px; padding: 12px 0;
+      opacity: 0;
+      transition: opacity 1s ease;
+    }
+    .hero-track-wrap.visible { opacity: 1; }
+    .hero-track {
+      display: flex; gap: 12px;
+      will-change: transform;
+      flex-shrink: 0;
+    }
+    .hero-track.row-1 { animation: slideLeft 40s linear infinite; }
+    .hero-track.row-2 { animation: slideRight 50s linear infinite; }
+    .hero-track.row-3 { animation: slideLeft 35s linear infinite; }
+    .hero-slide {
+      flex-shrink: 0;
+      width: 280px; height: 158px;
+      border-radius: 4px;
+      overflow: hidden;
+      filter: blur(1px) brightness(.55) saturate(.7);
+      transition: filter .3s;
+    }
+    .hero-slide img {
+      width: 100%; height: 100%;
+      object-fit: cover; display: block;
+    }
+    @keyframes slideLeft {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    @keyframes slideRight {
+      0%   { transform: translateX(-50%); }
+      100% { transform: translateX(0); }
+    }
     .hero-label { font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 0.3em; color: var(--accent); text-transform: uppercase; margin-bottom: 16px; opacity: 0; animation: fadeUp .6s ease .3s forwards; }
     .hero-title { font-family: 'Bebas Neue', sans-serif; font-size: clamp(72px, 14vw, 180px); line-height: 0.9; color: var(--text); opacity: 0; animation: fadeUp .7s ease .5s forwards; }
     .hero-title .accent { color: var(--accent); }
@@ -287,6 +337,15 @@
 <section class="hero" id="home">
   <div class="hero-bg"></div>
   <div class="hero-grid"></div>
+
+  <!-- sliding showcase — populated by JS -->
+  <div class="hero-showcase">
+    <div class="hero-track-wrap" id="hero-track-wrap">
+      <div class="hero-track row-1" id="hero-row-1"></div>
+      <div class="hero-track row-2" id="hero-row-2"></div>
+      <div class="hero-track row-3" id="hero-row-3"></div>
+    </div>
+  </div>
   <div style="position:relative;z-index:1">
     <p class="hero-label" id="hero-label">Music Video Director</p>
     <h1 class="hero-title" id="hero-title">
@@ -682,6 +741,7 @@ async function loadCards() {
   if (error) { toast('Gagal load: ' + error.message, 'error'); return; }
   cards = data || [];
   renderGrid(true); renderFilters(); updateStats();
+  buildShowcase();
   // re-render list jika tab list sedang aktif
   if (el('tab-list').classList.contains('active')) renderExistingList();
 }
@@ -692,8 +752,46 @@ async function loadSiteInfo() {
 }
 
 // ─────────────────────────────────────────────
-// RENDER GRID
+// HERO SHOWCASE SLIDER
 // ─────────────────────────────────────────────
+function buildShowcase() {
+  const thumbs = cards
+    .map(c => c.thumb || (c.ytId ? `https://img.youtube.com/vi/${c.ytId}/maxresdefault.jpg` : null))
+    .filter(Boolean);
+
+  if (thumbs.length < 2) return; // not enough cards
+
+  // duplicate for seamless loop (need enough to fill double width)
+  const fill = (arr, min) => {
+    let r = [...arr];
+    while (r.length < min) r = [...r, ...arr];
+    return r;
+  };
+
+  const rows = [
+    { id: 'hero-row-1', items: fill(thumbs, 16) },
+    { id: 'hero-row-2', items: fill([...thumbs].reverse(), 16) },
+    { id: 'hero-row-3', items: fill(thumbs.slice(Math.floor(thumbs.length/2)).concat(thumbs.slice(0, Math.floor(thumbs.length/2))), 16) },
+  ];
+
+  rows.forEach(({ id, items }) => {
+    const row = el(id);
+    if (!row) return;
+    // double the items for seamless infinite scroll
+    const doubled = [...items, ...items];
+    row.innerHTML = doubled.map(src =>
+      `<div class="hero-slide"><img src="${src}" loading="lazy" onerror="this.parentElement.style.display='none'"></div>`
+    ).join('');
+  });
+
+  // fade in after a beat
+  setTimeout(() => {
+    const wrap = el('hero-track-wrap');
+    if (wrap) wrap.classList.add('visible');
+  }, 400);
+}
+
+
 function cardHTML(c) {
   const thumb = c.thumb || (c.ytId ? `https://img.youtube.com/vi/${c.ytId}/maxresdefault.jpg` : '');
   const tags  = (c.tags||[]).map(t=>`<span class="mv-tag">${esc(t)}</span>`).join('');
