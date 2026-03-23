@@ -591,7 +591,7 @@
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
-<script>(function(){const _c=s=>atob(s);const SB_URL=_c('aHR0cHM6Ly92aWRvYW5kb2x5YXdjemlyZGlmdS5zdXBhYmFzZS5jbw==');const SB_KEY=_c('c2JfcHVibGlzaGFibGVfanNKOTYyQnNYVEpKQVZSN3hZVGNPZ19xbGNibmxqeg==');const SHORTCUT=_c('YWRt');const ADMIN_SESSION_KEY=_c('bXZwX2FkbWluX3Nlc3Npb24=');const ADMIN_TIMEOUT_MS=60*60*1000;let sb,cards=[],siteInfo={},activeFilter='all';let fetchTimer=null;let currentPage=1,loadedCount=0;function isAdminActive(){try{const s=JSON.parse(sessionStorage.getItem(ADMIN_SESSION_KEY)||'null');if (!s) return false;if (Date.now()-s.ts>ADMIN_TIMEOUT_MS){sessionStorage.removeItem(ADMIN_SESSION_KEY);return false;}
+<script>const _c=s=>atob(s);const SB_URL=_c('aHR0cHM6Ly92aWRvYW5kb2x5YXdjemlyZGlmdS5zdXBhYmFzZS5jbw==');const SB_KEY=_c('c2JfcHVibGlzaGFibGVfanNKOTYyQnNYVEpKQVZSN3hZVGNPZ19xbGNibmxqeg==');const SHORTCUT=_c('YWRt');const ADMIN_SESSION_KEY=_c('bXZwX2FkbWluX3Nlc3Npb24=');const ADMIN_TIMEOUT_MS=60*60*1000;let sb,cards=[],siteInfo={},activeFilter='all';let fetchTimer=null;let currentPage=1,loadedCount=0;function isAdminActive(){try{const s=JSON.parse(sessionStorage.getItem(ADMIN_SESSION_KEY)||'null');if (!s) return false;if (Date.now()-s.ts>ADMIN_TIMEOUT_MS){sessionStorage.removeItem(ADMIN_SESSION_KEY);return false;}
 return true;}catch{return false;}
 }
 function setAdminSession(active){if (active) sessionStorage.setItem(ADMIN_SESSION_KEY,JSON.stringify({ts:Date.now()}));else sessionStorage.removeItem(ADMIN_SESSION_KEY);}
@@ -740,6 +740,6 @@ function setText(id,v){if(v&&el(id))el(id).textContent=v;}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function ytExtract(s){if(!s)return null;const m=s.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/)||s.match(/^([a-zA-Z0-9_-]{11})$/);return m?m[1]:null;}
 let _tt;function toast(msg,type=''){const t=el('toast');t.textContent=msg;t.className=`toast ${type}show`;clearTimeout(_tt);_tt=setTimeout(()=>t.classList.remove('show'),3200);}
-init();})();</script>
+init();</script>
 </body>
 </html>
