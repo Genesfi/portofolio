@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&family=Space+Mono&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
   <style>
     :root {
       --bg: #080810; --surface: #10101c;
@@ -152,7 +153,12 @@
 
     /* EXISTING LIST */
     .existing-list { display: flex; flex-direction: column; gap: 6px; }
-    .existing-item { background: var(--bg); border: 1px solid rgba(240,240,240,.06); overflow: hidden; }
+    .existing-item { background: var(--bg); border: 1px solid rgba(240,240,240,.06); overflow: hidden; transition: border-color .2s; }
+    .existing-item.sortable-chosen { border-color: var(--accent); opacity: .9; }
+    .existing-item.sortable-ghost { opacity: .3; border: 1px dashed var(--accent); }
+    .drag-handle { cursor: grab; color: var(--muted); padding: 0 6px; font-size: 16px; line-height: 1; flex-shrink: 0; user-select: none; transition: color .2s; }
+    .drag-handle:hover { color: var(--accent); }
+    .drag-handle:active { cursor: grabbing; }
     .existing-item-header { display: flex; align-items: center; padding: 10px 12px; gap: 8px; }
     .existing-item-thumb { width: 48px; height: 28px; object-fit: cover; flex-shrink: 0; background: var(--surface); }
     .existing-item-title { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
@@ -656,16 +662,24 @@ function filterCards(tag, btn) {
 }
 
 // ─────────────────────────────────────────────
-// RENDER EXISTING LIST (tab Kelola)
+// RENDER EXISTING LIST + DRAG & DROP
 // ─────────────────────────────────────────────
+let sortableInstance = null;
+
 function renderExistingList() {
-  const list = el('existing-list');
-  if (!cards.length) { list.innerHTML = '<div style="color:var(--muted);font-size:12px;font-family:\'Space Mono\',monospace">Belum ada karya</div>'; return; }
-  list.innerHTML = cards.map(c => {
+  const listEl = el('existing-list');
+  if (!cards.length) {
+    listEl.innerHTML = '<div style="color:var(--muted);font-size:12px;font-family:\'Space Mono\',monospace">Belum ada karya</div>';
+    if (sortableInstance) { sortableInstance.destroy(); sortableInstance = null; }
+    return;
+  }
+
+  listEl.innerHTML = cards.map(c => {
     const thumb = c.thumb || (c.ytId ? `https://img.youtube.com/vi/${c.ytId}/mqdefault.jpg` : '');
     return `
-    <div class="existing-item" id="item-${c.id}">
+    <div class="existing-item" id="item-${c.id}" data-id="${c.id}">
       <div class="existing-item-header">
+        <span class="drag-handle" title="Geser untuk urutkan">⠿</span>
         ${thumb ? `<img class="existing-item-thumb" src="${thumb}" onerror="this.style.display='none'">` : ''}
         <span class="existing-item-title">${esc(c.title)}</span>
         <div class="existing-item-actions">
@@ -675,7 +689,7 @@ function renderExistingList() {
       </div>
       <div class="inline-edit" id="edit-${c.id}">
         <label>YouTube URL / ID</label>
-        <input type="text" id="e-url-${c.id}" value="${esc(c.ytId||'')}" placeholder="Video ID atau URL">
+        <input type="text" id="e-url-${c.id}" value="${esc(c.ytId||'')}">
         <label>Judul</label>
         <input type="text" id="e-title-${c.id}" value="${esc(c.title)}">
         <label>Artis</label>
@@ -683,7 +697,7 @@ function renderExistingList() {
         <label>Tags (pisah koma)</label>
         <input type="text" id="e-tags-${c.id}" value="${esc((c.tags||[]).join(', '))}">
         <label>Custom Thumbnail URL</label>
-        <input type="text" id="e-thumb-${c.id}" value="${esc(c.thumb||'')}" placeholder="Kosongkan = YT otomatis">
+        <input type="text" id="e-thumb-${c.id}" value="${esc(c.thumb||'')}">
         <div class="checkbox-row" style="margin:6px 0">
           <input type="checkbox" id="e-feat-${c.id}" ${c.featured?'checked':''}>
           <label for="e-feat-${c.id}" style="margin:0;font-size:11px;text-transform:none;letter-spacing:0">Featured (2x besar)</label>
@@ -693,8 +707,38 @@ function renderExistingList() {
       </div>
     </div>`;
   }).join('');
-}
 
+  // destroy old instance
+  if (sortableInstance) { sortableInstance.destroy(); sortableInstance = null; }
+
+  // init drag & drop
+  sortableInstance = Sortable.create(listEl, {
+    handle: '.drag-handle',
+    animation: 180,
+    ghostClass: 'sortable-ghost',
+    chosenClass: 'sortable-chosen',
+    onEnd: async (evt) => {
+      if (evt.oldIndex === evt.newIndex) return;
+      // reorder local cards array
+      const moved = cards.splice(evt.oldIndex, 1)[0];
+      cards.splice(evt.newIndex, 0, moved);
+      // show saving note
+      let note = el('sort-saving');
+      if (!note) {
+        note = document.createElement('div');
+        note.id = 'sort-saving';
+        note.style.cssText = 'text-align:center;padding:8px;font-family:"Space Mono",monospace;font-size:11px;color:var(--accent);letter-spacing:.1em';
+        listEl.insertAdjacentElement('afterend', note);
+      }
+      note.textContent = '⟳ Menyimpan urutan...';
+      // batch save sort_order
+      await Promise.all(cards.map((c, i) => sb.from('mv_works').update({ sort_order: i }).eq('id', c.id)));
+      note.remove();
+      toast('Urutan berhasil disimpan! ✓', 'success');
+      renderGrid(true);
+    }
+  });
+}
 function toggleEdit(id) {
   const pane = el('edit-' + id);
   // tutup semua yang lain
