@@ -570,7 +570,13 @@ async function init() {
 
   setTimeout(() => {
     setLoadProgress(100, 'Ready!');
-    setTimeout(hideLoading, 300);
+    setTimeout(() => {
+      hideLoading();
+      // restore admin panel if session still valid after refresh
+      if (isAdminActive()) {
+        el('admin-panel').classList.add('open');
+      }
+    }, 300);
   }, 200);
 }
 
@@ -607,7 +613,11 @@ function switchTab(name, btn) {
 // PASSWORD
 // ─────────────────────────────────────────────
 function requestAdmin() {
-  if (adminUnlocked) { el('admin-panel').classList.toggle('open'); return; }
+  if (isAdminActive()) {
+    renewAdminSession();
+    el('admin-panel').classList.toggle('open');
+    return;
+  }
   el('pw-error').style.display = 'none';
   el('pw-input').value = '';
   el('pw-modal').style.display = 'flex';
@@ -616,7 +626,7 @@ function requestAdmin() {
 
 function checkPw() {
   if (el('pw-input').value === ADMIN_PW) {
-    adminUnlocked = true;
+    setAdminSession(true);
     el('pw-modal').style.display = 'none';
     el('admin-panel').classList.add('open');
   } else {
@@ -872,7 +882,8 @@ async function saveEdit(id) {
   const tagsRaw = el(`e-tags-${id}`).value.trim();
   const thumb   = el(`e-thumb-${id}`).value.trim();
   const feat    = el(`e-feat-${id}`).checked;
-  if (!title) { toast('Judul tidak boleh kosong!', 'error'); return; }
+  if (!title) { toast('Title cannot be empty!', 'error'); return; }
+  renewAdminSession();
   const ytId = ytExtract(urlVal) || urlVal || null;
   const tags = tagsRaw ? tagsRaw.split(',').map(t=>t.trim()).filter(Boolean) : [];
   const btn = el(`edit-${id}`).querySelector('.inline-save-btn');
@@ -903,7 +914,8 @@ async function addCard() {
   const tRaw   = el('inp-tags').value.trim();
   const thumb  = el('inp-thumb').value.trim();
   const feat   = el('inp-featured').checked;
-  if (!title) { toast('Judul wajib diisi!', 'error'); return; }
+  if (!title) { toast('Title is required!', 'error'); return; }
+  renewAdminSession();
   const ytId = ytExtract(url);
   const tags  = tRaw ? tRaw.split(',').map(t=>t.trim()).filter(Boolean) : [];
   const btn = el('add-btn'); btn.disabled=true; btn.textContent='Menyimpan...';
@@ -920,7 +932,8 @@ async function addCard() {
 // DELETE CARD
 // ─────────────────────────────────────────────
 async function deleteCard(id) {
-  if (!confirm('Hapus karya ini?')) return;
+  if (!confirm('Remove this work?')) return;
+  renewAdminSession();
   const { error } = await sb.from('mv_works').delete().eq('id',id);
   if (error) { toast('Gagal hapus: '+error.message,'error'); return; }
   toast('Karya dihapus','success');
@@ -994,7 +1007,8 @@ async function saveSiteEdit() {
     displayMode: mode ? mode.value : 'all',
     perPage:     parseInt(el('s-perpage')?.value) || 12,
   };
-  const btn = el('site-save-btn'); btn.textContent='Menyimpan...'; btn.disabled=true;
+  const btn = el('site-save-btn'); btn.textContent='Saving...'; btn.disabled=true;
+  renewAdminSession();
   const { error } = await sb.from('mv_site').upsert({ id:1, data: siteInfo });
   btn.textContent='Simpan Info Site →'; btn.disabled=false;
   if (error) { toast('Gagal: '+error.message,'error'); return; }
