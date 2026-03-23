@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Music Video Portfolio</title>
   <script src="/_sdk/element_sdk.js"></script>
+  <script src="/_sdk/data_sdk.js"></script>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&amp;family=DM+Sans:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
@@ -233,12 +234,15 @@
   <style>body { box-sizing: border-box; }</style>
   <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
  </head>
- <body class="h-full"><!-- NAV -->
+ <body class="h-full">
+  <!-- NAV -->
   <nav>
    <div style="max-width:1200px;margin:0 auto;padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between;">
-    <div style="display:flex;align-items:center;gap:10px;"><span style="width:32px;height:32px;background:var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center;"> <i data-lucide="music-2" style="width:16px;height:16px;color:#000;"></i> </span> <span id="nav-name" class="bebas" style="font-size:20px;letter-spacing:2px;color:var(--text);">ARTIST NAME</span>
+    <div style="display:flex;align-items:center;gap:10px;">
+     <span style="width:32px;height:32px;background:var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center;"> <i data-lucide="music-2" style="width:16px;height:16px;color:#000;"></i> </span> <span id="nav-name" class="bebas" style="font-size:20px;letter-spacing:2px;color:var(--text);">ARTIST NAME</span>
     </div>
-    <div style="display:flex;gap:24px;align-items:center;"><a href="#videos" style="color:var(--muted);text-decoration:none;font-size:14px;transition:color 0.2s;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">Videos</a> <a href="#about" style="color:var(--muted);text-decoration:none;font-size:14px;transition:color 0.2s;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">About</a> <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;gap:6px;background:#ff0000;color:#fff;text-decoration:none;font-size:13px;font-weight:600;padding:7px 16px;border-radius:8px;"> <i data-lucide="youtube" style="width:14px;height:14px;"></i> YouTube </a>
+    <div style="display:flex;gap:24px;align-items:center;">
+     <a href="#videos" style="color:var(--muted);text-decoration:none;font-size:14px;transition:color 0.2s;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">Videos</a> <a href="#about" style="color:var(--muted);text-decoration:none;font-size:14px;transition:color 0.2s;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">About</a> <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;gap:6px;background:#ff0000;color:#fff;text-decoration:none;font-size:13px;font-weight:600;padding:7px 16px;border-radius:8px;"> <i data-lucide="youtube" style="width:14px;height:14px;"></i> YouTube </a>
     </div>
    </div>
   </nav><!-- HERO -->
@@ -248,7 +252,8 @@
      <p class="section-label" id="hero-section-label">Music Portfolio</p>
      <h1 id="hero-title" class="bebas" style="font-size:88px;line-height:0.95;color:var(--text);margin:0 0 24px;">MUSIC<br><span style="color:var(--accent);">VIDEOS</span></h1>
      <p id="hero-subtitle" style="font-size:18px;color:var(--muted);max-width:520px;line-height:1.6;margin-bottom:36px;">Watch my latest work — cinematography, visuals, and storytelling through music.</p>
-     <div style="display:flex;gap:12px;flex-wrap:wrap;"><a href="#videos" class="btn-accent" style="text-decoration:none;display:inline-flex;align-items:center;gap:8px;padding:12px 26px;border-radius:8px;font-size:15px;"> <i data-lucide="play" style="width:16px;height:16px;"></i> Watch Now </a> <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" class="btn-ghost" style="text-decoration:none;display:inline-flex;align-items:center;gap:8px;padding:12px 22px;"> <i data-lucide="external-link" style="width:15px;height:15px;"></i> YouTube Channel </a>
+     <div style="display:flex;gap:12px;flex-wrap:wrap;">
+      <a href="#videos" class="btn-accent" style="text-decoration:none;display:inline-flex;align-items:center;gap:8px;padding:12px 26px;border-radius:8px;font-size:15px;"> <i data-lucide="play" style="width:16px;height:16px;"></i> Watch Now </a> <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" class="btn-ghost" style="text-decoration:none;display:inline-flex;align-items:center;gap:8px;padding:12px 22px;"> <i data-lucide="external-link" style="width:15px;height:15px;"></i> YouTube Channel </a>
      </div>
     </div>
    </div><!-- Stats bar -->
@@ -288,10 +293,12 @@
       <p class="section-label">Portfolio</p>
       <h2 class="bebas" style="font-size:48px;color:var(--text);margin:0;">ALL VIDEOS</h2>
      </div>
-     <div style="display:flex;gap:8px;flex-wrap:wrap;" id="filter-pills"><button class="pill active" data-filter="all">All</button> <button class="pill" data-filter="official">Official MV</button> <button class="pill" data-filter="lyric">Lyric Video</button> <button class="pill" data-filter="live">Live</button> <button class="pill" data-filter="collab">Collab</button>
+     <div style="display:flex;gap:8px;flex-wrap:wrap;" id="filter-pills">
+      <button class="pill active" data-filter="all">All</button> <button class="pill" data-filter="official">Official MV</button> <button class="pill" data-filter="lyric">Lyric Video</button> <button class="pill" data-filter="live">Live</button> <button class="pill" data-filter="collab">Collab</button>
      </div>
     </div>
-    <div id="video-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;"><!-- Cards rendered by JS -->
+    <div id="video-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;">
+     <!-- Cards rendered by JS -->
     </div>
    </div>
   </section><!-- ABOUT -->
@@ -301,11 +308,13 @@
      <p class="section-label">About</p>
      <h2 id="about-name" class="bebas" style="font-size:52px;color:var(--text);margin:0 0 20px;">ARTIST NAME</h2>
      <p id="about-bio" style="color:var(--muted);font-size:16px;line-height:1.75;margin-bottom:28px;">Independent artist crafting cinematic music videos that blend emotion, storytelling, and stunning visuals. Based in Jakarta, available worldwide.</p>
-     <div style="display:flex;gap:12px;flex-wrap:wrap;"><span class="tag">🎬 Director</span> <span class="tag">🎵 Music Producer</span> <span class="tag">📸 Cinematographer</span> <span class="tag">🌏 Indonesia</span>
+     <div style="display:flex;gap:12px;flex-wrap:wrap;">
+      <span class="tag">🎬 Director</span> <span class="tag">🎵 Music Producer</span> <span class="tag">📸 Cinematographer</span> <span class="tag">🌏 Indonesia</span>
      </div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-     <div style="background:var(--card);border-radius:12px;padding:24px;border:1px solid #252525;"><i data-lucide="film" style="width:28px;height:28px;color:var(--accent);margin-bottom:12px;"></i>
+     <div style="background:var(--card);border-radius:12px;padding:24px;border:1px solid #252525;">
+      <i data-lucide="film" style="width:28px;height:28px;color:var(--accent);margin-bottom:12px;"></i>
       <div class="bebas" style="font-size:28px;color:var(--text);">
        Full HD
       </div>
@@ -313,7 +322,8 @@
        4K Production
       </div>
      </div>
-     <div style="background:var(--card);border-radius:12px;padding:24px;border:1px solid #252525;"><i data-lucide="award" style="width:28px;height:28px;color:var(--accent);margin-bottom:12px;"></i>
+     <div style="background:var(--card);border-radius:12px;padding:24px;border:1px solid #252525;">
+      <i data-lucide="award" style="width:28px;height:28px;color:var(--accent);margin-bottom:12px;"></i>
       <div class="bebas" style="font-size:28px;color:var(--text);">
        Award
       </div>
@@ -321,7 +331,8 @@
        Best MV 2023
       </div>
      </div>
-     <div style="background:var(--card);border-radius:12px;padding:24px;border:1px solid #252525;"><i data-lucide="headphones" style="width:28px;height:28px;color:var(--accent);margin-bottom:12px;"></i>
+     <div style="background:var(--card);border-radius:12px;padding:24px;border:1px solid #252525;">
+      <i data-lucide="headphones" style="width:28px;height:28px;color:var(--accent);margin-bottom:12px;"></i>
       <div class="bebas" style="font-size:28px;color:var(--text);">
        10+ Yrs
       </div>
@@ -329,7 +340,8 @@
        Experience
       </div>
      </div>
-     <div style="background:var(--card);border-radius:12px;padding:24px;border:1px solid #252525;"><i data-lucide="globe" style="width:28px;height:28px;color:var(--accent);margin-bottom:12px;"></i>
+     <div style="background:var(--card);border-radius:12px;padding:24px;border:1px solid #252525;">
+      <i data-lucide="globe" style="width:28px;height:28px;color:var(--accent);margin-bottom:12px;"></i>
       <div class="bebas" style="font-size:28px;color:var(--text);">
        Global
       </div>
@@ -345,14 +357,16 @@
   </footer><!-- VIDEO MODAL -->
   <div class="modal-backdrop" id="video-modal" role="dialog" aria-modal="true" aria-label="Video Player">
    <div class="modal-box">
-    <div class="modal-iframe-wrap"><iframe id="modal-iframe" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+    <div class="modal-iframe-wrap">
+     <iframe id="modal-iframe" allowfullscreen allow="autoplay; encrypted-media"></iframe>
     </div>
     <div class="modal-footer">
      <div>
       <div id="modal-title" style="font-weight:600;font-size:16px;color:var(--text);"></div>
       <div id="modal-meta" style="font-size:13px;color:var(--muted);margin-top:4px;"></div>
      </div>
-     <div style="display:flex;gap:10px;align-items:center;"><a id="modal-yt-link" href="#" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:6px;background:#ff0000;color:#fff;text-decoration:none;font-size:13px;font-weight:600;padding:8px 16px;border-radius:8px;"> <i data-lucide="youtube" style="width:14px;height:14px;"></i> Open on YouTube </a> <button onclick="closeModal()" class="btn-ghost" style="display:flex;align-items:center;gap:6px;"> <i data-lucide="x" style="width:14px;height:14px;"></i> Close </button>
+     <div style="display:flex;gap:10px;align-items:center;">
+      <a id="modal-yt-link" href="#" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:6px;background:#ff0000;color:#fff;text-decoration:none;font-size:13px;font-weight:600;padding:8px 16px;border-radius:8px;"> <i data-lucide="youtube" style="width:14px;height:14px;"></i> Open on YouTube </a> <button onclick="closeModal()" class="btn-ghost" style="display:flex;align-items:center;gap:6px;"> <i data-lucide="x" style="width:14px;height:14px;"></i> Close </button>
      </div>
     </div>
    </div>
@@ -365,30 +379,39 @@
     <div style="background:#111;border-radius:10px;padding:20px;margin-bottom:20px;border:1px solid #2a2a2a;">
      <p style="font-size:12px;letter-spacing:2px;color:var(--accent);font-weight:600;margin:0 0 16px;text-transform:uppercase;">Site Info</p>
      <div style="display:grid;gap:14px;">
-      <div><label class="edit-label" for="inp-artist-name">Artist Name</label> <input id="inp-artist-name" class="edit-input" type="text" placeholder="Your artist name">
+      <div>
+       <label class="edit-label" for="inp-artist-name">Artist Name</label> <input id="inp-artist-name" class="edit-input" type="text" placeholder="Your artist name">
       </div>
-      <div><label class="edit-label" for="inp-tagline">Bio / Tagline</label> <input id="inp-tagline" class="edit-input" type="text" placeholder="Short bio or tagline">
+      <div>
+       <label class="edit-label" for="inp-tagline">Bio / Tagline</label> <input id="inp-tagline" class="edit-input" type="text" placeholder="Short bio or tagline">
       </div>
-      <div><label class="edit-label" for="inp-footer">Footer Text</label> <input id="inp-footer" class="edit-input" type="text" placeholder="© 2024 Your Name">
+      <div>
+       <label class="edit-label" for="inp-footer">Footer Text</label> <input id="inp-footer" class="edit-input" type="text" placeholder="© 2024 Your Name">
       </div>
      </div><button onclick="saveSiteSettings()" class="btn-accent" style="margin-top:16px;width:100%;">Save Site Info</button>
     </div><!-- Add video -->
     <div style="background:#111;border-radius:10px;padding:20px;margin-bottom:20px;border:1px solid #2a2a2a;">
      <p style="font-size:12px;letter-spacing:2px;color:var(--accent);font-weight:600;margin:0 0 16px;text-transform:uppercase;">Add New Video</p>
      <div style="display:grid;gap:14px;">
-      <div><label class="edit-label" for="inp-title">Video Title *</label> <input id="inp-title" class="edit-input" type="text" placeholder="e.g. Song Name - Official MV">
+      <div>
+       <label class="edit-label" for="inp-title">Video Title *</label> <input id="inp-title" class="edit-input" type="text" placeholder="e.g. Song Name - Official MV">
       </div>
-      <div><label class="edit-label" for="inp-yt">YouTube URL *</label> <input id="inp-yt" class="edit-input" type="text" placeholder="https://www.youtube.com/watch?v=...">
+      <div>
+       <label class="edit-label" for="inp-yt">YouTube URL *</label> <input id="inp-yt" class="edit-input" type="text" placeholder="https://www.youtube.com/watch?v=...">
       </div>
-      <div><label class="edit-label" for="inp-thumb">Custom Thumbnail URL (optional)</label> <input id="inp-thumb" class="edit-input" type="text" placeholder="Leave blank to use YouTube thumbnail">
+      <div>
+       <label class="edit-label" for="inp-thumb">Custom Thumbnail URL (optional)</label> <input id="inp-thumb" class="edit-input" type="text" placeholder="Leave blank to use YouTube thumbnail">
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-       <div><label class="edit-label" for="inp-category">Category</label> <select id="inp-category" class="edit-input" style="cursor:pointer;"> <option value="official">Official MV</option> <option value="lyric">Lyric Video</option> <option value="live">Live</option> <option value="collab">Collab</option> </select>
+       <div>
+        <label class="edit-label" for="inp-category">Category</label> <select id="inp-category" class="edit-input" style="cursor:pointer;"> <option value="official">Official MV</option> <option value="lyric">Lyric Video</option> <option value="live">Live</option> <option value="collab">Collab</option> </select>
        </div>
-       <div><label class="edit-label" for="inp-duration">Duration</label> <input id="inp-duration" class="edit-input" type="text" placeholder="e.g. 3:45">
+       <div>
+        <label class="edit-label" for="inp-duration">Duration</label> <input id="inp-duration" class="edit-input" type="text" placeholder="e.g. 3:45">
        </div>
       </div>
-      <div><label class="edit-label" for="inp-views">Views (e.g. 1.2M)</label> <input id="inp-views" class="edit-input" type="text" placeholder="e.g. 500K">
+      <div>
+       <label class="edit-label" for="inp-views">Views (e.g. 1.2M)</label> <input id="inp-views" class="edit-input" type="text" placeholder="e.g. 500K">
       </div>
      </div><button onclick="addVideo()" class="btn-accent" style="margin-top:16px;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;"> <i data-lucide="plus" style="width:16px;height:16px;"></i> Add Video </button>
      <div id="add-msg" style="display:none;margin-top:10px;font-size:13px;text-align:center;"></div>
@@ -398,44 +421,8 @@
   </div><!-- FAB: Edit --> <button class="fab" onclick="openEditModal()" title="Manage Videos" aria-label="Manage Videos"> <i data-lucide="settings-2" style="width:20px;height:20px;"></i> </button>
   <script>
 // ── State ──────────────────────────────────────────────────────────────
-let videos = [
-  {
-    id: 'dQw4w9WgXcQ',
-    title: 'Never Gonna Give You Up – Official MV',
-    ytUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-    thumb: '',
-    category: 'official',
-    duration: '3:33',
-    views: '1.4B'
-  },
-  {
-    id: '9bZkp7q19f0',
-    title: 'Gangnam Style – Official MV',
-    ytUrl: 'https://www.youtube.com/watch?v=9bZkp7q19f0',
-    thumb: '',
-    category: 'official',
-    duration: '4:13',
-    views: '5.1B'
-  },
-  {
-    id: 'JGwWNGJdvx8',
-    title: 'Shape of You – Lyric Video',
-    ytUrl: 'https://www.youtube.com/watch?v=JGwWNGJdvx8',
-    thumb: '',
-    category: 'lyric',
-    duration: '3:54',
-    views: '6.2B'
-  },
-  {
-    id: 'kJQP7kiw5Fk',
-    title: 'Despacito – Official MV',
-    ytUrl: 'https://www.youtube.com/watch?v=kJQP7kiw5Fk',
-    thumb: '',
-    category: 'official',
-    duration: '4:42',
-    views: '8.2B'
-  }
-];
+let videos = [];
+let loadingState = { isCreating: false, isDeleting: {} };
 
 let siteConfig = {
   artist_name: 'ARTIST NAME',
@@ -446,6 +433,27 @@ let siteConfig = {
 };
 
 let currentFilter = 'all';
+
+// ── Data SDK Initialization ────────────────────────────────────────────
+const dataHandler = {
+  onDataChanged(data) {
+    videos = data;
+    renderGrid();
+    renderEditList();
+    updateStats();
+  }
+};
+
+(async () => {
+  const initResult = await window.dataSdk.init(dataHandler);
+  if (initResult.isOk) {
+    console.log('Data SDK initialized');
+  } else {
+    console.error('Failed to initialize Data SDK:', initResult.error);
+  }
+  renderGrid();
+  lucide.createIcons();
+})();
 
 // ── Utils ──────────────────────────────────────────────────────────────
 function getYTId(url) {
@@ -465,6 +473,10 @@ function getThumb(video) {
 function getEmbedUrl(ytUrl) {
   const id = getYTId(ytUrl);
   return id ? `https://www.youtube.com/embed/${id}?autoplay=1` : '';
+}
+
+function updateStats() {
+  document.getElementById('stat-videos').textContent = videos.length;
 }
 
 // ── Render Grid ────────────────────────────────────────────────────────
@@ -529,8 +541,7 @@ function renderGrid() {
   // Remove cards not in current filter
   existingCards.forEach(el => el.remove());
 
-  // Update stat
-  document.getElementById('stat-videos').textContent = videos.length;
+  updateStats();
   lucide.createIcons();
 }
 
@@ -604,7 +615,7 @@ function applySiteConfig() {
   document.getElementById('footer-text').textContent = siteConfig.footer_text;
 }
 
-function addVideo() {
+async function addVideo() {
   const title = document.getElementById('inp-title').value.trim();
   const ytUrl = document.getElementById('inp-yt').value.trim();
   const thumb = document.getElementById('inp-thumb').value.trim();
@@ -613,6 +624,7 @@ function addVideo() {
   const views = document.getElementById('inp-views').value.trim();
 
   const msg = document.getElementById('add-msg');
+  const btn = document.querySelector('button[onclick="addVideo()"]');
 
   if (!title || !ytUrl) {
     msg.style.display = 'block';
@@ -629,22 +641,52 @@ function addVideo() {
     return;
   }
 
-  videos.push({ id, title, ytUrl, thumb, category, duration, views });
-
-  // Clear form
-  ['inp-title','inp-yt','inp-thumb','inp-duration','inp-views'].forEach(i => document.getElementById(i).value = '');
+  // Show loading state
+  loadingState.isCreating = true;
+  btn.disabled = true;
   msg.style.display = 'block';
   msg.style.color = 'var(--accent)';
-  msg.textContent = '✓ Video added!';
-  setTimeout(() => { msg.style.display = 'none'; }, 2000);
+  msg.textContent = '⏳ Adding video...';
 
-  renderGrid();
-  renderEditList();
+  const result = await window.dataSdk.create({
+    id,
+    title,
+    ytUrl,
+    thumb,
+    category,
+    duration,
+    views
+  });
+
+  if (result.isOk) {
+    // Clear form
+    ['inp-title','inp-yt','inp-thumb','inp-duration','inp-views'].forEach(i => document.getElementById(i).value = '');
+    msg.style.color = 'var(--accent)';
+    msg.textContent = '✓ Video added!';
+    setTimeout(() => { msg.style.display = 'none'; }, 2000);
+  } else {
+    msg.style.color = '#ff6b6b';
+    msg.textContent = '❌ Error: ' + (result.error?.message || 'Failed to add video');
+  }
+
+  loadingState.isCreating = false;
+  btn.disabled = false;
 }
 
-function removeVideo(id) {
-  videos = videos.filter(v => v.id !== id);
-  renderGrid();
+async function removeVideo(id) {
+  const video = videos.find(v => v.id === id);
+  if (!video) return;
+
+  loadingState.isDeleting[id] = true;
+  renderEditList();
+
+  const result = await window.dataSdk.delete(video);
+
+  if (!result.isOk) {
+    alert('Failed to delete video: ' + (result.error?.message || 'Unknown error'));
+  }
+
+  loadingState.isDeleting[id] = false;
   renderEditList();
 }
 
@@ -655,14 +697,14 @@ function renderEditList() {
     return;
   }
   container.innerHTML = videos.map((v, i) => `
-    <div style="background:#111;border-radius:10px;padding:14px 16px;border:1px solid #2a2a2a;display:flex;align-items:center;gap:12px;">
+    <div style="background:#111;border-radius:10px;padding:14px 16px;border:1px solid #2a2a2a;display:flex;align-items:center;gap:12px;opacity:${loadingState.isDeleting[v.id] ? '0.5' : '1'};transition:opacity 0.2s;">
       <img src="${getThumb(v)}" alt="" style="width:60px;height:34px;object-fit:cover;border-radius:6px;background:#1e1e1e;flex-shrink:0;" loading="lazy" />
       <div style="flex:1;min-width:0;">
         <div style="font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${v.title}</div>
         <div style="font-size:11px;color:var(--muted);margin-top:2px;">${v.category} · ${v.duration || '—'}</div>
       </div>
-      <button onclick="removeVideo('${v.id}')" style="background:rgba(255,80,80,0.12);border:1px solid rgba(255,80,80,0.2);color:#ff6b6b;border-radius:6px;padding:6px 10px;cursor:pointer;flex-shrink:0;" title="Remove">
-        <i data-lucide="trash-2" style="width:14px;height:14px;"></i>
+      <button onclick="removeVideo('${v.id}')" ${loadingState.isDeleting[v.id] ? 'disabled' : ''} style="background:rgba(255,80,80,0.12);border:1px solid rgba(255,80,80,0.2);color:#ff6b6b;border-radius:6px;padding:6px 10px;cursor:pointer;flex-shrink:0;opacity:${loadingState.isDeleting[v.id] ? '0.5' : '1'};transition:opacity 0.2s;" title="Remove">
+        ${loadingState.isDeleting[v.id] ? '<i data-lucide="loader" style="width:14px;height:14px;animation:spin 1s linear infinite;"></i>' : '<i data-lucide="trash-2" style="width:14px;height:14px;"></i>'}
       </button>
     </div>`).join('');
   lucide.createIcons();
@@ -763,8 +805,7 @@ window.elementSdk && window.elementSdk.init({
 });
 
 // ── Init ───────────────────────────────────────────────────────────────
-renderGrid();
 lucide.createIcons();
-</script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9e092f374677fcbd',t:'MTc3NDIyNDMyNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9e09466815e8fcbd',t:'MTc3NDIyNTI3Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
