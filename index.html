@@ -403,8 +403,7 @@
       <p id="about-p1">Hi! I'm a music video director & animator creating vibrant visual worlds for artists.</p>
       <p id="about-p2">Specializing in anime-style illustration, motion graphics, and lyric video production.</p>
       <div style="margin-top:28px;display:flex;gap:12px;flex-wrap:wrap">
-        <a href="#" target="_blank" class="btn btn-primary" id="about-yt-link">YouTube Channel</a>
-        <a href="#" target="_blank" class="btn btn-ghost" id="about-tw-link">Twitter / X</a>
+        <div id="about-social-btns" style="display:flex;gap:12px;flex-wrap:wrap"></div>
       </div>
     </div>
     <div class="stats-grid">
@@ -419,10 +418,7 @@
 <!-- FOOTER -->
 <footer>
   <div class="footer-brand" id="footer-brand">MV<span>.</span>PORTFOLIO</div>
-  <div class="social-links">
-    <a href="#" target="_blank" id="footer-yt">YouTube</a>
-    <a href="#" target="_blank" id="footer-tw">Twitter</a>
-  </div>
+  <div class="social-links" id="footer-social-links"></div>
   <span class="footer-copy" id="footer-copy">© 2024 — All Rights Reserved</span>
 </footer>
 
@@ -546,8 +542,35 @@
       <div><label>Subjudul Hero</label><input type="text" id="s-hsub" placeholder="Deskripsi singkat..."></div>
       <div><label>About Paragraf 1</label><input type="text" id="s-about1"></div>
       <div><label>About Paragraf 2</label><input type="text" id="s-about2"></div>
-      <div><label>Link YouTube</label><input type="text" id="s-yt" placeholder="https://youtube.com/@..."></div>
-      <div><label>Link Twitter / X</label><input type="text" id="s-tw" placeholder="https://twitter.com/..."></div>
+      <div style="background:var(--bg);border:1px solid rgba(200,255,0,.1);padding:14px;margin-bottom:4px">
+        <label style="color:var(--accent);margin-bottom:10px;display:block">Social Media Links</label>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);width:80px;flex-shrink:0">YouTube</span>
+            <input type="text" id="s-yt" placeholder="https://youtube.com/@..." style="flex:1">
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);width:80px;flex-shrink:0">Twitter/X</span>
+            <input type="text" id="s-tw" placeholder="https://twitter.com/..." style="flex:1">
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);width:80px;flex-shrink:0">Discord</span>
+            <input type="text" id="s-discord" placeholder="https://discord.gg/..." style="flex:1">
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);width:80px;flex-shrink:0">VGen</span>
+            <input type="text" id="s-vgen" placeholder="https://vgen.co/creator/..." style="flex:1">
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);width:80px;flex-shrink:0">Instagram</span>
+            <input type="text" id="s-ig" placeholder="https://instagram.com/..." style="flex:1">
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);width:80px;flex-shrink:0">TikTok</span>
+            <input type="text" id="s-tiktok" placeholder="https://tiktok.com/@..." style="flex:1">
+          </div>
+        </div>
+      </div>
       <div><label>Footer Copyright</label><input type="text" id="s-copy" placeholder="© 2024 Nama Kamu"></div>
       <div><label>Tahun Mulai</label><input type="text" id="s-year" placeholder="2022"></div>
       <button class="admin-add-btn" id="site-save-btn" onclick="saveSiteEdit()" style="margin-top:8px">Simpan Info Site →</button>
@@ -1144,8 +1167,29 @@ function applySiteInfo() {
   setText('about-p1',s.about1); setText('about-p2',s.about2);
   setText('footer-copy',s.copy);
   if(s.htitle){const lines=s.htitle.split('|');el('hero-title').innerHTML=lines.map((l,i)=>i===0?l:i===1?`<span class="accent">${l}</span>`:`<span class="stroke">${l}</span>`).join('<br>');}
-  if(s.yt){el('about-yt-link').href=s.yt;el('footer-yt').href=s.yt;}
-  if(s.tw){el('about-tw-link').href=s.tw;el('footer-tw').href=s.tw;}
+  // build dynamic social links
+  const socials = [
+    { key:'yt',      label:'YouTube',   icon:'▶',  primary: true  },
+    { key:'tw',      label:'Twitter/X', icon:'𝕏',  primary: false },
+    { key:'discord', label:'Discord',   icon:'◈',  primary: false },
+    { key:'vgen',    label:'VGen',      icon:'✦',  primary: false },
+    { key:'ig',      label:'Instagram', icon:'◉',  primary: false },
+    { key:'tiktok',  label:'TikTok',    icon:'♪',  primary: false },
+  ];
+  const aboutWrap = el('about-social-btns');
+  const footerWrap = el('footer-social-links');
+  if (aboutWrap) {
+    aboutWrap.innerHTML = socials
+      .filter(s2 => s[s2.key])
+      .map(s2 => `<a href="${s[s2.key]}" target="_blank" class="btn ${s2.primary?'btn-primary':'btn-ghost'}" style="padding:10px 20px;font-size:11px">${s2.icon} ${s2.label}</a>`)
+      .join('');
+  }
+  if (footerWrap) {
+    footerWrap.innerHTML = socials
+      .filter(s2 => s[s2.key])
+      .map(s2 => `<a href="${s[s2.key]}" target="_blank">${s2.label}</a>`)
+      .join('');
+  }
 }
 
 function previewMode(mode) {
@@ -1155,7 +1199,7 @@ function previewMode(mode) {
 
 function fillSiteForm() {
   const s = siteInfo;
-  ['brand','siteTitle','label','htitle','hsub','about1','about2','yt','tw','copy','year'].forEach(k => {
+  ['brand','siteTitle','label','htitle','hsub','about1','about2','yt','tw','discord','vgen','ig','tiktok','copy','year'].forEach(k => {
     if (el('s-'+k)) el('s-'+k).value = s[k] || '';
   });
   // set perpage
@@ -1173,7 +1217,9 @@ async function saveSiteEdit() {
     label:  el('s-label').value,
     htitle:      el('s-htitle').value,  hsub:   el('s-hsub').value,
     about1:      el('s-about1').value,  about2: el('s-about2').value,
-    yt:          el('s-yt').value,      tw:     el('s-tw').value,
+    yt:       el('s-yt').value,      tw:      el('s-tw').value,
+    discord:  el('s-discord').value,  vgen:    el('s-vgen').value,
+    ig:       el('s-ig').value,        tiktok:  el('s-tiktok').value,
     copy:        el('s-copy').value,    year:   el('s-year').value,
     displayMode: mode ? mode.value : 'all',
     perPage:     parseInt(el('s-perpage')?.value) || 12,
