@@ -372,6 +372,30 @@
   <!-- TAB: SITE -->
   <div class="tab-pane" id="tab-site">
     <div class="admin-form">
+
+      <!-- DISPLAY MODE -->
+      <div style="background:var(--bg);border:1px solid rgba(200,255,0,.15);padding:14px;margin-bottom:4px">
+        <label style="color:var(--accent);margin-bottom:10px;display:block">Mode Tampil Karya</label>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;text-transform:none;letter-spacing:0;font-size:12px;color:var(--text)">
+            <input type="radio" name="display-mode" id="dm-all" value="all" style="width:auto;margin-top:2px" onchange="previewMode('all')">
+            <div><strong>Tampil Semua</strong><div style="color:var(--muted);font-size:11px;margin-top:2px">Semua karya muncul sekaligus, scroll ke bawah</div></div>
+          </label>
+          <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;text-transform:none;letter-spacing:0;font-size:12px;color:var(--text)">
+            <input type="radio" name="display-mode" id="dm-pagination" value="pagination" style="width:auto;margin-top:2px" onchange="previewMode('pagination')">
+            <div><strong>Pagination</strong><div style="color:var(--muted);font-size:11px;margin-top:2px">Dibagi per halaman, ada tombol 1 2 3...</div></div>
+          </label>
+          <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;text-transform:none;letter-spacing:0;font-size:12px;color:var(--text)">
+            <input type="radio" name="display-mode" id="dm-loadmore" value="loadmore" style="width:auto;margin-top:2px" onchange="previewMode('loadmore')">
+            <div><strong>Load More</strong><div style="color:var(--muted);font-size:11px;margin-top:2px">Tampil sebagian, ada tombol "Muat Lebih Banyak"</div></div>
+          </label>
+        </div>
+        <div style="margin-top:10px;display:flex;align-items:center;gap:10px">
+          <label style="text-transform:uppercase;letter-spacing:.1em;font-size:10px;color:var(--muted);margin:0;white-space:nowrap">Karya per halaman/batch</label>
+          <input type="number" id="s-perpage" value="12" min="4" max="50" style="width:70px;padding:6px 8px;font-size:12px">
+        </div>
+      </div>
+
       <div><label>Nama / Brand</label><input type="text" id="s-brand" placeholder="e.g. YORU.MV"></div>
       <div><label>Tagline</label><input type="text" id="s-label" placeholder="Music Video Director"></div>
       <div><label>Judul Hero (| untuk baris baru)</label><input type="text" id="s-htitle" placeholder="YOUR|WORK|HERE"></div>
@@ -410,6 +434,7 @@ const SHORTCUT = 'adm';
 
 let sb, cards = [], siteInfo = {}, activeFilter = 'all', adminUnlocked = false;
 let fetchTimer = null;
+let currentPage = 1, loadedCount = 0;
 
 // ─────────────────────────────────────────────
 // INIT
@@ -521,7 +546,7 @@ async function loadCards() {
   const { data, error } = await sb.from('mv_works').select('*').order('sort_order').order('created_at');
   if (error) { toast('Gagal load: ' + error.message, 'error'); return; }
   cards = data || [];
-  renderGrid(); renderFilters(); updateStats();
+  renderGrid(true); renderFilters(); updateStats();
   // re-render list jika tab list sedang aktif
   if (el('tab-list').classList.contains('active')) renderExistingList();
 }
@@ -534,29 +559,85 @@ async function loadSiteInfo() {
 // ─────────────────────────────────────────────
 // RENDER GRID
 // ─────────────────────────────────────────────
-function renderGrid() {
-  const grid = el('mv-grid');
-  const list = activeFilter === 'all' ? cards : cards.filter(c => (c.tags||[]).includes(activeFilter));
+function cardHTML(c) {
+  const thumb = c.thumb || (c.ytId ? `https://img.youtube.com/vi/${c.ytId}/maxresdefault.jpg` : '');
+  const tags  = (c.tags||[]).map(t=>`<span class="mv-tag">${esc(t)}</span>`).join('');
+  return `
+    <div class="mv-card${c.featured?' featured':''}" onclick="openModal('${c.id}')">
+      ${thumb ? `<img class="mv-thumb" src="${thumb}" alt="${esc(c.title)}" loading="lazy" onerror="this.style.display='none'">` : ''}
+      <div class="mv-placeholder" style="${thumb?'display:none':''}">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      </div>
+      <div class="mv-play"><svg width="18" height="18" viewBox="0 0 24 24" fill="#000"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
+      <div class="mv-overlay">
+        <div>${tags}<div class="mv-title">${esc(c.title)}</div><div class="mv-artist">${esc(c.artist||'')}</div></div>
+      </div>
+    </div>`;
+}
+
+function getDisplayMode() { return siteInfo.displayMode || 'all'; }
+function getPerPage()     { return parseInt(siteInfo.perPage) || 12; }
+
+function renderGrid(resetPage) {
+  if (resetPage) { currentPage = 1; loadedCount = 0; }
+  const grid   = el('mv-grid');
+  const mode   = getDisplayMode();
+  const perPage= getPerPage();
+  const list   = activeFilter === 'all' ? cards : cards.filter(c => (c.tags||[]).includes(activeFilter));
+
   el('works-count').textContent = String(list.length).padStart(2,'0');
+  // remove old pagination/loadmore UI
+  ['mv-pagination','mv-loadmore-btn'].forEach(id => { const e = el(id); if(e) e.remove(); });
+
   if (!list.length) {
     grid.innerHTML = `<div style="grid-column:1/-1;padding:80px;text-align:center;color:var(--muted);font-family:'Space Mono',monospace;font-size:13px">Belum ada karya.</div>`;
     return;
   }
-  grid.innerHTML = list.map(c => {
-    const thumb = c.thumb || (c.ytId ? `https://img.youtube.com/vi/${c.ytId}/maxresdefault.jpg` : '');
-    const tags  = (c.tags||[]).map(t=>`<span class="mv-tag">${esc(t)}</span>`).join('');
-    return `
-      <div class="mv-card${c.featured?' featured':''}" onclick="openModal('${c.id}')">
-        ${thumb ? `<img class="mv-thumb" src="${thumb}" alt="${esc(c.title)}" loading="lazy" onerror="this.style.display='none'">` : ''}
-        <div class="mv-placeholder" style="${thumb?'display:none':''}">
-          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-        </div>
-        <div class="mv-play"><svg width="18" height="18" viewBox="0 0 24 24" fill="#000"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
-        <div class="mv-overlay">
-          <div>${tags}<div class="mv-title">${esc(c.title)}</div><div class="mv-artist">${esc(c.artist||'')}</div></div>
-        </div>
-      </div>`;
-  }).join('');
+
+  if (mode === 'pagination') {
+    const totalPages = Math.ceil(list.length / perPage);
+    currentPage = Math.min(currentPage, totalPages);
+    const start = (currentPage - 1) * perPage;
+    const slice = list.slice(start, start + perPage);
+    grid.innerHTML = slice.map(cardHTML).join('');
+
+    // build pagination bar
+    if (totalPages > 1) {
+      const bar = document.createElement('div');
+      bar.id = 'mv-pagination';
+      bar.style.cssText = 'grid-column:1/-1;display:flex;justify-content:center;gap:6px;padding:32px 0 8px;flex-wrap:wrap';
+      for (let i = 1; i <= totalPages; i++) {
+        const btn = document.createElement('button');
+        btn.textContent = i;
+        btn.style.cssText = `padding:8px 16px;font-family:'Space Mono',monospace;font-size:12px;border:1px solid rgba(240,240,240,.15);background:${i===currentPage?'var(--accent)':'transparent'};color:${i===currentPage?'#000':'var(--muted)'};cursor:pointer;transition:all .2s`;
+        btn.onclick = () => { currentPage = i; renderGrid(false); window.scrollTo({top: el('works').offsetTop - 80, behavior:'smooth'}); };
+        bar.appendChild(btn);
+      }
+      grid.appendChild(bar);
+    }
+
+  } else if (mode === 'loadmore') {
+    if (resetPage) loadedCount = perPage;
+    else loadedCount = Math.max(loadedCount, perPage);
+    const slice = list.slice(0, loadedCount);
+    grid.innerHTML = slice.map(cardHTML).join('');
+
+    if (loadedCount < list.length) {
+      const remaining = list.length - loadedCount;
+      const btn = document.createElement('button');
+      btn.id = 'mv-loadmore-btn';
+      btn.textContent = `Muat Lebih Banyak (${remaining} lagi)`;
+      btn.style.cssText = 'grid-column:1/-1;margin:24px auto 0;display:block;padding:14px 40px;background:transparent;border:1px solid rgba(200,255,0,.3);color:var(--accent);font-family:"Space Mono",monospace;font-size:12px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:all .2s';
+      btn.onmouseenter = () => btn.style.background = 'rgba(200,255,0,.08)';
+      btn.onmouseleave = () => btn.style.background = 'transparent';
+      btn.onclick = () => { loadedCount += perPage; renderGrid(false); };
+      grid.appendChild(btn);
+    }
+
+  } else {
+    // mode: all
+    grid.innerHTML = list.map(cardHTML).join('');
+  }
 }
 
 function renderFilters() {
@@ -571,7 +652,7 @@ function filterCards(tag, btn) {
   activeFilter = tag;
   document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  renderGrid();
+  renderGrid(true);
 }
 
 // ─────────────────────────────────────────────
@@ -716,26 +797,40 @@ function applySiteInfo() {
   if(s.tw){el('about-tw-link').href=s.tw;el('footer-tw').href=s.tw;}
 }
 
+function previewMode(mode) {
+  siteInfo.displayMode = mode;
+  renderGrid(true);
+}
+
 function fillSiteForm() {
   const s = siteInfo;
   ['brand','label','htitle','hsub','about1','about2','yt','tw','copy','year'].forEach(k => {
     if (el('s-'+k)) el('s-'+k).value = s[k] || '';
   });
+  // set perpage
+  if (el('s-perpage')) el('s-perpage').value = s.perPage || 12;
+  // set display mode radio
+  const mode = s.displayMode || 'all';
+  const radio = el('dm-' + mode);
+  if (radio) radio.checked = true;
 }
 
 async function saveSiteEdit() {
+  const mode = document.querySelector('input[name="display-mode"]:checked');
   siteInfo = {
-    brand:  el('s-brand').value,  label:  el('s-label').value,
-    htitle: el('s-htitle').value, hsub:   el('s-hsub').value,
-    about1: el('s-about1').value, about2: el('s-about2').value,
-    yt:     el('s-yt').value,     tw:     el('s-tw').value,
-    copy:   el('s-copy').value,   year:   el('s-year').value,
+    brand:       el('s-brand').value,   label:  el('s-label').value,
+    htitle:      el('s-htitle').value,  hsub:   el('s-hsub').value,
+    about1:      el('s-about1').value,  about2: el('s-about2').value,
+    yt:          el('s-yt').value,      tw:     el('s-tw').value,
+    copy:        el('s-copy').value,    year:   el('s-year').value,
+    displayMode: mode ? mode.value : 'all',
+    perPage:     parseInt(el('s-perpage')?.value) || 12,
   };
   const btn = el('site-save-btn'); btn.textContent='Menyimpan...'; btn.disabled=true;
   const { error } = await sb.from('mv_site').upsert({ id:1, data: siteInfo });
   btn.textContent='Simpan Info Site →'; btn.disabled=false;
   if (error) { toast('Gagal: '+error.message,'error'); return; }
-  applySiteInfo(); updateStats();
+  applySiteInfo(); updateStats(); renderGrid(true);
   toast('Info site tersimpan! ✓','success');
 }
 
