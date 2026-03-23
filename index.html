@@ -445,8 +445,8 @@
     <h3>🔒 Admin Login</h3>
     <p>Sign in to access the admin panel.</p>
     <p class="pw-error" id="pw-error">❌ Invalid email or password.</p>
-    <input type="email" id="pw-email" placeholder="Email..." style="margin-bottom:8px" onkeydown="if(event.key==='Enter')el('pw-input').focus()">
-    <input type="password" id="pw-input" placeholder="Password..." onkeydown="if(event.key==='Enter')checkPw()">
+    <input type="email" id="pw-email" autocomplete="email" placeholder="Email..." style="margin-bottom:8px" onkeydown="if(event.key==='Enter')el('pw-input').focus()">
+    <input type="password" id="pw-input" autocomplete="current-password" placeholder="Password..." onkeydown="if(event.key==='Enter')checkPw()">
     <button class="pw-btn" id="pw-btn" onclick="checkPw()">Sign In →</button>
   </div>
 </div>
@@ -468,19 +468,19 @@
 
   <!-- TAB: TAMBAH -->
   <div class="tab-pane active" id="tab-add">
-    <div class="admin-form">
+    <div class="admin-form" autocomplete="off">
       <div class="form-row">
         <label>YouTube URL atau Video ID</label>
-        <input type="text" id="inp-url" placeholder="Paste link YT → judul otomatis terisi" oninput="onUrlInput(this.value)">
+        <input type="text" id="inp-url" autocomplete="off" placeholder="Paste link YT → judul otomatis terisi" oninput="onUrlInput(this.value)">
         <span class="fetch-status" id="fetch-status"></span>
       </div>
       <div class="form-row">
         <label>Judul <span style="color:var(--accent);font-size:9px">(otomatis dari YT, bisa diedit)</span></label>
-        <input type="text" id="inp-title" placeholder="Judul lagu / MV">
+        <input type="text" id="inp-title" autocomplete="off" placeholder="Judul lagu / MV">
       </div>
       <div>
         <label>Artis / Channel <span style="color:var(--accent);font-size:9px">(otomatis dari YT)</span></label>
-        <input type="text" id="inp-artist" placeholder="Nama artis">
+        <input type="text" id="inp-artist" autocomplete="off" placeholder="Nama artis">
       </div>
       <div>
         <label>Tags <span style="color:var(--muted);font-size:9px">(klik preset atau ketik manual)</span></label>
@@ -491,11 +491,11 @@
           <button type="button" class="tag-preset-btn" onclick="togglePresetTag('inp-tags','Debut',this)">Debut</button>
           <button type="button" class="tag-preset-btn" onclick="togglePresetTag('inp-tags','Trailer',this)">Trailer</button>
         </div>
-        <input type="text" id="inp-tags" placeholder="Atau ketik tag custom..." oninput="syncPresetHighlight('inp-tags','add-tag-presets')">
+        <input type="text" id="inp-tags" autocomplete="off" placeholder="Atau ketik tag custom..." oninput="syncPresetHighlight('inp-tags','add-tag-presets')">
       </div>
       <div>
         <label>Custom Thumbnail URL <span style="color:var(--muted);font-size:9px">(opsional)</span></label>
-        <input type="text" id="inp-thumb" placeholder="Kosongkan = thumbnail YT otomatis">
+        <input type="text" id="inp-thumb" autocomplete="off" placeholder="Kosongkan = thumbnail YT otomatis">
       </div>
       <div class="checkbox-row">
         <input type="checkbox" id="inp-featured">
