@@ -252,7 +252,7 @@
     .pw-inner { background: var(--surface); border: 1px solid rgba(200,255,0,.2); padding: 36px; width: 100%; max-width: 340px; }
     .pw-inner h3 { font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: .08em; color: var(--accent); margin-bottom: 8px; }
     .pw-inner p { color: var(--muted); font-size: 13px; margin-bottom: 16px; }
-    .pw-inner input { width: 100%; background: var(--bg); border: 1px solid rgba(240,240,240,.15); color: var(--text); padding: 12px; font-family: 'Space Mono', monospace; font-size: 13px; outline: none; margin-bottom: 12px; }
+    .pw-inner input { width: 100%; background: var(--bg); border: 1px solid rgba(240,240,240,.15); color: var(--text); padding: 12px; font-family: 'Space Mono', monospace; font-size: 13px; outline: none; margin-bottom: 8px; display: block; }
     .pw-inner input:focus { border-color: var(--accent); }
     .pw-btn { width: 100%; background: var(--accent); color: #000; border: none; padding: 12px; font-family: 'Space Mono', monospace; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; cursor: pointer; }
     .pw-error { color: var(--accent2); font-size: 12px; font-family: 'Space Mono', monospace; display: none; margin-bottom: 10px; }
@@ -439,11 +439,12 @@
 <!-- PASSWORD MODAL -->
 <div class="pw-modal" id="pw-modal">
   <div class="pw-inner">
-    <h3>🔒 Admin</h3>
-    <p>Masukkan password untuk lanjut.</p>
-    <p class="pw-error" id="pw-error">❌ Password salah!</p>
+    <h3>🔒 Admin Login</h3>
+    <p>Sign in to access the admin panel.</p>
+    <p class="pw-error" id="pw-error">❌ Invalid email or password.</p>
+    <input type="email" id="pw-email" placeholder="Email..." style="margin-bottom:8px" onkeydown="if(event.key==='Enter')el('pw-input').focus()">
     <input type="password" id="pw-input" placeholder="Password..." onkeydown="if(event.key==='Enter')checkPw()">
-    <button class="pw-btn" onclick="checkPw()">Masuk →</button>
+    <button class="pw-btn" id="pw-btn" onclick="checkPw()">Sign In →</button>
   </div>
 </div>
 
@@ -594,12 +595,13 @@
 // ─────────────────────────────────────────────
 // CONFIG
 // ─────────────────────────────────────────────
-const SB_URL   = 'https://vidoandolyawczirdifu.supabase.co';
-const SB_KEY   = 'sb_publishable_jsJ962BsXTJJAVR7xYTcOg_qlcbnljz';
-const ADMIN_PW = '@Sera63271611';
-const SHORTCUT = 'adm';
+const _c=s=>atob(s);
+const SB_URL = _c('aHR0cHM6Ly92aWRvYW5kb2x5YXdjemlyZGlmdS5zdXBhYmFzZS5jbw==');
+const SB_KEY = _c('c2JfcHVibGlzaGFibGVfanNKOTYyQnNYVEpKQVZSN3hZVGNPZ19xbGNibmxqeg==');
+// auth handled by Supabase
+const SHORTCUT = _c('YWRt');
 
-const ADMIN_SESSION_KEY = 'mvp_admin_session';
+const ADMIN_SESSION_KEY = _c('bXZwX2FkbWluX3Nlc3Npb24=');
 const ADMIN_TIMEOUT_MS  = 60 * 60 * 1000; // 1 jam
 
 let sb, cards = [], siteInfo = {}, activeFilter = 'all';
@@ -723,21 +725,36 @@ function requestAdmin() {
     return;
   }
   el('pw-error').style.display = 'none';
+  el('pw-email').value = '';
   el('pw-input').value = '';
   el('pw-modal').style.display = 'flex';
-  setTimeout(() => el('pw-input').focus(), 100);
+  setTimeout(() => el('pw-email').focus(), 100);
 }
 
-function checkPw() {
-  if (el('pw-input').value === ADMIN_PW) {
+async function checkPw() {
+  const email = el('pw-email').value.trim();
+  const pass  = el('pw-input').value;
+  if (!email || !pass) {
+    el('pw-error').style.display = 'block';
+    el('pw-error').textContent = '❌ Please enter email and password.';
+    return;
+  }
+  const btn = el('pw-btn');
+  btn.textContent = 'Signing in...'; btn.disabled = true;
+  try {
+    const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+    if (error || !data.user) throw new Error(error?.message || 'Auth failed');
     setAdminSession(true);
     el('pw-modal').style.display = 'none';
     el('admin-panel').classList.add('open');
-  } else {
+    toast('Welcome back! ✓', 'success');
+  } catch(e) {
     el('pw-error').style.display = 'block';
+    el('pw-error').textContent = '❌ Invalid email or password.';
     el('pw-input').value = '';
     el('pw-input').focus();
   }
+  btn.textContent = 'Sign In →'; btn.disabled = false;
 }
 
 // ─────────────────────────────────────────────
