@@ -202,6 +202,21 @@
     .admin-add-btn:disabled { opacity: .5; cursor: not-allowed; }
     .admin-divider { border: none; border-top: 1px solid rgba(240,240,240,.08); margin: 16px 0; }
 
+    /* TAG PRESETS */
+    .tag-presets { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
+    .tag-preset-btn {
+      padding: 4px 12px;
+      background: transparent;
+      border: 1px solid rgba(200,255,0,.25);
+      color: var(--muted);
+      font-family: 'Space Mono', monospace;
+      font-size: 10px; letter-spacing: .08em;
+      text-transform: uppercase; cursor: pointer;
+      border-radius: 2px; transition: all .15s;
+    }
+    .tag-preset-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .tag-preset-btn.active { background: var(--accent); border-color: var(--accent); color: #000; }
+
     /* EXISTING LIST */
     .existing-list { display: flex; flex-direction: column; gap: 6px; }
     .existing-item { background: var(--bg); border: 1px solid rgba(240,240,240,.06); overflow: hidden; transition: border-color .2s; }
@@ -468,8 +483,15 @@
         <input type="text" id="inp-artist" placeholder="Nama artis">
       </div>
       <div>
-        <label>Tags (pisah koma)</label>
-        <input type="text" id="inp-tags" placeholder="animation, vocaloid, jpop">
+        <label>Tags <span style="color:var(--muted);font-size:9px">(klik preset atau ketik manual)</span></label>
+        <div class="tag-presets" id="add-tag-presets">
+          <button type="button" class="tag-preset-btn" onclick="togglePresetTag('inp-tags','Simple MV',this)">Simple MV</button>
+          <button type="button" class="tag-preset-btn" onclick="togglePresetTag('inp-tags','Semi Complex',this)">Semi Complex</button>
+          <button type="button" class="tag-preset-btn" onclick="togglePresetTag('inp-tags','Complex',this)">Complex</button>
+          <button type="button" class="tag-preset-btn" onclick="togglePresetTag('inp-tags','Debut',this)">Debut</button>
+          <button type="button" class="tag-preset-btn" onclick="togglePresetTag('inp-tags','Trailer',this)">Trailer</button>
+        </div>
+        <input type="text" id="inp-tags" placeholder="Atau ketik tag custom..." oninput="syncPresetHighlight('inp-tags','add-tag-presets')">
       </div>
       <div>
         <label>Custom Thumbnail URL <span style="color:var(--muted);font-size:9px">(opsional)</span></label>
@@ -752,8 +774,47 @@ async function loadSiteInfo() {
 }
 
 // ─────────────────────────────────────────────
-// HERO SHOWCASE SLIDER
+// TAG PRESET HELPERS
 // ─────────────────────────────────────────────
+function getTagsArray(inputId) {
+  return el(inputId).value.split(',').map(t=>t.trim()).filter(Boolean);
+}
+
+function setTagsArray(inputId, arr) {
+  el(inputId).value = arr.join(', ');
+}
+
+function togglePresetTag(inputId, tag, btn) {
+  renewAdminSession();
+  let tags = getTagsArray(inputId);
+  if (tags.includes(tag)) {
+    tags = tags.filter(t => t !== tag);
+    btn.classList.remove('active');
+  } else {
+    tags.push(tag);
+    btn.classList.add('active');
+  }
+  setTagsArray(inputId, tags);
+}
+
+function syncPresetHighlight(inputId, presetsId) {
+  const tags   = getTagsArray(inputId);
+  const wrap   = el(presetsId);
+  if (!wrap) return;
+  wrap.querySelectorAll('.tag-preset-btn').forEach(btn => {
+    btn.classList.toggle('active', tags.includes(btn.textContent.trim()));
+  });
+}
+
+// sync presets on admin panel open (for edit forms)
+function syncAllPresets() {
+  cards.forEach(c => {
+    const presetsId = `edit-tag-presets-${c.id}`;
+    if (el(presetsId)) syncPresetHighlight(`e-tags-${c.id}`, presetsId);
+  });
+}
+
+
 function buildShowcase() {
   const thumbs = cards
     .map(c => c.thumb || (c.ytId ? `https://img.youtube.com/vi/${c.ytId}/maxresdefault.jpg` : null))
@@ -921,8 +982,15 @@ function renderExistingList() {
         <input type="text" id="e-title-${c.id}" value="${esc(c.title)}">
         <label>Artis</label>
         <input type="text" id="e-artist-${c.id}" value="${esc(c.artist||'')}">
-        <label>Tags (pisah koma)</label>
-        <input type="text" id="e-tags-${c.id}" value="${esc((c.tags||[]).join(', '))}">
+        <label>Tags <span style="color:var(--muted);font-size:9px">(klik preset atau ketik)</span></label>
+        <div class="tag-presets" id="edit-tag-presets-${c.id}">
+          <button type="button" class="tag-preset-btn" onclick="togglePresetTag('e-tags-${c.id}','Simple MV',this)">Simple MV</button>
+          <button type="button" class="tag-preset-btn" onclick="togglePresetTag('e-tags-${c.id}','Semi Complex',this)">Semi Complex</button>
+          <button type="button" class="tag-preset-btn" onclick="togglePresetTag('e-tags-${c.id}','Complex',this)">Complex</button>
+          <button type="button" class="tag-preset-btn" onclick="togglePresetTag('e-tags-${c.id}','Debut',this)">Debut</button>
+          <button type="button" class="tag-preset-btn" onclick="togglePresetTag('e-tags-${c.id}','Trailer',this)">Trailer</button>
+        </div>
+        <input type="text" id="e-tags-${c.id}" value="${esc((c.tags||[]).join(', '))}" oninput="syncPresetHighlight('e-tags-${c.id}','edit-tag-presets-${c.id}')" onfocus="syncPresetHighlight('e-tags-${c.id}','edit-tag-presets-${c.id}')">
         <label>Custom Thumbnail URL</label>
         <input type="text" id="e-thumb-${c.id}" value="${esc(c.thumb||'')}">
         <div class="checkbox-row" style="margin:6px 0">
@@ -968,9 +1036,12 @@ function renderExistingList() {
 }
 function toggleEdit(id) {
   const pane = el('edit-' + id);
-  // tutup semua yang lain
   document.querySelectorAll('.inline-edit.open').forEach(p => { if (p.id !== 'edit-'+id) p.classList.remove('open'); });
   pane.classList.toggle('open');
+  // sync preset highlights after open
+  if (pane.classList.contains('open')) {
+    setTimeout(() => syncPresetHighlight(`e-tags-${id}`, `edit-tag-presets-${id}`), 50);
+  }
 }
 
 async function saveEdit(id) {
@@ -1023,6 +1094,8 @@ async function addCard() {
   toast('Karya berhasil ditambahkan! ✓','success');
   ['inp-url','inp-title','inp-artist','inp-tags','inp-thumb'].forEach(id=>el(id).value='');
   el('inp-featured').checked=false;
+  // reset preset highlights
+  document.querySelectorAll('#add-tag-presets .tag-preset-btn').forEach(b=>b.classList.remove('active'));
   setFetchStatus('','');
 }
 
