@@ -111,27 +111,68 @@
     .social-links a { color: var(--muted); text-decoration: none; font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; transition: color .2s; }
     .social-links a:hover { color: var(--accent); }
 
-    /* ADMIN PANEL — tersembunyi, dibuka via shortcut */
-    .admin-panel { position: fixed; bottom: 24px; right: 24px; z-index: 150; width: 380px; background: var(--surface); border: 1px solid rgba(200,255,0,.2); padding: 24px; display: none; max-height: 82vh; overflow-y: auto; }
+    /* ADMIN PANEL */
+    .admin-panel { position: fixed; bottom: 24px; right: 24px; z-index: 150; width: 400px; background: var(--surface); border: 1px solid rgba(200,255,0,.25); padding: 24px; display: none; max-height: 88vh; overflow-y: auto; box-shadow: 0 8px 40px rgba(0,0,0,.6); }
     .admin-panel.open { display: block; }
-    .admin-title { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: .08em; margin-bottom: 4px; color: var(--accent); display: flex; align-items: center; justify-content: space-between; }
-    .admin-close-btn { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 20px; padding: 0; }
+    .admin-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+    .admin-title { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: .08em; color: var(--accent); }
+    .admin-close-btn { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 20px; }
     .admin-close-btn:hover { color: var(--accent2); }
-    .admin-hint { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--muted); margin-bottom: 16px; letter-spacing: .05em; }
+    .admin-hint { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--muted); margin-bottom: 16px; }
+
+    /* TABS */
+    .admin-tabs { display: flex; gap: 2px; margin-bottom: 16px; }
+    .tab-btn { flex: 1; padding: 8px; background: var(--bg); border: 1px solid rgba(240,240,240,.08); color: var(--muted); font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; cursor: pointer; transition: all .2s; }
+    .tab-btn.active { background: var(--accent); border-color: var(--accent); color: #000; }
+
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; }
+
+    /* FORM */
     .admin-form { display: flex; flex-direction: column; gap: 10px; }
+    .form-row { position: relative; }
     .admin-form label { font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: .15em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 4px; }
     .admin-form input { width: 100%; background: var(--bg); border: 1px solid rgba(240,240,240,.1); color: var(--text); padding: 10px 12px; font-family: 'DM Sans', sans-serif; font-size: 13px; outline: none; transition: border-color .2s; }
     .admin-form input:focus { border-color: var(--accent); }
     .admin-form .checkbox-row { display: flex; align-items: center; gap: 10px; }
     .admin-form input[type="checkbox"] { width: auto; }
+
+    /* AUTO-FETCH indicator */
+    .fetch-status { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 11px; font-family: 'Space Mono', monospace; }
+    .fetch-status.loading { color: var(--accent); }
+    .fetch-status.ok { color: #4cff91; }
+    .fetch-status.err { color: var(--accent2); }
+
+    .field-note { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--accent); margin-top: 2px; }
+
     .admin-add-btn { background: var(--accent); color: #000; border: none; padding: 12px; font-family: 'Space Mono', monospace; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; cursor: pointer; margin-top: 4px; transition: all .2s; width: 100%; }
     .admin-add-btn:hover:not(:disabled) { background: #d4ff1a; }
     .admin-add-btn:disabled { opacity: .5; cursor: not-allowed; }
     .admin-divider { border: none; border-top: 1px solid rgba(240,240,240,.08); margin: 16px 0; }
+
+    /* EXISTING LIST */
     .existing-list { display: flex; flex-direction: column; gap: 6px; }
-    .existing-item { display: flex; align-items: center; justify-content: space-between; background: var(--bg); padding: 10px 12px; font-size: 12px; }
-    .existing-item-title { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-right: 8px; }
-    .del-btn { background: none; border: none; color: var(--accent2); cursor: pointer; font-size: 16px; line-height: 1; }
+    .existing-item { background: var(--bg); border: 1px solid rgba(240,240,240,.06); overflow: hidden; }
+    .existing-item-header { display: flex; align-items: center; padding: 10px 12px; gap: 8px; }
+    .existing-item-thumb { width: 48px; height: 28px; object-fit: cover; flex-shrink: 0; background: var(--surface); }
+    .existing-item-title { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
+    .existing-item-actions { display: flex; gap: 6px; flex-shrink: 0; }
+    .edit-btn { background: rgba(200,255,0,.15); border: 1px solid rgba(200,255,0,.3); color: var(--accent); cursor: pointer; font-size: 12px; padding: 4px 10px; font-family: 'Space Mono', monospace; transition: all .2s; }
+    .edit-btn:hover { background: var(--accent); color: #000; }
+    .del-btn { background: rgba(255,60,172,.1); border: 1px solid rgba(255,60,172,.3); color: var(--accent2); cursor: pointer; font-size: 14px; padding: 4px 10px; transition: all .2s; }
+    .del-btn:hover { background: var(--accent2); color: #fff; }
+
+    /* INLINE EDIT FORM */
+    .inline-edit { display: none; padding: 12px; border-top: 1px solid rgba(240,240,240,.08); background: rgba(200,255,0,.03); }
+    .inline-edit.open { display: block; }
+    .inline-edit input { width: 100%; background: var(--bg); border: 1px solid rgba(240,240,240,.1); color: var(--text); padding: 8px 10px; font-family: 'DM Sans', sans-serif; font-size: 12px; outline: none; margin-bottom: 6px; }
+    .inline-edit input:focus { border-color: var(--accent); }
+    .inline-edit label { font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 3px; }
+    .inline-edit-row { display: flex; gap: 6px; }
+    .inline-edit-row input { flex: 1; margin-bottom: 0; }
+    .inline-save-btn { width: 100%; margin-top: 8px; background: var(--accent); color: #000; border: none; padding: 8px; font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; cursor: pointer; }
+    .inline-save-btn:hover { background: #d4ff1a; }
+    .inline-cancel-btn { width: 100%; margin-top: 4px; background: transparent; color: var(--muted); border: 1px solid rgba(240,240,240,.1); padding: 6px; font-family: 'Space Mono', monospace; font-size: 10px; cursor: pointer; }
 
     /* PASSWORD MODAL */
     .pw-modal { position: fixed; inset: 0; z-index: 400; background: rgba(0,0,0,.92); display: none; align-items: center; justify-content: center; }
@@ -165,12 +206,12 @@
 
     @keyframes fadeUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
     ::-webkit-scrollbar{width:6px} ::-webkit-scrollbar-track{background:var(--bg)} ::-webkit-scrollbar-thumb{background:rgba(200,255,0,.3)}
-    @media(max-width:600px){nav{padding:14px 20px}section{padding:60px 20px}.hero{padding:0 20px 40px}.admin-panel{width:calc(100vw - 32px);right:16px}}
+    @media(max-width:600px){nav{padding:14px 20px}section{padding:60px 20px}.hero{padding:0 20px 40px}.admin-panel{width:calc(100vw - 32px);right:16px;bottom:0;max-height:70vh}}
   </style>
 </head>
 <body>
 
-<!-- NAV — bersih, tidak ada tombol admin -->
+<!-- NAV -->
 <nav>
   <ul class="nav-links">
     <li><a href="#works">Works</a></li>
@@ -223,8 +264,8 @@
         <h2 class="section-title">About</h2>
         <div class="section-line"></div>
       </div>
-      <p id="about-p1">Hi! I'm a music video director & animator creating vibrant visual worlds for artists. Every project starts with the music and ends with something that makes people feel.</p>
-      <p id="about-p2">Specializing in anime-style illustration, motion graphics, and lyric video production. Open for commissions and collaboration.</p>
+      <p id="about-p1">Hi! I'm a music video director & animator creating vibrant visual worlds for artists.</p>
+      <p id="about-p2">Specializing in anime-style illustration, motion graphics, and lyric video production.</p>
       <div style="margin-top:28px;display:flex;gap:12px;flex-wrap:wrap">
         <a href="#" target="_blank" class="btn btn-primary" id="about-yt-link">YouTube Channel</a>
         <a href="#" target="_blank" class="btn btn-ghost" id="about-tw-link">Twitter / X</a>
@@ -274,77 +315,83 @@
   </div>
 </div>
 
-<!-- ADMIN PANEL — tersembunyi -->
+<!-- ADMIN PANEL -->
 <div class="admin-panel" id="admin-panel">
-  <div class="admin-title">
-    Tambah Karya
+  <div class="admin-header">
+    <div class="admin-title">Admin Panel</div>
     <button class="admin-close-btn" onclick="el('admin-panel').classList.remove('open')">✕</button>
   </div>
-  <div class="admin-hint">Tekan ESC atau ✕ untuk tutup</div>
-  <div class="admin-form">
-    <div>
-      <label>YouTube URL atau Video ID</label>
-      <input type="text" id="inp-url" placeholder="https://youtube.com/watch?v=... atau ID">
-    </div>
-    <div>
-      <label>Judul</label>
-      <input type="text" id="inp-title" placeholder="Judul lagu / MV">
-    </div>
-    <div>
-      <label>Artis / Channel</label>
-      <input type="text" id="inp-artist" placeholder="Nama artis">
-    </div>
-    <div>
-      <label>Tags (pisah koma)</label>
-      <input type="text" id="inp-tags" placeholder="animation, vocaloid, jpop">
-    </div>
-    <div>
-      <label>Custom Thumbnail URL (opsional)</label>
-      <input type="text" id="inp-thumb" placeholder="Kosongkan = thumbnail YT otomatis">
-    </div>
-    <div class="checkbox-row">
-      <input type="checkbox" id="inp-featured">
-      <label for="inp-featured" style="margin:0;font-size:11px">Featured (tampil 2x lebih besar)</label>
-    </div>
-    <button class="admin-add-btn" id="add-btn" onclick="addCard()">+ Tambah ke Portofolio</button>
+  <div class="admin-hint">Shortcut: ketik "adm" · ESC untuk tutup</div>
 
-    <hr class="admin-divider">
-    <div style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Karya yang ada</div>
-    <div class="existing-list" id="existing-list"></div>
+  <!-- TABS -->
+  <div class="admin-tabs">
+    <button class="tab-btn active" onclick="switchTab('add',this)">+ Tambah</button>
+    <button class="tab-btn" onclick="switchTab('list',this)">📋 Kelola</button>
+    <button class="tab-btn" onclick="switchTab('site',this)">✏ Site</button>
+  </div>
 
-    <hr class="admin-divider">
-    <!-- Edit Site tersembunyi di dalam admin panel -->
-    <button onclick="openSiteEdit()" style="width:100%;background:transparent;border:1px solid rgba(200,255,0,.2);color:var(--accent);padding:10px;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;">✏ Edit Info Site</button>
+  <!-- TAB: TAMBAH -->
+  <div class="tab-pane active" id="tab-add">
+    <div class="admin-form">
+      <div class="form-row">
+        <label>YouTube URL atau Video ID</label>
+        <input type="text" id="inp-url" placeholder="Paste link YT → judul otomatis terisi" oninput="onUrlInput(this.value)">
+        <span class="fetch-status" id="fetch-status"></span>
+      </div>
+      <div class="form-row">
+        <label>Judul <span style="color:var(--accent);font-size:9px">(otomatis dari YT, bisa diedit)</span></label>
+        <input type="text" id="inp-title" placeholder="Judul lagu / MV">
+      </div>
+      <div>
+        <label>Artis / Channel <span style="color:var(--accent);font-size:9px">(otomatis dari YT)</span></label>
+        <input type="text" id="inp-artist" placeholder="Nama artis">
+      </div>
+      <div>
+        <label>Tags (pisah koma)</label>
+        <input type="text" id="inp-tags" placeholder="animation, vocaloid, jpop">
+      </div>
+      <div>
+        <label>Custom Thumbnail URL <span style="color:var(--muted);font-size:9px">(opsional)</span></label>
+        <input type="text" id="inp-thumb" placeholder="Kosongkan = thumbnail YT otomatis">
+      </div>
+      <div class="checkbox-row">
+        <input type="checkbox" id="inp-featured">
+        <label for="inp-featured" style="margin:0;font-size:11px">Featured (tampil 2x lebih besar)</label>
+      </div>
+      <button class="admin-add-btn" id="add-btn" onclick="addCard()">+ Tambah ke Portofolio</button>
+    </div>
+  </div>
+
+  <!-- TAB: KELOLA -->
+  <div class="tab-pane" id="tab-list">
+    <div class="existing-list" id="existing-list">
+      <div style="color:var(--muted);font-size:12px;font-family:'Space Mono',monospace">Loading...</div>
+    </div>
+  </div>
+
+  <!-- TAB: SITE -->
+  <div class="tab-pane" id="tab-site">
+    <div class="admin-form">
+      <div><label>Nama / Brand</label><input type="text" id="s-brand" placeholder="e.g. YORU.MV"></div>
+      <div><label>Tagline</label><input type="text" id="s-label" placeholder="Music Video Director"></div>
+      <div><label>Judul Hero (| untuk baris baru)</label><input type="text" id="s-htitle" placeholder="YOUR|WORK|HERE"></div>
+      <div><label>Subjudul Hero</label><input type="text" id="s-hsub" placeholder="Deskripsi singkat..."></div>
+      <div><label>About Paragraf 1</label><input type="text" id="s-about1"></div>
+      <div><label>About Paragraf 2</label><input type="text" id="s-about2"></div>
+      <div><label>Link YouTube</label><input type="text" id="s-yt" placeholder="https://youtube.com/@..."></div>
+      <div><label>Link Twitter / X</label><input type="text" id="s-tw" placeholder="https://twitter.com/..."></div>
+      <div><label>Footer Copyright</label><input type="text" id="s-copy" placeholder="© 2024 Nama Kamu"></div>
+      <div><label>Tahun Mulai</label><input type="text" id="s-year" placeholder="2022"></div>
+      <button class="admin-add-btn" id="site-save-btn" onclick="saveSiteEdit()" style="margin-top:8px">Simpan Info Site →</button>
+    </div>
   </div>
 </div>
 
-<!-- SITE EDIT PANEL -->
+<!-- SITE EDIT PANEL (legacy, tidak dipakai tapi dibiarkan) -->
 <div class="site-edit-panel" id="site-edit-panel">
   <div class="site-edit-inner">
-    <h2>Edit Info Site</h2>
-    <label>Nama / Brand</label>
-    <input type="text" id="edit-brand" placeholder="e.g. YORU.MV">
-    <label>Tagline</label>
-    <input type="text" id="edit-label" placeholder="Music Video Director">
-    <label>Judul Hero (| untuk baris baru)</label>
-    <input type="text" id="edit-htitle" placeholder="YOUR|WORK|HERE">
-    <label>Subjudul Hero</label>
-    <textarea id="edit-hsub" rows="3"></textarea>
-    <label>About — Paragraf 1</label>
-    <textarea id="edit-about1" rows="3"></textarea>
-    <label>About — Paragraf 2</label>
-    <textarea id="edit-about2" rows="3"></textarea>
-    <label>Link YouTube</label>
-    <input type="text" id="edit-yt" placeholder="https://youtube.com/@...">
-    <label>Link Twitter / X</label>
-    <input type="text" id="edit-tw" placeholder="https://twitter.com/...">
-    <label>Footer Copyright</label>
-    <input type="text" id="edit-copy" placeholder="© 2024 Nama Kamu">
-    <label>Tahun Mulai</label>
-    <input type="text" id="edit-year" placeholder="2022">
     <div class="site-edit-actions">
-      <button class="btn-cancel" onclick="closeSiteEdit()">Batal</button>
-      <button class="btn-save" id="site-save-btn" onclick="saveSiteEdit()">Simpan →</button>
+      <button class="btn-cancel" onclick="closeSiteEdit()">Tutup</button>
     </div>
   </div>
 </div>
@@ -354,15 +401,15 @@
 
 <script>
 // ─────────────────────────────────────────────
-// HARDCODED CONFIG — tidak perlu setup lagi
+// CONFIG
 // ─────────────────────────────────────────────
-const SB_URL  = 'https://vidoandolyawczirdifu.supabase.co';
-const SB_KEY  = 'sb_publishable_jsJ962BsXTJJAVR7xYTcOg_qlcbnljz';
+const SB_URL   = 'https://vidoandolyawczirdifu.supabase.co';
+const SB_KEY   = 'sb_publishable_jsJ962BsXTJJAVR7xYTcOg_qlcbnljz';
 const ADMIN_PW = '@Sera63271611';
-// Shortcut: ketik "adm" di keyboard saat tidak sedang focus di input
 const SHORTCUT = 'adm';
 
 let sb, cards = [], siteInfo = {}, activeFilter = 'all', adminUnlocked = false;
+let fetchTimer = null;
 
 // ─────────────────────────────────────────────
 // INIT
@@ -371,43 +418,46 @@ async function init() {
   sb = window.supabase.createClient(SB_URL, SB_KEY);
   await loadSiteInfo();
   await loadCards();
-  sb.channel('mv')
+  sb.channel('mv_realtime')
     .on('postgres_changes', { event:'*', schema:'public', table:'mv_works' }, loadCards)
     .on('postgres_changes', { event:'*', schema:'public', table:'mv_site'  }, loadSiteInfo)
     .subscribe();
 }
 
 // ─────────────────────────────────────────────
-// SECRET SHORTCUT — ketik "adm"
+// SECRET SHORTCUT
 // ─────────────────────────────────────────────
-let keyBuffer = '';
+let keyBuf = '';
 document.addEventListener('keydown', e => {
-  // Jangan trigger saat sedang ngetik di input/textarea
   if (['INPUT','TEXTAREA'].includes(e.target.tagName)) return;
-
   if (e.key === 'Escape') {
     closeModal(); closeSiteEdit();
     el('admin-panel').classList.remove('open');
     el('pw-modal').style.display = 'none';
     return;
   }
-
-  keyBuffer += e.key.toLowerCase();
-  if (keyBuffer.length > SHORTCUT.length) keyBuffer = keyBuffer.slice(-SHORTCUT.length);
-  if (keyBuffer === SHORTCUT) {
-    keyBuffer = '';
-    requestAdmin();
-  }
+  keyBuf += e.key.toLowerCase();
+  if (keyBuf.length > SHORTCUT.length) keyBuf = keyBuf.slice(-SHORTCUT.length);
+  if (keyBuf === SHORTCUT) { keyBuf = ''; requestAdmin(); }
 });
+
+// ─────────────────────────────────────────────
+// TABS
+// ─────────────────────────────────────────────
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  el('tab-' + name).classList.add('active');
+  if (name === 'list') renderExistingList();
+  if (name === 'site') fillSiteForm();
+}
 
 // ─────────────────────────────────────────────
 // PASSWORD
 // ─────────────────────────────────────────────
 function requestAdmin() {
-  if (adminUnlocked) {
-    el('admin-panel').classList.toggle('open');
-    return;
-  }
+  if (adminUnlocked) { el('admin-panel').classList.toggle('open'); return; }
   el('pw-error').style.display = 'none';
   el('pw-input').value = '';
   el('pw-modal').style.display = 'flex';
@@ -427,13 +477,53 @@ function checkPw() {
 }
 
 // ─────────────────────────────────────────────
+// AUTO-FETCH YOUTUBE INFO
+// ─────────────────────────────────────────────
+function onUrlInput(val) {
+  clearTimeout(fetchTimer);
+  const ytId = ytExtract(val);
+  if (!ytId) { setFetchStatus('', ''); return; }
+  setFetchStatus('loading', '⟳ Mengambil info...');
+  fetchTimer = setTimeout(() => fetchYtInfo(ytId), 800);
+}
+
+async function fetchYtInfo(ytId) {
+  try {
+    // Gunakan oEmbed API — tidak butuh API key
+    const res = await fetch(`https://www.youtube.com/oembed?url=https://youtube.com/watch?v=${ytId}&format=json`);
+    if (!res.ok) throw new Error('not found');
+    const data = await res.json();
+
+    // Isi judul hanya jika field masih kosong
+    if (!el('inp-title').value.trim()) {
+      el('inp-title').value = data.title || '';
+    }
+    // Isi artis hanya jika field masih kosong
+    if (!el('inp-artist').value.trim()) {
+      el('inp-artist').value = data.author_name || '';
+    }
+    setFetchStatus('ok', '✓ Info berhasil diambil');
+  } catch {
+    setFetchStatus('err', '⚠ Tidak bisa ambil info (private/unlisted)');
+  }
+}
+
+function setFetchStatus(type, msg) {
+  const s = el('fetch-status');
+  s.textContent = msg;
+  s.className = 'fetch-status' + (type ? ' ' + type : '');
+}
+
+// ─────────────────────────────────────────────
 // LOAD DATA
 // ─────────────────────────────────────────────
 async function loadCards() {
   const { data, error } = await sb.from('mv_works').select('*').order('sort_order').order('created_at');
   if (error) { toast('Gagal load: ' + error.message, 'error'); return; }
   cards = data || [];
-  renderGrid(); renderFilters(); renderExistingList(); updateStats();
+  renderGrid(); renderFilters(); updateStats();
+  // re-render list jika tab list sedang aktif
+  if (el('tab-list').classList.contains('active')) renderExistingList();
 }
 
 async function loadSiteInfo() {
@@ -442,7 +532,7 @@ async function loadSiteInfo() {
 }
 
 // ─────────────────────────────────────────────
-// RENDER
+// RENDER GRID
 // ─────────────────────────────────────────────
 function renderGrid() {
   const grid = el('mv-grid');
@@ -484,14 +574,70 @@ function filterCards(tag, btn) {
   renderGrid();
 }
 
+// ─────────────────────────────────────────────
+// RENDER EXISTING LIST (tab Kelola)
+// ─────────────────────────────────────────────
 function renderExistingList() {
   const list = el('existing-list');
-  if (!cards.length) { list.innerHTML = '<div style="color:var(--muted);font-size:12px">Belum ada karya</div>'; return; }
-  list.innerHTML = cards.map(c=>`
-    <div class="existing-item">
-      <span class="existing-item-title">${esc(c.title)}</span>
-      <button class="del-btn" onclick="deleteCard('${c.id}')">✕</button>
-    </div>`).join('');
+  if (!cards.length) { list.innerHTML = '<div style="color:var(--muted);font-size:12px;font-family:\'Space Mono\',monospace">Belum ada karya</div>'; return; }
+  list.innerHTML = cards.map(c => {
+    const thumb = c.thumb || (c.ytId ? `https://img.youtube.com/vi/${c.ytId}/mqdefault.jpg` : '');
+    return `
+    <div class="existing-item" id="item-${c.id}">
+      <div class="existing-item-header">
+        ${thumb ? `<img class="existing-item-thumb" src="${thumb}" onerror="this.style.display='none'">` : ''}
+        <span class="existing-item-title">${esc(c.title)}</span>
+        <div class="existing-item-actions">
+          <button class="edit-btn" onclick="toggleEdit('${c.id}')">✏</button>
+          <button class="del-btn" onclick="deleteCard('${c.id}')">✕</button>
+        </div>
+      </div>
+      <div class="inline-edit" id="edit-${c.id}">
+        <label>YouTube URL / ID</label>
+        <input type="text" id="e-url-${c.id}" value="${esc(c.ytId||'')}" placeholder="Video ID atau URL">
+        <label>Judul</label>
+        <input type="text" id="e-title-${c.id}" value="${esc(c.title)}">
+        <label>Artis</label>
+        <input type="text" id="e-artist-${c.id}" value="${esc(c.artist||'')}">
+        <label>Tags (pisah koma)</label>
+        <input type="text" id="e-tags-${c.id}" value="${esc((c.tags||[]).join(', '))}">
+        <label>Custom Thumbnail URL</label>
+        <input type="text" id="e-thumb-${c.id}" value="${esc(c.thumb||'')}" placeholder="Kosongkan = YT otomatis">
+        <div class="checkbox-row" style="margin:6px 0">
+          <input type="checkbox" id="e-feat-${c.id}" ${c.featured?'checked':''}>
+          <label for="e-feat-${c.id}" style="margin:0;font-size:11px;text-transform:none;letter-spacing:0">Featured (2x besar)</label>
+        </div>
+        <button class="inline-save-btn" onclick="saveEdit('${c.id}')">💾 Simpan Perubahan</button>
+        <button class="inline-cancel-btn" onclick="toggleEdit('${c.id}')">Batal</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleEdit(id) {
+  const pane = el('edit-' + id);
+  // tutup semua yang lain
+  document.querySelectorAll('.inline-edit.open').forEach(p => { if (p.id !== 'edit-'+id) p.classList.remove('open'); });
+  pane.classList.toggle('open');
+}
+
+async function saveEdit(id) {
+  const urlVal  = el(`e-url-${id}`).value.trim();
+  const title   = el(`e-title-${id}`).value.trim();
+  const artist  = el(`e-artist-${id}`).value.trim();
+  const tagsRaw = el(`e-tags-${id}`).value.trim();
+  const thumb   = el(`e-thumb-${id}`).value.trim();
+  const feat    = el(`e-feat-${id}`).checked;
+  if (!title) { toast('Judul tidak boleh kosong!', 'error'); return; }
+  const ytId = ytExtract(urlVal) || urlVal || null;
+  const tags = tagsRaw ? tagsRaw.split(',').map(t=>t.trim()).filter(Boolean) : [];
+  const btn = el(`edit-${id}`).querySelector('.inline-save-btn');
+  btn.textContent = 'Menyimpan...'; btn.disabled = true;
+  const { error } = await sb.from('mv_works').update({ ytId, title, artist, tags, thumb: thumb||null, featured: feat }).eq('id', id);
+  btn.textContent = '💾 Simpan Perubahan'; btn.disabled = false;
+  if (error) { toast('Gagal simpan: '+error.message,'error'); return; }
+  toast('Karya berhasil diperbarui! ✓','success');
+  toggleEdit(id);
 }
 
 function updateStats() {
@@ -504,7 +650,7 @@ function updateStats() {
 }
 
 // ─────────────────────────────────────────────
-// ADD / DELETE
+// ADD CARD
 // ─────────────────────────────────────────────
 async function addCard() {
   const url    = el('inp-url').value.trim();
@@ -519,12 +665,16 @@ async function addCard() {
   const btn = el('add-btn'); btn.disabled=true; btn.textContent='Menyimpan...';
   const { error } = await sb.from('mv_works').insert([{ ytId, title, artist, tags, thumb: thumb||null, featured: feat, sort_order: cards.length }]);
   btn.disabled=false; btn.textContent='+ Tambah ke Portofolio';
-  if (error) { toast('Gagal: '+error.message, 'error'); return; }
-  toast('Karya berhasil ditambahkan! ✓', 'success');
+  if (error) { toast('Gagal: '+error.message,'error'); return; }
+  toast('Karya berhasil ditambahkan! ✓','success');
   ['inp-url','inp-title','inp-artist','inp-tags','inp-thumb'].forEach(id=>el(id).value='');
   el('inp-featured').checked=false;
+  setFetchStatus('','');
 }
 
+// ─────────────────────────────────────────────
+// DELETE CARD
+// ─────────────────────────────────────────────
 async function deleteCard(id) {
   if (!confirm('Hapus karya ini?')) return;
   const { error } = await sb.from('mv_works').delete().eq('id',id);
@@ -545,7 +695,6 @@ function openModal(id) {
   el('modal').classList.add('open');
   document.body.style.overflow='hidden';
 }
-
 function closeModal(e) {
   if (e && e.target !== el('modal')) return;
   el('modal').classList.remove('open');
@@ -567,22 +716,30 @@ function applySiteInfo() {
   if(s.tw){el('about-tw-link').href=s.tw;el('footer-tw').href=s.tw;}
 }
 
-function openSiteEdit() {
-  const s=siteInfo;
-  ['brand','label','htitle','hsub','about1','about2','yt','tw','copy','year'].forEach(k=>{ if(el('edit-'+k)) el('edit-'+k).value=s[k]||''; });
-  el('site-edit-panel').classList.add('open');
+function fillSiteForm() {
+  const s = siteInfo;
+  ['brand','label','htitle','hsub','about1','about2','yt','tw','copy','year'].forEach(k => {
+    if (el('s-'+k)) el('s-'+k).value = s[k] || '';
+  });
 }
-function closeSiteEdit(){el('site-edit-panel').classList.remove('open');}
 
 async function saveSiteEdit() {
-  siteInfo={brand:el('edit-brand').value,label:el('edit-label').value,htitle:el('edit-htitle').value,hsub:el('edit-hsub').value,about1:el('edit-about1').value,about2:el('edit-about2').value,yt:el('edit-yt').value,tw:el('edit-tw').value,copy:el('edit-copy').value,year:el('edit-year').value};
-  const btn=el('site-save-btn'); btn.textContent='Menyimpan...'; btn.disabled=true;
-  const{error}=await sb.from('mv_site').upsert({id:1,data:siteInfo});
-  btn.textContent='Simpan →'; btn.disabled=false;
-  if(error){toast('Gagal: '+error.message,'error');return;}
-  applySiteInfo(); updateStats(); closeSiteEdit();
+  siteInfo = {
+    brand:  el('s-brand').value,  label:  el('s-label').value,
+    htitle: el('s-htitle').value, hsub:   el('s-hsub').value,
+    about1: el('s-about1').value, about2: el('s-about2').value,
+    yt:     el('s-yt').value,     tw:     el('s-tw').value,
+    copy:   el('s-copy').value,   year:   el('s-year').value,
+  };
+  const btn = el('site-save-btn'); btn.textContent='Menyimpan...'; btn.disabled=true;
+  const { error } = await sb.from('mv_site').upsert({ id:1, data: siteInfo });
+  btn.textContent='Simpan Info Site →'; btn.disabled=false;
+  if (error) { toast('Gagal: '+error.message,'error'); return; }
+  applySiteInfo(); updateStats();
   toast('Info site tersimpan! ✓','success');
 }
+
+function closeSiteEdit() { el('site-edit-panel').classList.remove('open'); }
 
 // ─────────────────────────────────────────────
 // UTILS
