@@ -440,7 +440,8 @@ function fillDesignForm() {
 let pendingLogo = null, pendingFavicon = null;
 
 function handleLogoUpload(input) {
-    const file = input.files; if (!file) return;
+    const file = input.files; 
+    if (!file) return;
     const reader = new FileReader();
     reader.onload = (e) => {
         pendingLogo = e.target.result;
@@ -453,7 +454,8 @@ function handleLogoUpload(input) {
 }
 
 function handleFaviconUpload(input) {
-    const file = input.files; if (!file) return;
+    const file = input.files; 
+    if (!file) return;
     const reader = new FileReader();
     reader.onload = (e) => {
         pendingFavicon = e.target.result;
@@ -462,53 +464,38 @@ function handleFaviconUpload(input) {
     reader.readAsDataURL(file);
 }
 
-// Fungsi pembantu untuk membaca file secara langsung saat tombol diklik
-const getBase64 = (file) => new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = error => reject(error);
-});
-
 async function saveLogoFavicon() {
     renewAdminSession();
     
-    // Baca paksa dari kotak input (berjaga-jaga jika browser auto-fill dan onchange terlewat)
-    const logoInput = el('logo-upload').files;
-    const favInput = el('favicon-upload').files;
-
-    if (!logoInput && !favInput && !pendingLogo && !pendingFavicon) { 
-        toast('No new images selected', 'error'); 
+    // Mencegah error jika user klik Save tapi belum klik Choose File setelah refresh
+    if (!pendingLogo && !pendingFavicon) { 
+        toast('Silakan klik "Choose File" lagi untuk memilih gambar', 'error'); 
         return; 
     }
 
     const btn = el('logo-save-btn');
     btn.textContent = 'Saving...'; btn.disabled = true;
 
-    try {
-        // Jika ada file di input, proses menjadi format gambar
-        if (logoInput) siteInfo.logoData = await getBase64(logoInput);
-        else if (pendingLogo) siteInfo.logoData = pendingLogo;
+    if (pendingLogo) siteInfo.logoData = pendingLogo;
+    if (pendingFavicon) siteInfo.faviconData = pendingFavicon;
 
-        if (favInput) siteInfo.faviconData = await getBase64(favInput);
-        else if (pendingFavicon) siteInfo.faviconData = pendingFavicon;
-
-        const { error } = await sb.from('mv_site').upsert({ id: 1, data: siteInfo });
-        if (error) throw error;
-
-        applyLogoFavicon();
-        pendingLogo = null; pendingFavicon = null;
-        
-        // Bersihkan kotak input setelah berhasil disave
-        el('logo-upload').value = ''; 
-        el('favicon-upload').value = '';
-        
-        toast('Logo & Favicon saved! ✓', 'success');
-    } catch (error) {
-        toast('Error: ' + error.message, 'error');
-    } finally {
-        btn.textContent = '💾 Save Logo & Favicon'; btn.disabled = false;
+    const { error } = await sb.from('mv_site').upsert({ id: 1, data: siteInfo });
+    
+    btn.textContent = '💾 Save Logo & Favicon'; btn.disabled = false;
+    
+    if (error) { 
+        toast('Error: ' + error.message, 'error'); 
+        return; 
     }
+    
+    applyLogoFavicon();
+    pendingLogo = null; pendingFavicon = null;
+    
+    // Menghapus ghost text dari input box
+    el('logo-upload').value = ''; 
+    el('favicon-upload').value = '';
+    
+    toast('Logo & Favicon saved! ✓', 'success');
 }
 
 function applyLogoFavicon() {
@@ -547,7 +534,13 @@ async function init() {
         .on('postgres_changes', { event: '*', schema: 'public', table: 'mv_works' }, loadCards)
         .on('postgres_changes', { event: '*', schema: 'public', table: 'mv_site' }, loadSiteInfo)
         .subscribe();
-    setTimeout(() => { setLoadProgress(100, 'Ready!'); setTimeout(() => { hideLoading(); if (isAdminActive()) el('admin-panel').classList.add('open'); }, 300); }, 200);
+    setTimeout(() => { 
+        setLoadProgress(100, 'Ready!'); 
+        setTimeout(() => { 
+            hideLoading(); 
+            if (isAdminActive()) el('admin-panel').classList.add('open'); 
+        }, 300); 
+    }, 200);
 }
 
 init();
