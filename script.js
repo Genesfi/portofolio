@@ -133,12 +133,55 @@ function cardHTML(c) {
     const thumb = c.thumb || (c.ytId ? ytThumb(c.ytId) : '');
     const fallback = c.ytId ? ytThumbFallback(c.ytId) : '';
     const tags = (c.tags || []).map(t => `<span class="mv-tag">${esc(t)}</span>`).join('');
-    return `<div class="mv-card${c.featured ? ' featured' : ''}" onclick="openModal('${c.id}')">
+    const hasYt = !!c.ytId;
+
+    return `<div class="mv-card${c.featured ? ' featured' : ''}" 
+        data-id="${c.id}" 
+        data-ytid="${c.ytId || ''}"
+        onclick="openModal('${c.id}')"
+        ${hasYt ? `onmouseenter="startPreview(this,'${c.ytId}')" onmouseleave="stopPreview(this)"` : ''}>
 ${thumb ? `<img class="mv-thumb" src="${thumb}" alt="${esc(c.title)}" loading="lazy" onerror="this.src='${fallback}';this.onerror=null;">` : ''}
 <div class="mv-placeholder" style="${thumb ? 'display:none' : ''}"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
 <div class="mv-play"><svg width="18" height="18" viewBox="0 0 24 24" fill="#000"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
 <div class="mv-overlay"><div>${tags}<div class="mv-title">${esc(c.title)}</div><div class="mv-artist">${esc(c.artist || '')}</div></div></div>
 </div>`;
+}
+
+// ── HOVER PREVIEW ──
+let previewTimer = null;
+let activePreviewCard = null;
+
+function startPreview(card, ytId) {
+    if (!ytId || document.body.classList.contains('edit-mode')) return;
+    
+    // Delay 600ms biar gk langsung load pas mouse lewat
+    previewTimer = setTimeout(() => {
+        // Hapus preview card sebelumnya kalau ada
+        stopPreview(activePreviewCard);
+        
+        activePreviewCard = card;
+        card.classList.add('previewing');
+        
+        // Buat iframe preview
+        const iframe = document.createElement('iframe');
+        iframe.className = 'mv-preview-iframe';
+        iframe.src = `https://www.youtube.com/embed/${ytId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${ytId}&rel=0&modestbranding=1&iv_load_policy=3&start=5`;
+        iframe.allow = 'autoplay';
+        iframe.setAttribute('allowfullscreen', '');
+        
+        card.insertBefore(iframe, card.firstChild);
+    }, 600);
+}
+
+function stopPreview(card) {
+    clearTimeout(previewTimer);
+    if (!card) return;
+    
+    card.classList.remove('previewing');
+    const iframe = card.querySelector('.mv-preview-iframe');
+    if (iframe) iframe.remove();
+    
+    if (activePreviewCard === card) activePreviewCard = null;
 }
 
 function getDisplayMode() { return siteInfo.displayMode || 'all'; }
