@@ -409,25 +409,28 @@ function fillDesignForm() {
 
 // ── LOGO & FAVICON (STORAGE) ────────────────────────────
 
+// VARIABEL GLOBAL UNTUK MENGUNCI FILE ASLI 
+let pendingLogoFile = null;
+let pendingFaviconFile = null;
+
 async function uploadFileToSupabase(file, folderName) {
     if (!file) return null;
     
-    // BACA EKSTENSI DARI TIPE FILE ASLI (Paling Akurat)
+    // Tentukan ekstensi secara ketat (diambil langsung dari sistem file MIME type)
     let fileExt = 'png'; 
-    if (file.type && file.type.includes('/')) {
-        fileExt = file.type.split('/'); // contoh: 'image/gif' akan menjadi 'gif'
-    } else if (file.name && file.name.includes('.')) {
-        fileExt = file.name.split('.').pop().toLowerCase();
+    if (file.type) {
+        if (file.type.includes('gif')) fileExt = 'gif';
+        else if (file.type.includes('jpeg') || file.type.includes('jpg')) fileExt = 'jpg';
+        else if (file.type.includes('svg')) fileExt = 'svg';
+        else if (file.type.includes('webp')) fileExt = 'webp';
+    } else if (file.name) {
+        const parts = file.name.split('.');
+        if (parts.length > 1) fileExt = parts.pop().toLowerCase();
     }
 
-    // Rapikan sedikit jika SVG atau JPEG
-    if (fileExt === 'svg+xml') fileExt = 'svg';
-    if (fileExt === 'jpeg') fileExt = 'jpg';
+    // Nama file yang pasti unik dan tidak pakai nama asli untuk menghindari simbol rusak
+    const fileName = `${folderName}/${Date.now()}-file.${fileExt}`;
 
-    // Bikin nama unik
-    const fileName = `${folderName}/${Date.now()}-logo.${fileExt}`;
-
-    // Upload dengan contentType yang sesuai agar browser mengenali format aslinya
     const { data, error } = await sb.storage
         .from('portfolio-assets')
         .upload(fileName, file, { 
@@ -435,10 +438,7 @@ async function uploadFileToSupabase(file, folderName) {
             contentType: file.type || `image/${fileExt}` 
         });
 
-    if (error) {
-        console.error('Upload Error Details:', error);
-        throw error;
-    }
+    if (error) throw error;
 
     const { data: publicUrlData } = sb.storage
         .from('portfolio-assets')
@@ -450,6 +450,9 @@ async function uploadFileToSupabase(file, folderName) {
 function handleLogoUpload(input) {
     const file = input.files;
     if (!file) return;
+    
+    pendingLogoFile = file; // Mengunci file asli ke memori!
+
     const reader = new FileReader();
     reader.onload = (e) => {
         const prev = el('logo-preview');
@@ -463,16 +466,17 @@ function handleLogoUpload(input) {
 function handleFaviconUpload(input) {
     const file = input.files;
     if (!file) return;
+    
+    pendingFaviconFile = file; // Mengunci file asli ke memori!
+    
     toast('Favicon selected — click Save Logo & Favicon', '');
 }
 
 async function saveLogoFavicon() {
     renewAdminSession();
     
-    const logoFile = el('logo-upload').files;
-    const favFile = el('favicon-upload').files;
-
-    if (!logoFile && !favFile) {
+    // Menggunakan variabel global yang terkunci, bukan membaca ulang input box
+    if (!pendingLogoFile && !pendingFaviconFile) {
         toast('Silakan pilih gambar (Klik Choose File) terlebih dahulu', 'error');
         return;
     }
@@ -482,13 +486,13 @@ async function saveLogoFavicon() {
     btn.disabled = true;
 
     try {
-        if (logoFile) {
-            const logoUrl = await uploadFileToSupabase(logoFile, 'logos');
+        if (pendingLogoFile) {
+            const logoUrl = await uploadFileToSupabase(pendingLogoFile, 'logos');
             if (logoUrl) siteInfo.logoData = logoUrl;
         }
         
-        if (favFile) {
-            const favUrl = await uploadFileToSupabase(favFile, 'favicons');
+        if (pendingFaviconFile) {
+            const favUrl = await uploadFileToSupabase(pendingFaviconFile, 'favicons');
             if (favUrl) siteInfo.faviconData = favUrl;
         }
 
@@ -497,8 +501,11 @@ async function saveLogoFavicon() {
 
         applyLogoFavicon();
         
+        // Membersihkan input dan variabel agar siap upload berikutnya
         el('logo-upload').value = '';
         el('favicon-upload').value = '';
+        pendingLogoFile = null;
+        pendingFaviconFile = null;
         
         toast('Logo & Favicon uploaded and saved! ✓', 'success');
     } catch (err) {
