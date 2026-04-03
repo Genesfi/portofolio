@@ -71,7 +71,7 @@ function hideLoading() { const s = el('loading-screen'); if (!s) return; s.class
 async function loadCards() { const { data, error } = await sb.from('mv_works').select('*').order('sort_order').order('created_at'); if (error) { console.error(error); return; } cards = data || []; renderGrid(true); renderFilters(); updateStats(); buildShowcase(); if (el('tab-list')?.classList.contains('active')) renderExistingList(); }
 async function loadSiteInfo() { const { data } = await sb.from('mv_site').select('data').eq('id', 1).single(); if (data?.data) { siteInfo = data.data; applySiteInfo(); updateStats(); } }
 
-// ── UTILS (TAMENG ANTI-ERROR DITAMBAHKAN DI SINI) ──
+// ── UTILS ──
 function el(id) { return document.getElementById(id); }
 function setText(id, v) { if (v && el(id)) el(id).textContent = v; }
 function esc(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
@@ -412,18 +412,28 @@ function fillDesignForm() {
 async function uploadFileToSupabase(file, folderName) {
     if (!file) return null;
     
-    // TAMENG ANTI-ERROR: Amankan nama file jika bermasalah
+    // TAMENG ANTI-ERROR: Amankan nama file dan pastikan tipe gambarnya (MIME Type) terdeteksi
+    let safeName = 'image';
     let fileExt = 'png';
     if (file.name && typeof file.name === 'string') {
         const parts = file.name.split('.');
-        if (parts.length > 1) fileExt = parts.pop();
+        if (parts.length > 1) {
+            fileExt = parts.pop().toLowerCase();
+            safeName = parts.join('-').replace(/[^a-zA-Z0-9\-_]/g, '');
+        } else {
+            safeName = file.name.replace(/[^a-zA-Z0-9\-_]/g, '');
+        }
     }
 
-    const fileName = `${folderName}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+    const fileName = `${folderName}/${Date.now()}-${safeName}.${fileExt}`;
 
+    // Upload dengan menetapkan contentType (Ini yang bikin browser mau menampilkan gambarnya!)
     const { data, error } = await sb.storage
         .from('portfolio-assets')
-        .upload(fileName, file, { upsert: true });
+        .upload(fileName, file, { 
+            upsert: true,
+            contentType: file.type || 'image/' + fileExt 
+        });
 
     if (error) {
         console.error('Upload Error Details:', error);
@@ -534,7 +544,6 @@ function applySiteInfo() {
     
     setText('hero-label', s.label); setText('hero-sub', s.hsub); setText('about-p1', s.about1); setText('about-p2', s.about2); setText('footer-copy', s.copy);
     
-    // TAMENG ANTI-ERROR untuk split judul hero
     if (s.htitle && typeof s.htitle === 'string') { const lines = s.htitle.split('|'); el('hero-title').innerHTML = lines.map((l, i) => i === 0 ? l : i === 1 ? `<span class="accent">${l}</span>` : `<span class="stroke">${l}</span>`).join('<br>'); }
     
     const socials = [
