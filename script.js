@@ -74,7 +74,6 @@ async function loadSiteInfo() {
     const { data } = await sb.from('mv_site').select('data').eq('id', 1).single();
     if (data?.data) {
         siteInfo = data.data;
-        // Preload logo sebelum apply supaya tidak telat
         if (siteInfo.logoData) {
             await new Promise(resolve => {
                 const img = new Image();
@@ -145,58 +144,6 @@ ${thumb ? `<img class="mv-thumb" src="${thumb}" alt="${esc(c.title)}" loading="l
 <div class="mv-play"><svg width="18" height="18" viewBox="0 0 24 24" fill="#000"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
 <div class="mv-overlay"><div>${tags}<div class="mv-title">${esc(c.title)}</div><div class="mv-artist">${esc(c.artist || '')}</div></div></div>
 </div>`;
-}
-
-// ── HOVER PREVIEW ──
-let previewTimer = null;
-let activePreviewCard = null;
-const iframeCache = new Map(); // cache iframe yg sudah di-load
-
-function startPreview(card, ytId) {
-    if (!ytId || document.body.classList.contains('edit-mode')) return;
-
-    // Preload iframe di background SEGERA saat mouseenter (tanpa delay)
-    // supaya player sudah warming up sebelum delay 600ms selesai
-    if (!iframeCache.has(ytId)) {
-        const preloadIframe = document.createElement('iframe');
-        preloadIframe.src = `https://www.youtube.com/embed/${ytId}?autoplay=0&mute=1&controls=0&rel=0&modestbranding=1`;
-        preloadIframe.allow = 'autoplay';
-        preloadIframe.style.cssText = 'position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;top:-9999px;left:-9999px;';
-        document.body.appendChild(preloadIframe);
-        iframeCache.set(ytId, preloadIframe);
-    }
-
-    previewTimer = setTimeout(() => {
-        stopPreview(activePreviewCard);
-        activePreviewCard = card;
-        card.classList.add('previewing');
-
-        // Ambil dari cache, update src dengan autoplay + start time
-        const cachedIframe = iframeCache.get(ytId);
-        if (cachedIframe) {
-            cachedIframe.style.cssText = ''; // reset inline style
-            cachedIframe.className = 'mv-preview-iframe';
-            cachedIframe.src = `https://www.youtube.com/embed/${ytId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${ytId}&rel=0&modestbranding=1&iv_load_policy=3&start=60`;
-            card.insertBefore(cachedIframe, card.firstChild);
-        }
-    }, 600);
-}
-
-function stopPreview(card) {
-    clearTimeout(previewTimer);
-    if (!card) return;
-
-    card.classList.remove('previewing');
-    const iframe = card.querySelector('.mv-preview-iframe');
-    if (iframe) {
-        // Kembalikan ke hidden preload state, jangan di-remove
-        // supaya tetap cached untuk hover berikutnya
-        iframe.style.cssText = 'position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;top:-9999px;left:-9999px;';
-        iframe.src = iframe.src; // reset playback
-        document.body.appendChild(iframe); // pindah balik ke body
-    }
-
-    if (activePreviewCard === card) activePreviewCard = null;
 }
 
 function getDisplayMode() { return siteInfo.displayMode || 'all'; }
@@ -399,6 +346,69 @@ async function saveGridOrder() {
     renderGrid(true);
 }
 
+// ── HOVER PREVIEW ──
+let previewTimer = null;
+let activePreviewCard = null;
+const iframeCache = new Map();
+
+function startPreview(card, ytId) {
+    if (!ytId || document.body.classList.contains('edit-mode')) return;
+
+    // Mulai preload iframe di background SEGERA (tanpa delay)
+    // supaya YouTube player sudah warming up sebelum tampil
+    if (!iframeCache.has(ytId)) {
+        const preloadIframe = document.createElement('iframe');
+        preloadIframe.src = `https://www.youtube.com/embed/${ytId}?autoplay=0&mute=1&controls=0&rel=0&modestbranding=1&iv_load_policy=3`;
+        preloadIframe.allow = 'autoplay';
+        preloadIframe.style.cssText = 'position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;top:-9999px;left:-9999px;border:none;';
+        document.body.appendChild(preloadIframe);
+        iframeCache.set(ytId, preloadIframe);
+    }
+
+    // Delay 700ms sebelum tampilkan — hanya tampil kalau user benar-benar hover
+    previewTimer = setTimeout(() => {
+        stopPreview(activePreviewCard);
+        activePreviewCard = card;
+        card.classList.add('previewing');
+
+        const cachedIframe = iframeCache.get(ytId);
+        if (cachedIframe) {
+            // Reset style dari hidden preload
+            cachedIframe.removeAttribute('style');
+            cachedIframe.className = 'mv-preview-iframe';
+            // Update src dengan autoplay + start di tengah video (detik 60)
+            cachedIframe.src = `https://www.youtube.com/embed/${ytId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${ytId}&rel=0&modestbranding=1&iv_load_policy=3&start=60`;
+            card.insertBefore(cachedIframe, card.firstChild);
+
+            // Tandai preview-ready setelah iframe load
+            cachedIframe.onload = () => {
+                card.classList.add('preview-ready');
+            };
+        }
+    }, 700);
+}
+
+function stopPreview(card) {
+    clearTimeout(previewTimer);
+    if (!card) return;
+
+    card.classList.remove('previewing', 'preview-ready');
+    const iframe = card.querySelector('.mv-preview-iframe');
+    if (iframe) {
+        const ytId = card.dataset.ytid;
+        // Kembalikan ke hidden preload state (jangan di-remove, biar tetap cached)
+        iframe.style.cssText = 'position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;top:-9999px;left:-9999px;border:none;';
+        iframe.className = '';
+        // Stop video dengan reset src ke versi non-autoplay
+        if (ytId) {
+            iframe.src = `https://www.youtube.com/embed/${ytId}?autoplay=0&mute=1&controls=0&rel=0&modestbranding=1&iv_load_policy=3`;
+        }
+        document.body.appendChild(iframe);
+    }
+
+    if (activePreviewCard === card) activePreviewCard = null;
+}
+
 // ── COLORS ──
 const COLOR_PRESETS = {
     lime: { text: '#f0f0f0', accent: '#c8ff00', accent2: '#ff3cac', bg: '#080810', surface: '#10101c' },
@@ -561,18 +571,15 @@ function applyLogoFavicon() {
     const loadingLogoText = document.getElementById('loading-logo-text');
 
     if (siteInfo.logoData) {
-        // Sembunyikan teks DULU supaya tidak flicker
         if (loadingLogoText) loadingLogoText.style.display = 'none';
         if (loadingLogoImg) {
             loadingLogoImg.style.display = 'block';
             loadingLogoImg.src = siteInfo.logoData;
         }
-        // Cache URL ke localStorage supaya kunjungan berikutnya logo muncul instan
         try { localStorage.setItem('mv_logo_url', siteInfo.logoData); } catch (e) { }
     } else {
         if (loadingLogoImg) loadingLogoImg.style.display = 'none';
         if (loadingLogoText) loadingLogoText.style.display = 'block';
-        // Bersihkan cache kalau logo dihapus
         try { localStorage.removeItem('mv_logo_url'); } catch (e) { }
     }
 
