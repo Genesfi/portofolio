@@ -1352,7 +1352,7 @@ footer {
 
 .loading-logo {
     width: clamp(200px, 40vw, 320px);
-    animation: logoPulse 1.8s ease-in-out infinite;
+    /* animation: logoPulse 1.8s ease-in-out infinite; */
 }
 
 @keyframes logoPulse {
