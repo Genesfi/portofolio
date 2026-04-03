@@ -437,77 +437,46 @@ function fillDesignForm() {
 }
 
 // ── LOGO & FAVICON ────────────────────────────
+let pendingLogo = null, pendingFavicon = null;
+
 function handleLogoUpload(input) {
-    const file = input.files; 
-    if (!file || !(file instanceof Blob)) return;
+    const file = input.files; if (!file) return;
     const reader = new FileReader();
     reader.onload = (e) => {
+        pendingLogo = e.target.result;
         const prev = el('logo-preview');
         const img = el('logo-preview-img');
-        if (prev && img) { img.src = e.target.result; prev.style.display = 'block'; }
+        if (prev && img) { img.src = pendingLogo; prev.style.display = 'block'; }
         toast('Logo ready — click Save Logo & Favicon', '');
     };
     reader.readAsDataURL(file);
 }
 
 function handleFaviconUpload(input) {
-    const file = input.files; 
-    if (!file || !(file instanceof Blob)) return;
-    toast('Favicon ready — click Save Logo & Favicon', '');
-}
-
-// Fungsi super aman untuk mengubah gambar jadi Base64 tanpa error "Blob"
-const getBase64 = (file) => new Promise((resolve, reject) => {
-    if (!file || !(file instanceof Blob)) {
-        resolve(null);
-        return;
-    }
+    const file = input.files; if (!file) return;
     const reader = new FileReader();
+    reader.onload = (e) => {
+        pendingFavicon = e.target.result;
+        toast('Favicon ready — click Save Logo & Favicon', '');
+    };
     reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = error => reject(error);
-});
+}
 
 async function saveLogoFavicon() {
     renewAdminSession();
+    // PESAN KESALAHAN YANG DIPERBAIKI (MODIFIKASI KECIL DARI ASLINYA)
+    if (!pendingLogo && !pendingFavicon) { toast('Silakan klik "Choose File" untuk memilih gambar', 'error'); return; }
     
-    // Tarik file langsung dari input box saat tombol diklik
-    const logoFile = el('logo-upload').files;
-    const favFile = el('favicon-upload').files;
-
-    if (!logoFile && !favFile) { 
-        toast('Silakan pilih gambar terlebih dahulu', 'error'); 
-        return; 
-    }
-
     const btn = el('logo-save-btn');
     btn.textContent = 'Saving...'; btn.disabled = true;
-
-    try {
-        if (logoFile) {
-            const b64 = await getBase64(logoFile);
-            if (b64) siteInfo.logoData = b64;
-        }
-        if (favFile) {
-            const b64 = await getBase64(favFile);
-            if (b64) siteInfo.faviconData = b64;
-        }
-
-        const { error } = await sb.from('mv_site').upsert({ id: 1, data: siteInfo });
-        if (error) throw error;
-        
-        applyLogoFavicon();
-        
-        // Bersihkan input supaya tidak ada file "hantu" saat refresh
-        el('logo-upload').value = ''; 
-        el('favicon-upload').value = '';
-        
-        toast('Logo & Favicon saved! ✓', 'success');
-    } catch (err) {
-        toast('Error: ' + err.message, 'error');
-    } finally {
-        btn.textContent = '💾 Save Logo & Favicon'; btn.disabled = false;
-    }
+    if (pendingLogo) siteInfo.logoData = pendingLogo;
+    if (pendingFavicon) siteInfo.faviconData = pendingFavicon;
+    const { error } = await sb.from('mv_site').upsert({ id: 1, data: siteInfo });
+    btn.textContent = '💾 Save Logo & Favicon'; btn.disabled = false;
+    if (error) { toast('Error: ' + error.message, 'error'); return; }
+    applyLogoFavicon();
+    pendingLogo = null; pendingFavicon = null;
+    toast('Logo & Favicon saved! ✓', 'success');
 }
 
 function applyLogoFavicon() {
@@ -534,6 +503,11 @@ function applyLogoFavicon() {
 
 // ── INIT ──
 async function init() {
+    // MODIFIKASI: Bersihkan input file "hantu" visual pada muat ulang halaman
+    const logoUp = el('logo-upload'), favUp = el('favicon-upload');
+    if (logoUp) logoUp.value = '';
+    if (favUp) favUp.value = '';
+
     document.body.classList.add('loading');
     setLoadProgress(15, 'Connecting...');
     sb = window.supabase.createClient(SB_URL, SB_KEY);
