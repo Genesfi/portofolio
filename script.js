@@ -69,7 +69,23 @@ function hideLoading() { const s = el('loading-screen'); if (!s) return; s.class
 
 // ── LOAD DATA ──
 async function loadCards() { const { data, error } = await sb.from('mv_works').select('*').order('sort_order').order('created_at'); if (error) { console.error(error); return; } cards = data || []; renderGrid(true); renderFilters(); updateStats(); buildShowcase(); if (el('tab-list')?.classList.contains('active')) renderExistingList(); }
-async function loadSiteInfo() { const { data } = await sb.from('mv_site').select('data').eq('id', 1).single(); if (data?.data) { siteInfo = data.data; applySiteInfo(); updateStats(); } }
+async function loadSiteInfo() {
+    const { data } = await sb.from('mv_site').select('data').eq('id', 1).single();
+    if (data?.data) {
+        siteInfo = data.data;
+        // Preload logo dulu sebelum apply, biar ga telat
+        if (siteInfo.logoData) {
+            await new Promise(resolve => {
+                const img = new Image();
+                img.onload = resolve;
+                img.onerror = resolve; // tetap lanjut walau gagal
+                img.src = siteInfo.logoData;
+            });
+        }
+        applySiteInfo();
+        updateStats();
+    }
+}
 
 // ── UTILS ──
 function el(id) { return document.getElementById(id); }
@@ -527,11 +543,11 @@ function applyLogoFavicon() {
     const loadingLogoText = document.getElementById('loading-logo-text');
     
     if (siteInfo.logoData) {
+        if (loadingLogoText) loadingLogoText.style.display = 'none'; // sembunyikan teks DULU
         if (loadingLogoImg) {
-            loadingLogoImg.src = siteInfo.logoData;
             loadingLogoImg.style.display = 'block';
+            loadingLogoImg.src = siteInfo.logoData;
         }
-        if (loadingLogoText) loadingLogoText.style.display = 'none';
     } else {
         if (loadingLogoImg) loadingLogoImg.style.display = 'none';
         if (loadingLogoText) loadingLogoText.style.display = 'block';
@@ -542,6 +558,20 @@ function applyLogoFavicon() {
         if (!link) { link = document.createElement('link'); link.rel = 'icon'; document.head.appendChild(link); }
         link.href = siteInfo.faviconData;
     }
+}
+
+async function deleteLogo() {
+    if (!confirm('Hapus logo yang sedang dipakai?')) return;
+    renewAdminSession();
+    siteInfo.logoData = null;
+    const { error } = await sb.from('mv_site').upsert({ id: 1, data: siteInfo });
+    if (error) { toast('Error: ' + error.message, 'error'); return; }
+    applyLogoFavicon();
+    const prev = el('logo-preview');
+    const img = el('logo-preview-img');
+    if (prev) prev.style.display = 'none';
+    if (img) img.src = '';
+    toast('Logo dihapus! ✓', 'success');
 }
 
 // ── SITE INFO ──
