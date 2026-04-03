@@ -150,37 +150,52 @@ ${thumb ? `<img class="mv-thumb" src="${thumb}" alt="${esc(c.title)}" loading="l
 // ── HOVER PREVIEW ──
 let previewTimer = null;
 let activePreviewCard = null;
+const iframeCache = new Map(); // cache iframe yg sudah di-load
 
 function startPreview(card, ytId) {
     if (!ytId || document.body.classList.contains('edit-mode')) return;
-    
-    // Delay 600ms biar gk langsung load pas mouse lewat
+
+    // Preload iframe di background SEGERA saat mouseenter (tanpa delay)
+    // supaya player sudah warming up sebelum delay 600ms selesai
+    if (!iframeCache.has(ytId)) {
+        const preloadIframe = document.createElement('iframe');
+        preloadIframe.src = `https://www.youtube.com/embed/${ytId}?autoplay=0&mute=1&controls=0&rel=0&modestbranding=1`;
+        preloadIframe.allow = 'autoplay';
+        preloadIframe.style.cssText = 'position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;top:-9999px;left:-9999px;';
+        document.body.appendChild(preloadIframe);
+        iframeCache.set(ytId, preloadIframe);
+    }
+
     previewTimer = setTimeout(() => {
-        // Hapus preview card sebelumnya kalau ada
         stopPreview(activePreviewCard);
-        
         activePreviewCard = card;
         card.classList.add('previewing');
-        
-        // Buat iframe preview
-        const iframe = document.createElement('iframe');
-        iframe.className = 'mv-preview-iframe';
-        iframe.src = `https://www.youtube.com/embed/${ytId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${ytId}&rel=0&modestbranding=1&iv_load_policy=3&start=60`;
-        iframe.allow = 'autoplay';
-        iframe.setAttribute('allowfullscreen', '');
-        
-        card.insertBefore(iframe, card.firstChild);
+
+        // Ambil dari cache, update src dengan autoplay + start time
+        const cachedIframe = iframeCache.get(ytId);
+        if (cachedIframe) {
+            cachedIframe.style.cssText = ''; // reset inline style
+            cachedIframe.className = 'mv-preview-iframe';
+            cachedIframe.src = `https://www.youtube.com/embed/${ytId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${ytId}&rel=0&modestbranding=1&iv_load_policy=3&start=60`;
+            card.insertBefore(cachedIframe, card.firstChild);
+        }
     }, 600);
 }
 
 function stopPreview(card) {
     clearTimeout(previewTimer);
     if (!card) return;
-    
+
     card.classList.remove('previewing');
     const iframe = card.querySelector('.mv-preview-iframe');
-    if (iframe) iframe.remove();
-    
+    if (iframe) {
+        // Kembalikan ke hidden preload state, jangan di-remove
+        // supaya tetap cached untuk hover berikutnya
+        iframe.style.cssText = 'position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;top:-9999px;left:-9999px;';
+        iframe.src = iframe.src; // reset playback
+        document.body.appendChild(iframe); // pindah balik ke body
+    }
+
     if (activePreviewCard === card) activePreviewCard = null;
 }
 
