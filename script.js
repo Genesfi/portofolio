@@ -165,7 +165,7 @@ function startPreview(card, ytId) {
         // Buat iframe preview
         const iframe = document.createElement('iframe');
         iframe.className = 'mv-preview-iframe';
-        iframe.src = `https://www.youtube.com/embed/${ytId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${ytId}&rel=0&modestbranding=1&iv_load_policy=3&start=5`;
+        iframe.src = `https://www.youtube.com/embed/${ytId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${ytId}&rel=0&modestbranding=1&iv_load_policy=3&start=60`;
         iframe.allow = 'autoplay';
         iframe.setAttribute('allowfullscreen', '');
         
