@@ -23,13 +23,13 @@ document.addEventListener('keydown', e => {
 });
 
 // ── TABS ──
-function switchTab(name, btn) { 
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); 
-    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active')); 
-    btn.classList.add('active'); el('tab-' + name).classList.add('active'); 
-    if (name === 'list') renderExistingList(); 
-    if (name === 'site') fillSiteForm(); 
-    if (name === 'design') fillDesignForm(); 
+function switchTab(name, btn) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active'); el('tab-' + name).classList.add('active');
+    if (name === 'list') renderExistingList();
+    if (name === 'site') fillSiteForm();
+    if (name === 'design') fillDesignForm();
 }
 
 // ── PASSWORD / AUTH ──
@@ -69,16 +69,17 @@ function hideLoading() { const s = el('loading-screen'); if (!s) return; s.class
 
 // ── LOAD DATA ──
 async function loadCards() { const { data, error } = await sb.from('mv_works').select('*').order('sort_order').order('created_at'); if (error) { console.error(error); return; } cards = data || []; renderGrid(true); renderFilters(); updateStats(); buildShowcase(); if (el('tab-list')?.classList.contains('active')) renderExistingList(); }
+
 async function loadSiteInfo() {
     const { data } = await sb.from('mv_site').select('data').eq('id', 1).single();
     if (data?.data) {
         siteInfo = data.data;
-        // Preload logo dulu sebelum apply, biar ga telat
+        // Preload logo sebelum apply supaya tidak telat
         if (siteInfo.logoData) {
             await new Promise(resolve => {
                 const img = new Image();
                 img.onload = resolve;
-                img.onerror = resolve; // tetap lanjut walau gagal
+                img.onerror = resolve;
                 img.src = siteInfo.logoData;
             });
         }
@@ -340,7 +341,7 @@ async function saveGridOrder() {
     renderGrid(true);
 }
 
-// ── COLORS ───────────────────────────────────
+// ── COLORS ──
 const COLOR_PRESETS = {
     lime: { text: '#f0f0f0', accent: '#c8ff00', accent2: '#ff3cac', bg: '#080810', surface: '#10101c' },
     cyan: { text: '#f0f0f0', accent: '#00ffee', accent2: '#ff3cac', bg: '#060c12', surface: '#0c1a22' },
@@ -391,8 +392,8 @@ async function saveColors() {
         const { error } = await sb.from('mv_site').upsert({ id: 1, data: siteInfo });
         if (error) throw error;
         toast('Colors saved! ✓', 'success');
-    } catch(err) {
-        toast('Error: ' + err.message, 'error'); 
+    } catch (err) {
+        toast('Error: ' + err.message, 'error');
     } finally {
         btn.textContent = '💾 Save Colors'; btn.disabled = false;
     }
@@ -423,13 +424,10 @@ function fillDesignForm() {
     }
 }
 
-// ── LOGO & FAVICON ────────────────────────────
-
-// Pending file objects (bukan base64, langsung File object)
+// ── LOGO & FAVICON ──
 let pendingLogoFile = null;
 let pendingFaviconFile = null;
 
-// Ambil MIME type yang benar dari file, support GIF, PNG, JPG, WEBP, SVG, ICO
 function getMimeType(file) {
     if (file.type && file.type !== '') return file.type;
     const ext = file.name.split('.').pop().toLowerCase();
@@ -443,114 +441,81 @@ function getFileExt(file) {
 
 async function uploadFileToSupabase(file, folderName) {
     if (!file) return null;
-
     const mimeType = getMimeType(file);
     const ext = getFileExt(file);
     const fileName = `${folderName}/${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`;
-
-    const { data, error } = await sb.storage
-        .from('portfolio-assets')
-        .upload(fileName, file, {
-            upsert: true,
-            contentType: mimeType
-        });
-
-    if (error) {
-        console.error('Upload Error:', error);
-        throw error;
-    }
-
-    const { data: publicUrlData } = sb.storage
-        .from('portfolio-assets')
-        .getPublicUrl(fileName);
-
+    const { data, error } = await sb.storage.from('portfolio-assets').upload(fileName, file, { upsert: true, contentType: mimeType });
+    if (error) { console.error('Upload Error:', error); throw error; }
+    const { data: publicUrlData } = sb.storage.from('portfolio-assets').getPublicUrl(fileName);
     return publicUrlData.publicUrl;
 }
 
 function handleLogoUpload(input) {
-    // FIX: ambil file[0], bukan files langsung
     const file = input.files[0];
     if (!file) return;
-
     pendingLogoFile = file;
-
-    // Preview langsung dari File object (support GIF animasi)
     const objectUrl = URL.createObjectURL(file);
     const prev = el('logo-preview');
     const img = el('logo-preview-img');
-    if (prev && img) {
-        img.src = objectUrl;
-        prev.style.display = 'block';
-    }
+    if (prev && img) { img.src = objectUrl; prev.style.display = 'block'; }
     toast('Logo selected — click Save Logo & Favicon', '');
 }
 
 function handleFaviconUpload(input) {
-    // FIX: ambil file[0], bukan files langsung
     const file = input.files[0];
     if (!file) return;
-
     pendingFaviconFile = file;
     toast('Favicon selected — click Save Logo & Favicon', '');
 }
 
 async function saveLogoFavicon() {
     renewAdminSession();
-
-    if (!pendingLogoFile && !pendingFaviconFile) {
-        toast('Silakan pilih gambar (Klik Choose File) terlebih dahulu', 'error');
-        return;
-    }
-
+    if (!pendingLogoFile && !pendingFaviconFile) { toast('Silakan pilih gambar (Klik Choose File) terlebih dahulu', 'error'); return; }
     const btn = el('logo-save-btn');
-    btn.textContent = 'Uploading & Saving...';
-    btn.disabled = true;
-
+    btn.textContent = 'Uploading & Saving...'; btn.disabled = true;
     try {
         if (pendingLogoFile) {
             const logoUrl = await uploadFileToSupabase(pendingLogoFile, 'logos');
             if (logoUrl) siteInfo.logoData = logoUrl;
         }
-
         if (pendingFaviconFile) {
             const favUrl = await uploadFileToSupabase(pendingFaviconFile, 'favicons');
             if (favUrl) siteInfo.faviconData = favUrl;
         }
-
         const { error } = await sb.from('mv_site').upsert({ id: 1, data: siteInfo });
         if (error) throw error;
-
         applyLogoFavicon();
-
-        // Bersihkan setelah sukses
         el('logo-upload').value = '';
         el('favicon-upload').value = '';
         pendingLogoFile = null;
         pendingFaviconFile = null;
-
         toast('Logo & Favicon uploaded and saved! ✓', 'success');
     } catch (err) {
         console.error(err);
         toast('Error: ' + err.message, 'error');
     } finally {
-        btn.textContent = '💾 Save Logo & Favicon';
-        btn.disabled = false;
+        btn.textContent = '💾 Save Logo & Favicon'; btn.disabled = false;
     }
 }
 
 function applyLogoFavicon() {
     const loadingLogoImg = document.getElementById('loading-logo-img');
     const loadingLogoText = document.getElementById('loading-logo-text');
-    
+
     if (siteInfo.logoData) {
-        if (loadingLogoText) loadingLogoText.style.display = 'none'; // sembunyikan teks DULU
+        // Sembunyikan teks DULU supaya tidak flicker
+        if (loadingLogoText) loadingLogoText.style.display = 'none';
         if (loadingLogoImg) {
             loadingLogoImg.style.display = 'block';
             loadingLogoImg.src = siteInfo.logoData;
         }
+        // Cache URL ke localStorage supaya kunjungan berikutnya logo muncul instan
+        try { localStorage.setItem('mv_logo_url', siteInfo.logoData); } catch (e) { }
     } else {
         if (loadingLogoImg) loadingLogoImg.style.display = 'none';
         if (loadingLogoText) loadingLogoText.style.display = 'block';
+        // Bersihkan cache kalau logo dihapus
+        try { localStorage.removeItem('mv_logo_url'); } catch (e) { }
     }
 
     if (siteInfo.faviconData) {
@@ -579,24 +544,24 @@ function applySiteInfo() {
     const s = siteInfo; if (!s || !Object.keys(s).length) return;
     if (s.colors) applyColors(s.colors);
     applyLogoFavicon();
-    
+
     const tabTitle = s.siteTitle || s.brand || 'MV Portfolio'; document.title = tabTitle; if (el('page-title')) el('page-title').textContent = tabTitle;
-    
+
     if (s.brand && typeof s.brand === 'string') { el('nav-brand').innerHTML = s.brand.replace('.', '<span>.</span>'); el('footer-brand').innerHTML = s.brand.replace('.', '<span>.</span>'); }
-    
+
     setText('hero-label', s.label); setText('hero-sub', s.hsub); setText('about-p1', s.about1); setText('about-p2', s.about2); setText('footer-copy', s.copy);
-    
+
     if (s.htitle && typeof s.htitle === 'string') { const lines = s.htitle.split('|'); el('hero-title').innerHTML = lines.map((l, i) => i === 0 ? l : i === 1 ? `<span class="accent">${l}</span>` : `<span class="stroke">${l}</span>`).join('<br>'); }
-    
+
     const socials = [
-        { key: 'yt', label: 'YouTube', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.7 15.5V8.5l6.3 3.5-6.3 3.5z"/></svg>', primary: true }, 
-        { key: 'tw', label: 'Twitter/X', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>', primary: false }, 
-        { key: 'discord', label: 'Discord', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057c.003.024.015.046.033.06a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>', primary: false }, 
-        { key: 'vgen', label: 'VGen', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>', primary: false }, 
-        { key: 'ig', label: 'Instagram', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>', primary: false }, 
+        { key: 'yt', label: 'YouTube', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.7 15.5V8.5l6.3 3.5-6.3 3.5z"/></svg>', primary: true },
+        { key: 'tw', label: 'Twitter/X', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>', primary: false },
+        { key: 'discord', label: 'Discord', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057c.003.024.015.046.033.06a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>', primary: false },
+        { key: 'vgen', label: 'VGen', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>', primary: false },
+        { key: 'ig', label: 'Instagram', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>', primary: false },
         { key: 'tiktok', label: 'TikTok', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.75a4.85 4.85 0 0 1-1.01-.06z"/></svg>', primary: false }
     ];
-    
+
     const aboutWrap = el('about-social-btns'), footerWrap = el('footer-social-links');
     if (aboutWrap) aboutWrap.innerHTML = socials.filter(s2 => s[s2.key]).map(s2 => `<a href="${s[s2.key]}" target="_blank" class="btn ${s2.primary ? 'btn-primary' : 'btn-ghost'}" style="padding:10px 20px;font-size:11px;display:inline-flex;align-items:center;gap:7px">${s2.icon} ${s2.label}</a>`).join('');
     if (footerWrap) footerWrap.innerHTML = socials.filter(s2 => s[s2.key]).map(s2 => `<a href="${s[s2.key]}" target="_blank">${s2.label}</a>`).join('');
@@ -609,19 +574,19 @@ function fillSiteForm() {
     const mode = s.displayMode || 'all', radio = el('dm-' + mode); if (radio) radio.checked = true;
 }
 
-function previewMode(mode) { 
-    siteInfo.displayMode = mode; 
-    renderGrid(true); 
+function previewMode(mode) {
+    siteInfo.displayMode = mode;
+    renderGrid(true);
 }
 
 async function saveSiteEdit() {
     const mode = document.querySelector('input[name="display-mode"]:checked');
-    siteInfo = { 
-        brand: el('s-brand').value, siteTitle: el('s-siteTitle').value, label: el('s-label').value, 
-        htitle: el('s-htitle').value, hsub: el('s-hsub').value, about1: el('s-about1').value, 
-        about2: el('s-about2').value, yt: el('s-yt').value, tw: el('s-tw').value, 
-        discord: el('s-discord').value, vgen: el('s-vgen').value, ig: el('s-ig').value, 
-        tiktok: el('s-tiktok').value, copy: el('s-copy').value, year: el('s-year').value, 
+    siteInfo = {
+        brand: el('s-brand').value, siteTitle: el('s-siteTitle').value, label: el('s-label').value,
+        htitle: el('s-htitle').value, hsub: el('s-hsub').value, about1: el('s-about1').value,
+        about2: el('s-about2').value, yt: el('s-yt').value, tw: el('s-tw').value,
+        discord: el('s-discord').value, vgen: el('s-vgen').value, ig: el('s-ig').value,
+        tiktok: el('s-tiktok').value, copy: el('s-copy').value, year: el('s-year').value,
         displayMode: mode ? mode.value : 'all', perPage: parseInt(el('s-perpage')?.value) || 12,
         colors: siteInfo.colors, logoData: siteInfo.logoData, faviconData: siteInfo.faviconData
     };
@@ -631,16 +596,16 @@ async function saveSiteEdit() {
         const { error } = await sb.from('mv_site').upsert({ id: 1, data: siteInfo });
         if (error) throw error;
         applySiteInfo(); updateStats(); renderGrid(true); toast('Site info saved! ✓', 'success');
-    } catch(err) {
+    } catch (err) {
         toast('Error: ' + err.message, 'error');
     } finally {
         btn.textContent = 'Simpan Info Site →'; btn.disabled = false;
     }
 }
 
-function closeSiteEdit() { 
+function closeSiteEdit() {
     const panel = el('site-edit-panel');
-    if (panel) panel.classList.remove('open'); 
+    if (panel) panel.classList.remove('open');
 }
 
 // ── INIT ──
@@ -661,12 +626,12 @@ async function init() {
         .on('postgres_changes', { event: '*', schema: 'public', table: 'mv_works' }, loadCards)
         .on('postgres_changes', { event: '*', schema: 'public', table: 'mv_site' }, loadSiteInfo)
         .subscribe();
-    setTimeout(() => { 
-        setLoadProgress(100, 'Ready!'); 
-        setTimeout(() => { 
-            hideLoading(); 
-            if (isAdminActive()) el('admin-panel').classList.add('open'); 
-        }, 300); 
+    setTimeout(() => {
+        setLoadProgress(100, 'Ready!');
+        setTimeout(() => {
+            hideLoading();
+            if (isAdminActive()) el('admin-panel').classList.add('open');
+        }, 300);
     }, 200);
 }
 
