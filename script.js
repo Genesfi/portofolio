@@ -68,7 +68,16 @@ function setLoadProgress(pct, text) { const bar = el('loading-bar'), txt = el('l
 function hideLoading() { const s = el('loading-screen'); if (!s) return; s.classList.add('hidden'); document.body.classList.remove('loading'); }
 
 // ── LOAD DATA ──
-async function loadCards() { const { data, error } = await sb.from('mv_works').select('*').order('sort_order').order('created_at'); if (error) { console.error(error); return; } cards = data || []; renderGrid(true); renderFilters(); updateStats(); buildShowcase(); if (el('tab-list')?.classList.contains('active')) renderExistingList(); }
+async function loadCards() {
+    const { data, error } = await sb.from('mv_works').select('*').order('sort_order').order('created_at');
+    if (error) { console.error(error); return; }
+    cards = data || [];
+    renderGrid(true);
+    renderFilters();
+    updateStats();
+    buildShowcase();
+    if (el('tab-list')?.classList.contains('active')) renderExistingList();
+}
 
 async function loadSiteInfo() {
     const { data } = await sb.from('mv_site').select('data').eq('id', 1).single();
@@ -133,12 +142,18 @@ function cardHTML(c) {
     const fallback = c.ytId ? ytThumbFallback(c.ytId) : '';
     const tags = (c.tags || []).map(t => `<span class="mv-tag">${esc(t)}</span>`).join('');
     const hasYt = !!c.ytId;
+    const isFeatured = !!c.featured;
 
-    return `<div class="mv-card${c.featured ? ' featured' : ''}" 
+    // Featured: tidak pakai hover handler, auto-play diurus oleh autoPlayFeatured()
+    const hoverAttrs = (hasYt && !isFeatured)
+        ? `onmouseenter="startPreview(this,'${c.ytId}')" onmouseleave="stopPreview(this)"`
+        : '';
+
+    return `<div class="mv-card${isFeatured ? ' featured' : ''}" 
         data-id="${c.id}" 
         data-ytid="${c.ytId || ''}"
         onclick="openModal('${c.id}')"
-        ${hasYt ? `onmouseenter="startPreview(this,'${c.ytId}')" onmouseleave="stopPreview(this)"` : ''}>
+        ${hoverAttrs}>
 ${thumb ? `<img class="mv-thumb" src="${thumb}" alt="${esc(c.title)}" loading="lazy" onerror="this.src='${fallback}';this.onerror=null;">` : ''}
 <div class="mv-placeholder" style="${thumb ? 'display:none' : ''}"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
 <div class="mv-play"><svg width="18" height="18" viewBox="0 0 24 24" fill="#000"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
@@ -167,7 +182,12 @@ function renderGrid(resetPage) {
         const slice = list.slice(0, loadedCount);
         grid.innerHTML = slice.map(cardHTML).join('');
         if (loadedCount < list.length) { const rem = list.length - loadedCount; const btn = document.createElement('button'); btn.id = 'mv-loadmore-btn'; btn.textContent = `Load More (${rem} more)`; btn.style.cssText = 'grid-column:1/-1;margin:24px auto 0;display:block;padding:14px 40px;background:transparent;border:1px solid rgba(200,255,0,.3);color:var(--accent);font-family:"Space Mono",monospace;font-size:12px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:all .2s'; btn.onmouseenter = () => btn.style.background = 'rgba(200,255,0,.08)'; btn.onmouseleave = () => btn.style.background = 'transparent'; btn.onclick = () => { loadedCount += perPage; renderGrid(false); }; grid.appendChild(btn); }
-    } else { grid.innerHTML = list.map(cardHTML).join(''); }
+    } else {
+        grid.innerHTML = list.map(cardHTML).join('');
+    }
+
+    // Auto-play semua featured card setelah DOM selesai render
+    setTimeout(() => autoPlayFeatured(), 800);
 }
 
 function renderFilters() {
@@ -176,6 +196,27 @@ function renderFilters() {
 }
 
 function filterCards(tag, btn) { activeFilter = tag; document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); renderGrid(true); }
+
+// ── AUTO PLAY FEATURED CARDS ──
+function autoPlayFeatured() {
+    const featuredCards = document.querySelectorAll('.mv-card.featured');
+    featuredCards.forEach(card => {
+        const ytId = card.dataset.ytid;
+        if (!ytId) return;
+        if (card.classList.contains('previewing')) return; // sudah jalan, skip
+
+        card.classList.add('previewing', 'featured-autoplay');
+
+        const iframe = document.createElement('iframe');
+        iframe.className = 'mv-preview-iframe';
+        iframe.allow = 'autoplay';
+        iframe.src = `https://www.youtube.com/embed/${ytId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${ytId}&rel=0&modestbranding=1&iv_load_policy=3&start=60`;
+
+        iframe.onload = () => card.classList.add('preview-ready');
+
+        card.insertBefore(iframe, card.firstChild);
+    });
+}
 
 // ── EXISTING LIST ──
 let sortableInstance = null;
@@ -346,16 +387,15 @@ async function saveGridOrder() {
     renderGrid(true);
 }
 
-// ── HOVER PREVIEW ──
+// ── HOVER PREVIEW (non-featured only) ──
 let previewTimer = null;
 let activePreviewCard = null;
 const iframeCache = new Map();
 
 function startPreview(card, ytId) {
     if (!ytId || document.body.classList.contains('edit-mode')) return;
+    if (card.classList.contains('featured')) return; // featured sudah auto-play
 
-    // Mulai preload iframe di background SEGERA (tanpa delay)
-    // supaya YouTube player sudah warming up sebelum tampil
     if (!iframeCache.has(ytId)) {
         const preloadIframe = document.createElement('iframe');
         preloadIframe.src = `https://www.youtube.com/embed/${ytId}?autoplay=0&mute=1&controls=0&rel=0&modestbranding=1&iv_load_policy=3`;
@@ -365,7 +405,6 @@ function startPreview(card, ytId) {
         iframeCache.set(ytId, preloadIframe);
     }
 
-    // Delay 700ms sebelum tampilkan — hanya tampil kalau user benar-benar hover
     previewTimer = setTimeout(() => {
         stopPreview(activePreviewCard);
         activePreviewCard = card;
@@ -373,17 +412,11 @@ function startPreview(card, ytId) {
 
         const cachedIframe = iframeCache.get(ytId);
         if (cachedIframe) {
-            // Reset style dari hidden preload
             cachedIframe.removeAttribute('style');
             cachedIframe.className = 'mv-preview-iframe';
-            // Update src dengan autoplay + start di tengah video (detik 60)
             cachedIframe.src = `https://www.youtube.com/embed/${ytId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${ytId}&rel=0&modestbranding=1&iv_load_policy=3&start=60`;
             card.insertBefore(cachedIframe, card.firstChild);
-
-            // Tandai preview-ready setelah iframe load
-            cachedIframe.onload = () => {
-                card.classList.add('preview-ready');
-            };
+            cachedIframe.onload = () => card.classList.add('preview-ready');
         }
     }, 700);
 }
@@ -391,21 +424,17 @@ function startPreview(card, ytId) {
 function stopPreview(card) {
     clearTimeout(previewTimer);
     if (!card) return;
+    if (card.classList.contains('featured-autoplay')) return; // jangan stop featured
 
     card.classList.remove('previewing', 'preview-ready');
     const iframe = card.querySelector('.mv-preview-iframe');
     if (iframe) {
         const ytId = card.dataset.ytid;
-        // Kembalikan ke hidden preload state (jangan di-remove, biar tetap cached)
         iframe.style.cssText = 'position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;top:-9999px;left:-9999px;border:none;';
         iframe.className = '';
-        // Stop video dengan reset src ke versi non-autoplay
-        if (ytId) {
-            iframe.src = `https://www.youtube.com/embed/${ytId}?autoplay=0&mute=1&controls=0&rel=0&modestbranding=1&iv_load_policy=3`;
-        }
+        if (ytId) iframe.src = `https://www.youtube.com/embed/${ytId}?autoplay=0&mute=1&controls=0&rel=0&modestbranding=1&iv_load_policy=3`;
         document.body.appendChild(iframe);
     }
-
     if (activePreviewCard === card) activePreviewCard = null;
 }
 
@@ -503,9 +532,7 @@ function getMimeType(file) {
     return map[ext] || 'image/png';
 }
 
-function getFileExt(file) {
-    return file.name.split('.').pop().toLowerCase() || 'png';
-}
+function getFileExt(file) { return file.name.split('.').pop().toLowerCase() || 'png'; }
 
 async function uploadFileToSupabase(file, folderName) {
     if (!file) return null;
@@ -519,19 +546,16 @@ async function uploadFileToSupabase(file, folderName) {
 }
 
 function handleLogoUpload(input) {
-    const file = input.files[0];
-    if (!file) return;
+    const file = input.files[0]; if (!file) return;
     pendingLogoFile = file;
     const objectUrl = URL.createObjectURL(file);
-    const prev = el('logo-preview');
-    const img = el('logo-preview-img');
+    const prev = el('logo-preview'), img = el('logo-preview-img');
     if (prev && img) { img.src = objectUrl; prev.style.display = 'block'; }
     toast('Logo selected — click Save Logo & Favicon', '');
 }
 
 function handleFaviconUpload(input) {
-    const file = input.files[0];
-    if (!file) return;
+    const file = input.files[0]; if (!file) return;
     pendingFaviconFile = file;
     toast('Favicon selected — click Save Logo & Favicon', '');
 }
@@ -542,25 +566,16 @@ async function saveLogoFavicon() {
     const btn = el('logo-save-btn');
     btn.textContent = 'Uploading & Saving...'; btn.disabled = true;
     try {
-        if (pendingLogoFile) {
-            const logoUrl = await uploadFileToSupabase(pendingLogoFile, 'logos');
-            if (logoUrl) siteInfo.logoData = logoUrl;
-        }
-        if (pendingFaviconFile) {
-            const favUrl = await uploadFileToSupabase(pendingFaviconFile, 'favicons');
-            if (favUrl) siteInfo.faviconData = favUrl;
-        }
+        if (pendingLogoFile) { const logoUrl = await uploadFileToSupabase(pendingLogoFile, 'logos'); if (logoUrl) siteInfo.logoData = logoUrl; }
+        if (pendingFaviconFile) { const favUrl = await uploadFileToSupabase(pendingFaviconFile, 'favicons'); if (favUrl) siteInfo.faviconData = favUrl; }
         const { error } = await sb.from('mv_site').upsert({ id: 1, data: siteInfo });
         if (error) throw error;
         applyLogoFavicon();
-        el('logo-upload').value = '';
-        el('favicon-upload').value = '';
-        pendingLogoFile = null;
-        pendingFaviconFile = null;
+        el('logo-upload').value = ''; el('favicon-upload').value = '';
+        pendingLogoFile = null; pendingFaviconFile = null;
         toast('Logo & Favicon uploaded and saved! ✓', 'success');
     } catch (err) {
-        console.error(err);
-        toast('Error: ' + err.message, 'error');
+        console.error(err); toast('Error: ' + err.message, 'error');
     } finally {
         btn.textContent = '💾 Save Logo & Favicon'; btn.disabled = false;
     }
@@ -569,20 +584,15 @@ async function saveLogoFavicon() {
 function applyLogoFavicon() {
     const loadingLogoImg = document.getElementById('loading-logo-img');
     const loadingLogoText = document.getElementById('loading-logo-text');
-
     if (siteInfo.logoData) {
         if (loadingLogoText) loadingLogoText.style.display = 'none';
-        if (loadingLogoImg) {
-            loadingLogoImg.style.display = 'block';
-            loadingLogoImg.src = siteInfo.logoData;
-        }
+        if (loadingLogoImg) { loadingLogoImg.style.display = 'block'; loadingLogoImg.src = siteInfo.logoData; }
         try { localStorage.setItem('mv_logo_url', siteInfo.logoData); } catch (e) { }
     } else {
         if (loadingLogoImg) loadingLogoImg.style.display = 'none';
         if (loadingLogoText) loadingLogoText.style.display = 'block';
         try { localStorage.removeItem('mv_logo_url'); } catch (e) { }
     }
-
     if (siteInfo.faviconData) {
         let link = document.querySelector('link[rel="icon"]');
         if (!link) { link = document.createElement('link'); link.rel = 'icon'; document.head.appendChild(link); }
@@ -597,8 +607,7 @@ async function deleteLogo() {
     const { error } = await sb.from('mv_site').upsert({ id: 1, data: siteInfo });
     if (error) { toast('Error: ' + error.message, 'error'); return; }
     applyLogoFavicon();
-    const prev = el('logo-preview');
-    const img = el('logo-preview-img');
+    const prev = el('logo-preview'), img = el('logo-preview-img');
     if (prev) prev.style.display = 'none';
     if (img) img.src = '';
     toast('Logo dihapus! ✓', 'success');
@@ -609,15 +618,10 @@ function applySiteInfo() {
     const s = siteInfo; if (!s || !Object.keys(s).length) return;
     if (s.colors) applyColors(s.colors);
     applyLogoFavicon();
-
     const tabTitle = s.siteTitle || s.brand || 'MV Portfolio'; document.title = tabTitle; if (el('page-title')) el('page-title').textContent = tabTitle;
-
     if (s.brand && typeof s.brand === 'string') { el('nav-brand').innerHTML = s.brand.replace('.', '<span>.</span>'); el('footer-brand').innerHTML = s.brand.replace('.', '<span>.</span>'); }
-
     setText('hero-label', s.label); setText('hero-sub', s.hsub); setText('about-p1', s.about1); setText('about-p2', s.about2); setText('footer-copy', s.copy);
-
     if (s.htitle && typeof s.htitle === 'string') { const lines = s.htitle.split('|'); el('hero-title').innerHTML = lines.map((l, i) => i === 0 ? l : i === 1 ? `<span class="accent">${l}</span>` : `<span class="stroke">${l}</span>`).join('<br>'); }
-
     const socials = [
         { key: 'yt', label: 'YouTube', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.7 15.5V8.5l6.3 3.5-6.3 3.5z"/></svg>', primary: true },
         { key: 'tw', label: 'Twitter/X', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>', primary: false },
@@ -626,7 +630,6 @@ function applySiteInfo() {
         { key: 'ig', label: 'Instagram', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>', primary: false },
         { key: 'tiktok', label: 'TikTok', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.75a4.85 4.85 0 0 1-1.01-.06z"/></svg>', primary: false }
     ];
-
     const aboutWrap = el('about-social-btns'), footerWrap = el('footer-social-links');
     if (aboutWrap) aboutWrap.innerHTML = socials.filter(s2 => s[s2.key]).map(s2 => `<a href="${s[s2.key]}" target="_blank" class="btn ${s2.primary ? 'btn-primary' : 'btn-ghost'}" style="padding:10px 20px;font-size:11px;display:inline-flex;align-items:center;gap:7px">${s2.icon} ${s2.label}</a>`).join('');
     if (footerWrap) footerWrap.innerHTML = socials.filter(s2 => s[s2.key]).map(s2 => `<a href="${s[s2.key]}" target="_blank">${s2.label}</a>`).join('');
@@ -639,10 +642,7 @@ function fillSiteForm() {
     const mode = s.displayMode || 'all', radio = el('dm-' + mode); if (radio) radio.checked = true;
 }
 
-function previewMode(mode) {
-    siteInfo.displayMode = mode;
-    renderGrid(true);
-}
+function previewMode(mode) { siteInfo.displayMode = mode; renderGrid(true); }
 
 async function saveSiteEdit() {
     const mode = document.querySelector('input[name="display-mode"]:checked');
@@ -668,17 +668,13 @@ async function saveSiteEdit() {
     }
 }
 
-function closeSiteEdit() {
-    const panel = el('site-edit-panel');
-    if (panel) panel.classList.remove('open');
-}
+function closeSiteEdit() { const panel = el('site-edit-panel'); if (panel) panel.classList.remove('open'); }
 
 // ── INIT ──
 async function init() {
     const logoUp = el('logo-upload'), favUp = el('favicon-upload');
     if (logoUp) logoUp.value = '';
     if (favUp) favUp.value = '';
-
     document.body.classList.add('loading');
     setLoadProgress(15, 'Connecting...');
     sb = window.supabase.createClient(SB_URL, SB_KEY);
