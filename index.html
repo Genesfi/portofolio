@@ -15,6 +15,46 @@
       --accent: #c8ff00; --accent2: #ff3cac;
       --text: #f0f0f0; --muted: #666; --grid-gap: 3px;
     }
+    /* ── DRAG EDIT MODE ── */
+    body.edit-mode .mv-card { outline: 2px dashed rgba(200,255,0,.3); cursor: grab !important; }
+    body.edit-mode .mv-card:active { cursor: grabbing !important; }
+    body.edit-mode .mv-card.sortable-chosen { outline: 2px solid var(--accent); box-shadow: 0 0 20px rgba(200,255,0,.3); opacity:.95; }
+    body.edit-mode .mv-card.sortable-ghost { opacity:.3; outline: 2px dashed var(--accent); }
+    .edit-mode-bar {
+      position: fixed; top: 62px; left: 0; right: 0; z-index: 99;
+      background: var(--accent); color: #000;
+      display: none; align-items: center; justify-content: center; gap: 16px;
+      padding: 10px 20px;
+      font-family: 'Space Mono', monospace; font-size: 12px; letter-spacing: .1em;
+    }
+    .edit-mode-bar.active { display: flex; }
+    .edit-mode-bar button {
+      background: #000; color: var(--accent); border: none;
+      padding: 6px 16px; font-family: 'Space Mono', monospace;
+      font-size: 11px; letter-spacing: .1em; cursor: pointer;
+      text-transform: uppercase;
+    }
+    .edit-mode-bar button:hover { background: #111; }
+    /* ── DRAG EDIT MODE ── */
+    body.edit-mode .mv-card { outline: 2px dashed rgba(200,255,0,.3); cursor: grab !important; }
+    body.edit-mode .mv-card:active { cursor: grabbing !important; }
+    body.edit-mode .mv-card.sortable-chosen { outline: 2px solid var(--accent); box-shadow: 0 0 20px rgba(200,255,0,.3); opacity:.95; }
+    body.edit-mode .mv-card.sortable-ghost { opacity:.3; outline: 2px dashed var(--accent); }
+    .edit-mode-bar {
+      position: fixed; top: 62px; left: 0; right: 0; z-index: 99;
+      background: var(--accent); color: #000;
+      display: none; align-items: center; justify-content: center; gap: 16px;
+      padding: 10px 20px;
+      font-family: 'Space Mono', monospace; font-size: 12px; letter-spacing: .1em;
+    }
+    .edit-mode-bar.active { display: flex; }
+    .edit-mode-bar button {
+      background: #000; color: var(--accent); border: none;
+      padding: 6px 16px; font-family: 'Space Mono', monospace;
+      font-size: 11px; letter-spacing: .1em; cursor: pointer;
+      text-transform: uppercase;
+    }
+    .edit-mode-bar button:hover { background: #111; }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
     body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; overflow-x: hidden; }
@@ -340,6 +380,13 @@
   <div class="loading-text" id="loading-text">Loading portfolio...</div>
 </div>
 
+<!-- EDIT MODE BAR -->
+<div class="edit-mode-bar" id="edit-mode-bar">
+  ✦ EDIT MODE — Drag cards to reorder
+  <button onclick="saveGridOrder()">💾 Save Order</button>
+  <button onclick="exitEditMode()">✕ Exit</button>
+</div>
+
 <!-- NAV -->
 <nav>
   <ul class="nav-links">
@@ -464,6 +511,7 @@
     <button class="tab-btn active" onclick="switchTab('add',this)">+ Tambah</button>
     <button class="tab-btn" onclick="switchTab('list',this)">📋 Kelola</button>
     <button class="tab-btn" onclick="switchTab('site',this)">✏ Site</button>
+    <button class="tab-btn" onclick="switchTab('design',this)">🎨 Design</button>
   </div>
 
   <!-- TAB: TAMBAH -->
@@ -509,7 +557,13 @@
   </div>
 
   <!-- TAB: KELOLA -->
+  <!-- EDIT MODE TOGGLE IN KELOLA -->
   <div class="tab-pane" id="tab-list">
+    <div style="margin-bottom:12px">
+      <button onclick="toggleEditMode()" id="edit-mode-toggle-btn" style="width:100%;padding:10px;background:rgba(200,255,0,.1);border:1px solid rgba(200,255,0,.3);color:var(--accent);font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;">
+        ✦ Drag Reorder on Page
+      </button>
+    </div>
     <div class="existing-list" id="existing-list">
       <div style="color:var(--muted);font-size:12px;font-family:'Space Mono',monospace">Loading...</div>
     </div>
@@ -585,6 +639,73 @@
   </div>
 </div>
 
+  <!-- TAB: DESIGN -->
+  <div class="tab-pane" id="tab-design">
+    <div class="admin-form">
+      <!-- LOGO UPLOAD -->
+      <div style="background:var(--bg);border:1px solid rgba(200,255,0,.15);padding:14px;margin-bottom:4px">
+        <label style="color:var(--accent);margin-bottom:10px;display:block">Logo & Favicon</label>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div>
+            <label>Upload Logo (tampil di loading screen)</label>
+            <input type="file" id="logo-upload" accept="image/*" onchange="handleLogoUpload(this)" style="width:100%;background:var(--bg);border:1px solid rgba(240,240,240,.1);color:var(--text);padding:8px;font-family:'DM Sans',sans-serif;font-size:12px;outline:none;">
+            <div id="logo-preview" style="margin-top:8px;display:none">
+              <img id="logo-preview-img" style="max-width:100%;max-height:80px;object-fit:contain;background:rgba(255,255,255,.05);padding:8px;">
+            </div>
+          </div>
+          <div>
+            <label>Upload Favicon (icon di tab browser)</label>
+            <input type="file" id="favicon-upload" accept="image/*" onchange="handleFaviconUpload(this)" style="width:100%;background:var(--bg);border:1px solid rgba(240,240,240,.1);color:var(--text);padding:8px;font-family:'DM Sans',sans-serif;font-size:12px;outline:none;">
+          </div>
+          <button class="admin-add-btn" onclick="saveLogoFavicon()" id="logo-save-btn">💾 Save Logo & Favicon</button>
+        </div>
+      </div>
+
+      <!-- COLOR THEME -->
+      <div style="background:var(--bg);border:1px solid rgba(200,255,0,.15);padding:14px;margin-bottom:4px">
+        <label style="color:var(--accent);margin-bottom:10px;display:block">Color Theme</label>
+
+        <!-- PRESETS -->
+        <label style="margin-bottom:6px;display:block">Quick Presets</label>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px" id="color-presets">
+          <button class="color-preset-btn" onclick="applyColorPreset('lime')" style="background:#080810;border:2px solid #c8ff00;color:#c8ff00;padding:6px 12px;font-family:'Space Mono',monospace;font-size:10px;cursor:pointer;">● Lime</button>
+          <button class="color-preset-btn" onclick="applyColorPreset('cyan')" style="background:#080810;border:2px solid #00ffff;color:#00ffff;padding:6px 12px;font-family:'Space Mono',monospace;font-size:10px;cursor:pointer;">● Cyan</button>
+          <button class="color-preset-btn" onclick="applyColorPreset('pink')" style="background:#080810;border:2px solid #ff2d78;color:#ff2d78;padding:6px 12px;font-family:'Space Mono',monospace;font-size:10px;cursor:pointer;">● Pink</button>
+          <button class="color-preset-btn" onclick="applyColorPreset('orange')" style="background:#080810;border:2px solid #ff7b00;color:#ff7b00;padding:6px 12px;font-family:'Space Mono',monospace;font-size:10px;cursor:pointer;">● Orange</button>
+          <button class="color-preset-btn" onclick="applyColorPreset('purple')" style="background:#080810;border:2px solid #9d4edd;color:#9d4edd;padding:6px 12px;font-family:'Space Mono',monospace;font-size:10px;cursor:pointer;">● Purple</button>
+          <button class="color-preset-btn" onclick="applyColorPreset('white')" style="background:#080810;border:2px solid #ffffff;color:#ffffff;padding:6px 12px;font-family:'Space Mono',monospace;font-size:10px;cursor:pointer;">● White</button>
+        </div>
+
+        <!-- CUSTOM COLORS -->
+        <label style="margin-bottom:8px;display:block">Custom Colors</label>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);width:100px;flex-shrink:0">Accent (Main)</span>
+            <input type="color" id="color-accent" value="#c8ff00" oninput="previewColor('accent',this.value)" style="width:44px;height:32px;border:none;background:none;cursor:pointer;padding:0;">
+            <input type="text" id="color-accent-hex" value="#c8ff00" oninput="previewColorHex('accent',this)" style="flex:1;background:var(--bg);border:1px solid rgba(240,240,240,.1);color:var(--text);padding:6px 10px;font-family:'Space Mono',monospace;font-size:11px;outline:none;">
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);width:100px;flex-shrink:0">Accent 2 (Pink)</span>
+            <input type="color" id="color-accent2" value="#ff3cac" oninput="previewColor('accent2',this.value)" style="width:44px;height:32px;border:none;background:none;cursor:pointer;padding:0;">
+            <input type="text" id="color-accent2-hex" value="#ff3cac" oninput="previewColorHex('accent2',this)" style="flex:1;background:var(--bg);border:1px solid rgba(240,240,240,.1);color:var(--text);padding:6px 10px;font-family:'Space Mono',monospace;font-size:11px;outline:none;">
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);width:100px;flex-shrink:0">Background</span>
+            <input type="color" id="color-bg" value="#080810" oninput="previewColor('bg',this.value)" style="width:44px;height:32px;border:none;background:none;cursor:pointer;padding:0;">
+            <input type="text" id="color-bg-hex" value="#080810" oninput="previewColorHex('bg',this)" style="flex:1;background:var(--bg);border:1px solid rgba(240,240,240,.1);color:var(--text);padding:6px 10px;font-family:'Space Mono',monospace;font-size:11px;outline:none;">
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);width:100px;flex-shrink:0">Surface</span>
+            <input type="color" id="color-surface" value="#10101c" oninput="previewColor('surface',this.value)" style="width:44px;height:32px;border:none;background:none;cursor:pointer;padding:0;">
+            <input type="text" id="color-surface-hex" value="#10101c" oninput="previewColorHex('surface',this)" style="flex:1;background:var(--bg);border:1px solid rgba(240,240,240,.1);color:var(--text);padding:6px 10px;font-family:'Space Mono',monospace;font-size:11px;outline:none;">
+          </div>
+        </div>
+        <button class="admin-add-btn" onclick="saveColors()" id="color-save-btn" style="margin-top:12px">💾 Save Colors</button>
+        <button onclick="resetColors()" style="width:100%;margin-top:6px;background:transparent;border:1px solid rgba(240,240,240,.1);color:var(--muted);padding:8px;font-family:'Space Mono',monospace;font-size:11px;cursor:pointer;">↺ Reset to Default</button>
+      </div>
+    </div>
+  </div>
+
 <!-- SITE EDIT PANEL (legacy, tidak dipakai tapi dibiarkan) -->
 <div class="site-edit-panel" id="site-edit-panel">
   <div class="site-edit-inner">
@@ -622,7 +743,7 @@ document.addEventListener('keydown',e=>{
 });
 
 // ── TABS ──
-function switchTab(name,btn){document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));btn.classList.add('active');el('tab-'+name).classList.add('active');if(name==='list')renderExistingList();if(name==='site')fillSiteForm();}
+function switchTab(name,btn){document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));btn.classList.add('active');el('tab-'+name).classList.add('active');if(name==='list')renderExistingList();if(name==='site')fillSiteForm();if(name==='design')fillDesignForm();}
 
 // ── PASSWORD / AUTH ──
 function requestAdmin(){
@@ -850,6 +971,7 @@ async function deleteCard(id){
 
 // ── MODAL ──
 function openModal(id){
+  if(document.body.classList.contains('edit-mode'))return;
   const c=cards.find(x=>x.id===id);if(!c)return;
   el('modal-title').textContent=c.title;el('modal-artist').textContent=c.artist||'';
   el('modal-tags').innerHTML=(c.tags||[]).map(t=>`<span class="mv-tag">${esc(t)}</span>`).join('');
@@ -866,6 +988,8 @@ function setFetchStatus(type,msg){const s=el('fetch-status');s.textContent=msg;s
 // ── SITE INFO ──
 function applySiteInfo(){
   const s=siteInfo;if(!s||!Object.keys(s).length)return;
+  if(s.colors)applyColors(s.colors);
+  applyLogoFavicon();
   const tabTitle=s.siteTitle||s.brand||'MV Portfolio';document.title=tabTitle;if(el('page-title'))el('page-title').textContent=tabTitle;
   if(s.brand){el('nav-brand').innerHTML=s.brand.replace('.','<span>.</span>');el('footer-brand').innerHTML=s.brand.replace('.','<span>.</span>');}
   setText('hero-label',s.label);setText('hero-sub',s.hsub);setText('about-p1',s.about1);setText('about-p2',s.about2);setText('footer-copy',s.copy);
@@ -904,6 +1028,197 @@ function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').
 function ytExtract(s){if(!s)return null;const m=s.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/)||s.match(/^([a-zA-Z0-9_-]{11})$/);return m?m[1]:null;}
 let _tt;
 function toast(msg,type=''){const t=el('toast');t.textContent=msg;t.className=`toast ${type} show`;clearTimeout(_tt);_tt=setTimeout(()=>t.classList.remove('show'),3200);}
+
+// ── EDIT MODE (drag on grid) ──────────────────
+let gridSortable = null;
+
+function toggleEditMode() {
+  const isActive = document.body.classList.toggle('edit-mode');
+  const bar = el('edit-mode-bar');
+  const btn = el('edit-mode-toggle-btn');
+  if (isActive) {
+    bar.classList.add('active');
+    btn.textContent = '✦ Exit Drag Mode';
+    btn.style.background = 'rgba(255,60,172,.1)';
+    btn.style.borderColor = 'rgba(255,60,172,.4)';
+    btn.style.color = 'var(--accent2)';
+    el('admin-panel').classList.remove('open');
+    initGridSortable();
+  } else {
+    exitEditMode();
+  }
+}
+
+function exitEditMode() {
+  document.body.classList.remove('edit-mode');
+  el('edit-mode-bar').classList.remove('active');
+  const btn = el('edit-mode-toggle-btn');
+  if (btn) {
+    btn.textContent = '✦ Drag Reorder on Page';
+    btn.style.background = 'rgba(200,255,0,.1)';
+    btn.style.borderColor = 'rgba(200,255,0,.3)';
+    btn.style.color = 'var(--accent)';
+  }
+  if (gridSortable) { gridSortable.destroy(); gridSortable = null; }
+}
+
+function initGridSortable() {
+  const grid = el('mv-grid');
+  if (!grid) return;
+  if (gridSortable) gridSortable.destroy();
+  gridSortable = Sortable.create(grid, {
+    animation: 200,
+    ghostClass: 'sortable-ghost',
+    chosenClass: 'sortable-chosen',
+    filter: '.mv-play,.mv-overlay',
+    onEnd: (evt) => {
+      if (evt.oldIndex === evt.newIndex) return;
+      // reorder cards array to match visual
+      const moved = cards.splice(evt.oldIndex, 1)[0];
+      cards.splice(evt.newIndex, 0, moved);
+      toast('Drag to rearrange • Click Save Order when done', '');
+    }
+  });
+}
+
+async function saveGridOrder() {
+  toast('Saving order...', '');
+  await Promise.all(cards.map((c, i) => sb.from('mv_works').update({ sort_order: i }).eq('id', c.id)));
+  toast('Order saved! ✓', 'success');
+  exitEditMode();
+  renderGrid(true);
+}
+
+// ── COLORS ───────────────────────────────────
+const COLOR_PRESETS = {
+  lime:   { accent:'#c8ff00', accent2:'#ff3cac', bg:'#080810', surface:'#10101c' },
+  cyan:   { accent:'#00ffee', accent2:'#ff3cac', bg:'#060c12', surface:'#0c1a22' },
+  pink:   { accent:'#ff2d78', accent2:'#ffe600', bg:'#100810', surface:'#1c101c' },
+  orange: { accent:'#ff7b00', accent2:'#00d4ff', bg:'#100a06', surface:'#1c1208' },
+  purple: { accent:'#9d4edd', accent2:'#ff6b6b', bg:'#08060e', surface:'#120e1e' },
+  white:  { accent:'#ffffff', accent2:'#ff3cac', bg:'#080810', surface:'#10101c' },
+};
+
+function applyColorPreset(name) {
+  const p = COLOR_PRESETS[name]; if (!p) return;
+  Object.entries(p).forEach(([k,v]) => {
+    document.documentElement.style.setProperty('--'+k, v);
+    const inp = el('color-'+k); if (inp) inp.value = v;
+    const hex = el('color-'+k+'-hex'); if (hex) hex.value = v;
+  });
+  toast('Preview applied — click Save Colors to keep it', '');
+}
+
+function previewColor(varName, val) {
+  document.documentElement.style.setProperty('--'+varName, val);
+  const hex = el('color-'+varName+'-hex');
+  if (hex) hex.value = val;
+}
+
+function previewColorHex(varName, input) {
+  const val = input.value.trim();
+  if (/^#[0-9a-fA-F]{6}$/.test(val)) {
+    document.documentElement.style.setProperty('--'+varName, val);
+    const picker = el('color-'+varName);
+    if (picker) picker.value = val;
+  }
+}
+
+async function saveColors() {
+  renewAdminSession();
+  const colors = {
+    accent:  el('color-accent').value,
+    accent2: el('color-accent2').value,
+    bg:      el('color-bg').value,
+    surface: el('color-surface').value,
+  };
+  siteInfo.colors = colors;
+  const btn = el('color-save-btn');
+  btn.textContent = 'Saving...'; btn.disabled = true;
+  const { error } = await sb.from('mv_site').upsert({ id: 1, data: siteInfo });
+  btn.textContent = '💾 Save Colors'; btn.disabled = false;
+  if (error) { toast('Error: '+error.message, 'error'); return; }
+  toast('Colors saved! ✓', 'success');
+}
+
+function applyColors(colors) {
+  if (!colors) return;
+  Object.entries(colors).forEach(([k,v]) => {
+    document.documentElement.style.setProperty('--'+k, v);
+    const inp = el('color-'+k); if (inp) inp.value = v;
+    const hex = el('color-'+k+'-hex'); if (hex) hex.value = v;
+  });
+}
+
+function resetColors() {
+  const defaults = { accent:'#c8ff00', accent2:'#ff3cac', bg:'#080810', surface:'#10101c' };
+  applyColors(defaults);
+  siteInfo.colors = defaults;
+  toast('Reset to default — click Save Colors to keep it', '');
+}
+
+function fillDesignForm() {
+  if (siteInfo.colors) applyColors(siteInfo.colors);
+  if (siteInfo.logoData) {
+    const prev = el('logo-preview');
+    const img  = el('logo-preview-img');
+    if (prev && img) { img.src = siteInfo.logoData; prev.style.display = 'block'; }
+  }
+}
+
+// ── LOGO & FAVICON ────────────────────────────
+let pendingLogo = null, pendingFavicon = null;
+
+function handleLogoUpload(input) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    pendingLogo = e.target.result;
+    const prev = el('logo-preview');
+    const img  = el('logo-preview-img');
+    if (prev && img) { img.src = pendingLogo; prev.style.display = 'block'; }
+    toast('Logo ready — click Save Logo & Favicon', '');
+  };
+  reader.readAsDataURL(file);
+}
+
+function handleFaviconUpload(input) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    pendingFavicon = e.target.result;
+    toast('Favicon ready — click Save Logo & Favicon', '');
+  };
+  reader.readAsDataURL(file);
+}
+
+async function saveLogoFavicon() {
+  renewAdminSession();
+  if (pendingLogo) siteInfo.logoData = pendingLogo;
+  if (pendingFavicon) siteInfo.faviconData = pendingFavicon;
+  if (!pendingLogo && !pendingFavicon) { toast('No new images selected', 'error'); return; }
+  const btn = el('logo-save-btn');
+  btn.textContent = 'Saving...'; btn.disabled = true;
+  const { error } = await sb.from('mv_site').upsert({ id: 1, data: siteInfo });
+  btn.textContent = '💾 Save Logo & Favicon'; btn.disabled = false;
+  if (error) { toast('Error: '+error.message, 'error'); return; }
+  applyLogoFavicon();
+  pendingLogo = null; pendingFavicon = null;
+  toast('Logo & Favicon saved! ✓', 'success');
+}
+
+function applyLogoFavicon() {
+  if (siteInfo.logoData) {
+    const loadingLogo = document.querySelector('.loading-logo');
+    if (loadingLogo) loadingLogo.src = siteInfo.logoData;
+  }
+  if (siteInfo.faviconData) {
+    let link = document.querySelector('link[rel="icon"]');
+    if (!link) { link = document.createElement('link'); link.rel = 'icon'; document.head.appendChild(link); }
+    link.href = siteInfo.faviconData;
+  }
+}
+
 
 init();
 </script>
