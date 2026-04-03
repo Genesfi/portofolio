@@ -1445,3 +1445,36 @@ body.loading footer {
         max-height: 70vh
     }
 }
+
+/* HOVER PREVIEW */
+.mv-preview-iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.mv-card.previewing .mv-preview-iframe {
+    opacity: 1;
+}
+
+.mv-card.previewing .mv-thumb {
+    opacity: 0;
+}
+
+.mv-card.previewing .mv-play {
+    opacity: 1 !important;
+    transform: translate(-50%, -50%) scale(1) !important;
+    z-index: 2;
+    background: rgba(0,0,0,0.7);
+    border: 2px solid var(--accent);
+}
+
+.mv-card.previewing .mv-play svg {
+    fill: var(--accent);
+}
