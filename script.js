@@ -36,19 +36,28 @@ function switchTab(name, btn) {
 function requestAdmin() {
     if (isAdminActive()) { renewAdminSession(); el('admin-panel').classList.toggle('open'); return; }
     el('pw-error').style.display = 'none'; el('pw-email').value = ''; el('pw-input').value = ''; el('pw-btn').disabled = false;
+    try { const lock = JSON.parse(sessionStorage.getItem(_c('bG9ja291dA==')) || 'null'); if (lock && Date.now() < lock.until) { const mins = Math.ceil((lock.until - Date.now()) / 60000); el('pw-error').style.display = 'block'; el('pw-error').textContent = `🔒 Too many attempts. Try again in ${mins} min.`; el('pw-btn').disabled = true; } } catch (e) { }
     el('pw-modal').style.display = 'flex'; setTimeout(() => el('pw-email').focus(), 100);
 }
 
 async function checkPw() {
+    const MAX = 5, LOCK_MS = 15 * 60 * 1000, now = Date.now();
+    const lockKey = _c('bG9ja291dA=='), attKey = _c('YXR0ZW1wdHM=');
+    try { const lock = JSON.parse(sessionStorage.getItem(lockKey) || 'null'); if (lock && now < lock.until) { const mins = Math.ceil((lock.until - now) / 60000); el('pw-error').style.display = 'block'; el('pw-error').textContent = `🔒 Too many attempts. Try again in ${mins} min.`; el('pw-btn').disabled = true; return; } } catch (e) { }
     const email = el('pw-email').value.trim(), pass = el('pw-input').value;
     if (!email || !pass) { el('pw-error').style.display = 'block'; el('pw-error').textContent = '❌ Please enter email and password.'; return; }
     const btn = el('pw-btn'); btn.textContent = 'Signing in...'; btn.disabled = true;
     try {
         const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
         if (error || !data.user) throw new Error('fail');
+        sessionStorage.removeItem(attKey); sessionStorage.removeItem(lockKey);
         setAdminSession(true); el('pw-modal').style.display = 'none'; el('admin-panel').classList.add('open'); toast('Welcome back! ✓', 'success');
     } catch (e) {
-        el('pw-error').style.display = 'block'; el('pw-error').textContent = `❌ Wrong credentials.`; btn.disabled = false;
+        let att = 0; try { att = parseInt(sessionStorage.getItem(attKey) || '0'); } catch (e) { }
+        att++; sessionStorage.setItem(attKey, att);
+        const rem = MAX - att;
+        if (att >= MAX) { sessionStorage.setItem(lockKey, JSON.stringify({ until: now + LOCK_MS })); sessionStorage.removeItem(attKey); el('pw-error').style.display = 'block'; el('pw-error').textContent = '🔒 Too many attempts. Locked for 15 minutes.'; btn.disabled = true; }
+        else { el('pw-error').style.display = 'block'; el('pw-error').textContent = `❌ Wrong credentials. ${rem} attempt${rem > 1 ? 's' : ''} left.`; btn.disabled = false; }
         el('pw-input').value = ''; el('pw-input').focus();
     }
     btn.textContent = 'Sign In →';
@@ -59,19 +68,19 @@ function setLoadProgress(pct, text) { const bar = el('loading-bar'), txt = el('l
 function hideLoading() { const s = el('loading-screen'); if (!s) return; s.classList.add('hidden'); document.body.classList.remove('loading'); }
 
 // ── LOAD DATA ──
-async function loadCards() { const { data, error } = await sb.from('mv_works').select('*').order('sort_order').order('created_at'); if (error) { toast('Error: ' + error.message, 'error'); return; } cards = data || []; renderGrid(true); renderFilters(); updateStats(); buildShowcase(); if (el('tab-list')?.classList.contains('active')) renderExistingList(); }
+async function loadCards() { const { data, error } = await sb.from('mv_works').select('*').order('sort_order').order('created_at'); if (error) { console.error(error); return; } cards = data || []; renderGrid(true); renderFilters(); updateStats(); buildShowcase(); if (el('tab-list')?.classList.contains('active')) renderExistingList(); }
 async function loadSiteInfo() { const { data } = await sb.from('mv_site').select('data').eq('id', 1).single(); if (data?.data) { siteInfo = data.data; applySiteInfo(); updateStats(); } }
 
-// ── UTILS ──
+// ── UTILS (TAMENG ANTI-ERROR DITAMBAHKAN DI SINI) ──
 function el(id) { return document.getElementById(id); }
 function setText(id, v) { if (v && el(id)) el(id).textContent = v; }
 function esc(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
-function ytExtract(s) { if (!s) return null; const m = s.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/) || s.match(/^([a-zA-Z0-9_-]{11})$/); return m ? m : null; }
+function ytExtract(s) { if (!s || typeof s !== 'string') return null; const m = s.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/) || s.match(/^([a-zA-Z0-9_-]{11})$/); return m ? m : null; }
 let _tt;
 function toast(msg, type = '') { const t = el('toast'); t.textContent = msg; t.className = `toast ${type} show`; clearTimeout(_tt); _tt = setTimeout(() => t.classList.remove('show'), 3200); }
 
 // ── TAG PRESETS ──
-function getTagsArray(id) { return el(id).value.split(',').map(t => t.trim()).filter(Boolean); }
+function getTagsArray(id) { const val = el(id).value || ''; return val.split(',').map(t => t.trim()).filter(Boolean); }
 function setTagsArray(id, arr) { el(id).value = arr.join(', '); }
 function togglePresetTag(inputId, tag, btn) { renewAdminSession(); let tags = getTagsArray(inputId); if (tags.includes(tag)) { tags = tags.filter(t => t !== tag); btn.classList.remove('active'); } else { tags.push(tag); btn.classList.add('active'); } setTagsArray(inputId, tags); }
 function syncPresetHighlight(inputId, presetsId) { const tags = getTagsArray(inputId), wrap = el(presetsId); if (!wrap) return; wrap.querySelectorAll('.tag-preset-btn').forEach(btn => { btn.classList.toggle('active', tags.includes(btn.textContent.trim())); }); }
@@ -195,7 +204,8 @@ async function saveEdit(id) {
     const tagsRaw = el(`e-tags-${id}`).value.trim(), thumb = el(`e-thumb-${id}`).value.trim(), feat = el(`e-feat-${id}`).checked;
     if (!title) { toast('Title cannot be empty!', 'error'); return; }
     renewAdminSession();
-    const ytId = ytExtract(urlVal) || urlVal || null, tags = tagsRaw ? tagsRaw.split(',').map(t => t.trim()).filter(Boolean) : [];
+    const ytId = ytExtract(urlVal) || urlVal || null;
+    const tags = tagsRaw ? tagsRaw.split(',').map(t => t.trim()).filter(Boolean) : [];
     const btn = el(`edit-${id}`).querySelector('.inline-save-btn'); btn.textContent = 'Saving...'; btn.disabled = true;
     const { error } = await sb.from('mv_works').update({ ytId, title, artist, tags, thumb: thumb || null, featured: feat }).eq('id', id);
     btn.textContent = '💾 Save Changes'; btn.disabled = false;
@@ -218,7 +228,8 @@ async function addCard() {
     const tRaw = el('inp-tags').value.trim(), thumb = el('inp-thumb').value.trim(), feat = el('inp-featured').checked;
     if (!title) { toast('Title is required!', 'error'); return; }
     renewAdminSession();
-    const ytId = ytExtract(url), tags = tRaw ? tRaw.split(',').map(t => t.trim()).filter(Boolean) : [];
+    const ytId = ytExtract(url);
+    const tags = tRaw ? tRaw.split(',').map(t => t.trim()).filter(Boolean) : [];
     const btn = el('add-btn'); btn.disabled = true; btn.textContent = 'Saving...';
     const { error } = await sb.from('mv_works').insert([{ ytId, title, artist, tags, thumb: thumb || null, featured: feat, sort_order: -1 }]);
     btn.disabled = false; btn.textContent = '+ Add to Portfolio';
@@ -360,10 +371,15 @@ async function saveColors() {
     siteInfo.colors = colors;
     const btn = el('color-save-btn');
     btn.textContent = 'Saving...'; btn.disabled = true;
-    const { error } = await sb.from('mv_site').upsert({ id: 1, data: siteInfo });
-    btn.textContent = '💾 Save Colors'; btn.disabled = false;
-    if (error) { toast('Error: ' + error.message, 'error'); return; }
-    toast('Colors saved! ✓', 'success');
+    try {
+        const { error } = await sb.from('mv_site').upsert({ id: 1, data: siteInfo });
+        if (error) throw error;
+        toast('Colors saved! ✓', 'success');
+    } catch(err) {
+        toast('Error: ' + err.message, 'error'); 
+    } finally {
+        btn.textContent = '💾 Save Colors'; btn.disabled = false;
+    }
 }
 
 function applyColors(colors) {
@@ -382,27 +398,38 @@ function resetColors() {
     toast('Reset to default — click Save Colors to keep it', '');
 }
 
-// ── LOGO & FAVICON (PENGGUNAAN DATABASE STORAGE BUCKET) ────────────────────────────
+function fillDesignForm() {
+    if (siteInfo.colors) applyColors(siteInfo.colors);
+    if (siteInfo.logoData) {
+        const prev = el('logo-preview');
+        const img = el('logo-preview-img');
+        if (prev && img) { img.src = siteInfo.logoData; prev.style.display = 'block'; }
+    }
+}
 
-// 1. Fungsi Bantuan untuk Upload ke Supabase Storage
+// ── LOGO & FAVICON (STORAGE) ────────────────────────────
+
 async function uploadFileToSupabase(file, folderName) {
     if (!file) return null;
     
-    // Bikin nama file unik agar tidak bentrok
-    const fileExt = file.name.split('.').pop();
+    // TAMENG ANTI-ERROR: Amankan nama file jika bermasalah
+    let fileExt = 'png';
+    if (file.name && typeof file.name === 'string') {
+        const parts = file.name.split('.');
+        if (parts.length > 1) fileExt = parts.pop();
+    }
+
     const fileName = `${folderName}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
 
-    // Upload ke bucket bernama 'portfolio-assets'
     const { data, error } = await sb.storage
         .from('portfolio-assets')
         .upload(fileName, file, { upsert: true });
 
     if (error) {
-        console.error('Upload Error:', error);
+        console.error('Upload Error Details:', error);
         throw error;
     }
 
-    // Ambil URL public dari file yang baru diupload
     const { data: publicUrlData } = sb.storage
         .from('portfolio-assets')
         .getPublicUrl(fileName);
@@ -410,7 +437,6 @@ async function uploadFileToSupabase(file, folderName) {
     return publicUrlData.publicUrl;
 }
 
-// 2. Fungsi Preview Gambar sebelum di-Save
 function handleLogoUpload(input) {
     const file = input.files;
     if (!file) return;
@@ -429,8 +455,6 @@ function handleFaviconUpload(input) {
     if (!file) return;
     toast('Favicon selected — click Save Logo & Favicon', '');
 }
-
-// 3. Fungsi Utama Save Logo & Favicon
 
 async function saveLogoFavicon() {
     renewAdminSession();
@@ -462,20 +486,20 @@ async function saveLogoFavicon() {
         if (error) throw error;
 
         applyLogoFavicon();
+        
         el('logo-upload').value = '';
         el('favicon-upload').value = '';
+        
         toast('Logo & Favicon uploaded and saved! ✓', 'success');
     } catch (err) {
-        // INI YANG DIUBAH: Menampilkan pesan error ASLI dari sistem
         console.error(err);
-        toast('Error: ' + err.message, 'error'); 
+        toast('Error: ' + err.message, 'error');
     } finally {
         btn.textContent = '💾 Save Logo & Favicon'; 
         btn.disabled = false;
     }
 }
 
-// 4. Menerapkan Logo di UI
 function applyLogoFavicon() {
     const loadingLogoImg = document.getElementById('loading-logo-img');
     const loadingLogoText = document.getElementById('loading-logo-text');
@@ -503,10 +527,15 @@ function applySiteInfo() {
     const s = siteInfo; if (!s || !Object.keys(s).length) return;
     if (s.colors) applyColors(s.colors);
     applyLogoFavicon();
+    
     const tabTitle = s.siteTitle || s.brand || 'MV Portfolio'; document.title = tabTitle; if (el('page-title')) el('page-title').textContent = tabTitle;
-    if (s.brand) { el('nav-brand').innerHTML = s.brand.replace('.', '<span>.</span>'); el('footer-brand').innerHTML = s.brand.replace('.', '<span>.</span>'); }
+    
+    if (s.brand && typeof s.brand === 'string') { el('nav-brand').innerHTML = s.brand.replace('.', '<span>.</span>'); el('footer-brand').innerHTML = s.brand.replace('.', '<span>.</span>'); }
+    
     setText('hero-label', s.label); setText('hero-sub', s.hsub); setText('about-p1', s.about1); setText('about-p2', s.about2); setText('footer-copy', s.copy);
-    if (s.htitle) { const lines = s.htitle.split('|'); el('hero-title').innerHTML = lines.map((l, i) => i === 0 ? l : i === 1 ? `<span class="accent">${l}</span>` : `<span class="stroke">${l}</span>`).join('<br>'); }
+    
+    // TAMENG ANTI-ERROR untuk split judul hero
+    if (s.htitle && typeof s.htitle === 'string') { const lines = s.htitle.split('|'); el('hero-title').innerHTML = lines.map((l, i) => i === 0 ? l : i === 1 ? `<span class="accent">${l}</span>` : `<span class="stroke">${l}</span>`).join('<br>'); }
     
     const socials = [
         { key: 'yt', label: 'YouTube', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.7 15.5V8.5l6.3 3.5-6.3 3.5z"/></svg>', primary: true }, 
@@ -547,24 +576,20 @@ async function saveSiteEdit() {
     };
     const btn = el('site-save-btn'); btn.textContent = 'Saving...'; btn.disabled = true;
     renewAdminSession();
-    const { error } = await sb.from('mv_site').upsert({ id: 1, data: siteInfo });
-    btn.textContent = 'Simpan Info Site →'; btn.disabled = false;
-    if (error) { toast('Error: ' + error.message, 'error'); return; }
-    applySiteInfo(); updateStats(); renderGrid(true); toast('Site info saved! ✓', 'success');
+    try {
+        const { error } = await sb.from('mv_site').upsert({ id: 1, data: siteInfo });
+        if (error) throw error;
+        applySiteInfo(); updateStats(); renderGrid(true); toast('Site info saved! ✓', 'success');
+    } catch(err) {
+        toast('Error: ' + err.message, 'error');
+    } finally {
+        btn.textContent = 'Simpan Info Site →'; btn.disabled = false;
+    }
 }
 
 function closeSiteEdit() { 
     const panel = el('site-edit-panel');
     if (panel) panel.classList.remove('open'); 
-}
-
-function fillDesignForm() {
-    if (siteInfo.colors) applyColors(siteInfo.colors);
-    if (siteInfo.logoData) {
-        const prev = el('logo-preview');
-        const img = el('logo-preview-img');
-        if (prev && img) { img.src = siteInfo.logoData; prev.style.display = 'block'; }
-    }
 }
 
 // ── INIT ──
