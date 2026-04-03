@@ -409,27 +409,40 @@ function fillDesignForm() {
 
 // ── LOGO & FAVICON (STORAGE) ────────────────────────────
 
-// Fungsi konversi dan upload file ke Supabase (ANTI RUSAK)
+// Mengubah file jadi format ArrayBuffer (Aman untuk SEMUA BROWSER LAMA/BARU)
+async function fileToArrayBuffer(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = (error) => reject(error);
+        reader.readAsArrayBuffer(file);
+    });
+}
+
 async function uploadFileToSupabase(file, folderName) {
     if (!file) return null;
+    
+    let fileExt = 'png'; 
+    if (file.type) {
+        if (file.type.includes('gif')) fileExt = 'gif';
+        else if (file.type.includes('jpeg') || file.type.includes('jpg')) fileExt = 'jpg';
+        else if (file.type.includes('svg')) fileExt = 'svg';
+        else if (file.type.includes('webp')) fileExt = 'webp';
+    } else if (file.name) {
+        const parts = file.name.split('.');
+        if (parts.length > 1) fileExt = parts.pop().toLowerCase();
+    }
 
-    // 1. Ambil ekstensi asli dari nama file (contoh: mylogo.gif -> gif)
-    const originalName = file.name || 'image.png';
-    const fileExt = originalName.split('.').pop().toLowerCase() || 'png';
+    const fileName = `${folderName}/${Date.now()}-file.${fileExt}`;
 
-    // 2. Buat nama file unik
-    const fileName = `${folderName}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+    // Menggunakan FileReader untuk kompatibilitas 100%
+    const arrayBuffer = await fileToArrayBuffer(file);
 
-    // 3. UBAH FILE JADI RAW BINARY (ARRAY BUFFER)
-    // Ini adalah kunci agar gambar tidak corrupt atau menjadi 0 byte di Supabase!
-    const arrayBuffer = await file.arrayBuffer();
-
-    // 4. Upload raw binary ke storage
     const { data, error } = await sb.storage
         .from('portfolio-assets')
-        .upload(fileName, arrayBuffer, {
+        .upload(fileName, arrayBuffer, { 
             upsert: true,
-            contentType: file.type || `image/${fileExt}`
+            contentType: file.type || `image/${fileExt}` 
         });
 
     if (error) {
@@ -437,7 +450,6 @@ async function uploadFileToSupabase(file, folderName) {
         throw error;
     }
 
-    // 5. Ambil URL Publik
     const { data: publicUrlData } = sb.storage
         .from('portfolio-assets')
         .getPublicUrl(fileName);
@@ -453,7 +465,7 @@ function handleLogoUpload(input) {
         const prev = el('logo-preview');
         const img = el('logo-preview-img');
         if (prev && img) { img.src = e.target.result; prev.style.display = 'block'; }
-        toast('Logo ready — click Save Logo & Favicon', '');
+        toast('Logo selected — click Save Logo & Favicon', '');
     };
     reader.readAsDataURL(file);
 }
@@ -461,13 +473,12 @@ function handleLogoUpload(input) {
 function handleFaviconUpload(input) {
     const file = input.files;
     if (!file) return;
-    toast('Favicon ready — click Save Logo & Favicon', '');
+    toast('Favicon selected — click Save Logo & Favicon', '');
 }
 
 async function saveLogoFavicon() {
     renewAdminSession();
-
-    // Ambil file langsung dari elemen input saat tombol diklik
+    
     const logoInput = el('logo-upload');
     const favInput = el('favicon-upload');
 
@@ -480,7 +491,7 @@ async function saveLogoFavicon() {
     }
 
     const btn = el('logo-save-btn');
-    btn.textContent = 'Uploading & Saving...';
+    btn.textContent = 'Uploading & Saving...'; 
     btn.disabled = true;
 
     try {
@@ -488,7 +499,7 @@ async function saveLogoFavicon() {
             const logoUrl = await uploadFileToSupabase(logoFile, 'logos');
             if (logoUrl) siteInfo.logoData = logoUrl;
         }
-
+        
         if (favFile) {
             const favUrl = await uploadFileToSupabase(favFile, 'favicons');
             if (favUrl) siteInfo.faviconData = favUrl;
@@ -498,17 +509,16 @@ async function saveLogoFavicon() {
         if (error) throw error;
 
         applyLogoFavicon();
-
-        // Bersihkan input agar tidak ada file "hantu" yang ikut terupload di masa depan
+        
         logoInput.value = '';
         favInput.value = '';
-
+        
         toast('Logo & Favicon uploaded and saved! ✓', 'success');
     } catch (err) {
         console.error(err);
         toast('Error: ' + err.message, 'error');
     } finally {
-        btn.textContent = '💾 Save Logo & Favicon';
+        btn.textContent = '💾 Save Logo & Favicon'; 
         btn.disabled = false;
     }
 }
@@ -516,7 +526,7 @@ async function saveLogoFavicon() {
 function applyLogoFavicon() {
     const loadingLogoImg = document.getElementById('loading-logo-img');
     const loadingLogoText = document.getElementById('loading-logo-text');
-
+    
     if (siteInfo.logoData) {
         if (loadingLogoImg) {
             loadingLogoImg.src = siteInfo.logoData;
@@ -606,7 +616,6 @@ function closeSiteEdit() {
 
 // ── INIT ──
 async function init() {
-    // Pastikan input file dibersihkan saat pertama kali load agar tidak ada file hantu
     const logoUp = el('logo-upload'), favUp = el('favicon-upload');
     if (logoUp) logoUp.value = '';
     if (favUp) favUp.value = '';
