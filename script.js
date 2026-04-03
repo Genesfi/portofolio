@@ -6,11 +6,13 @@ const ADMIN_SESSION_KEY = _c('bXZwX2FkbWluX3Nlc3Npb24=');
 const ADMIN_TIMEOUT_MS = 60 * 60 * 1000;
 let sb, cards = [], siteInfo = {}, activeFilter = 'all', fetchTimer = null, currentPage = 1, loadedCount = 0;
 
+// ── ADMIN SESSION ──
 function isAdminActive() { try { const s = JSON.parse(sessionStorage.getItem(ADMIN_SESSION_KEY) || 'null'); if (!s) return false; if (Date.now() - s.ts > ADMIN_TIMEOUT_MS) { sessionStorage.removeItem(ADMIN_SESSION_KEY); return false; } return true; } catch { return false; } }
 function setAdminSession(a) { if (a) sessionStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify({ ts: Date.now() })); else sessionStorage.removeItem(ADMIN_SESSION_KEY); }
 function renewAdminSession() { if (isAdminActive()) setAdminSession(true); }
 setInterval(() => { if (!isAdminActive() && el('admin-panel')?.classList.contains('open')) { el('admin-panel').classList.remove('open'); toast('Admin session expired. Type "adm" to log in again.', 'error'); } }, 60 * 1000);
 
+// ── SECRET SHORTCUT ──
 let keyBuf = '';
 document.addEventListener('keydown', e => {
     if (['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return;
@@ -20,6 +22,7 @@ document.addEventListener('keydown', e => {
     if (keyBuf === SHORTCUT) { keyBuf = ''; requestAdmin(); }
 });
 
+// ── TABS ──
 function switchTab(name, btn) { 
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); 
     document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active')); 
@@ -29,6 +32,7 @@ function switchTab(name, btn) {
     if (name === 'design') fillDesignForm(); 
 }
 
+// ── PASSWORD / AUTH ──
 function requestAdmin() {
     if (isAdminActive()) { renewAdminSession(); el('admin-panel').classList.toggle('open'); return; }
     el('pw-error').style.display = 'none'; el('pw-email').value = ''; el('pw-input').value = ''; el('pw-btn').disabled = false;
@@ -59,24 +63,29 @@ async function checkPw() {
     btn.textContent = 'Sign In →';
 }
 
+// ── LOADING ──
 function setLoadProgress(pct, text) { const bar = el('loading-bar'), txt = el('loading-text'); if (bar) bar.style.width = pct + '%'; if (txt && text) txt.textContent = text; }
 function hideLoading() { const s = el('loading-screen'); if (!s) return; s.classList.add('hidden'); document.body.classList.remove('loading'); }
 
-async function loadCards() { const { data, error } = await sb.from('mv_works').select('*').order('sort_order').order('created_at'); if (error) return; cards = data || []; renderGrid(true); renderFilters(); updateStats(); buildShowcase(); if (el('tab-list')?.classList.contains('active')) renderExistingList(); }
+// ── LOAD DATA ──
+async function loadCards() { const { data, error } = await sb.from('mv_works').select('*').order('sort_order').order('created_at'); if (error) { console.error(error); return; } cards = data || []; renderGrid(true); renderFilters(); updateStats(); buildShowcase(); if (el('tab-list')?.classList.contains('active')) renderExistingList(); }
 async function loadSiteInfo() { const { data } = await sb.from('mv_site').select('data').eq('id', 1).single(); if (data?.data) { siteInfo = data.data; applySiteInfo(); updateStats(); } }
 
+// ── UTILS ──
 function el(id) { return document.getElementById(id); }
 function setText(id, v) { if (v && el(id)) el(id).textContent = v; }
 function esc(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
-function ytExtract(s) { if (!s || typeof s !== 'string') return null; const m = s.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/) || s.match(/^([a-zA-Z0-9_-]{11})$/); return m ? m : null; }
+function ytExtract(s) { if (!s || typeof s !== 'string') return null; const m = s.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/) || s.match(/^([a-zA-Z0-9_-]{11})$/); return m ? m[1] : null; }
 let _tt;
 function toast(msg, type = '') { const t = el('toast'); t.textContent = msg; t.className = `toast ${type} show`; clearTimeout(_tt); _tt = setTimeout(() => t.classList.remove('show'), 3200); }
 
+// ── TAG PRESETS ──
 function getTagsArray(id) { const val = el(id).value || ''; return val.split(',').map(t => t.trim()).filter(Boolean); }
 function setTagsArray(id, arr) { el(id).value = arr.join(', '); }
 function togglePresetTag(inputId, tag, btn) { renewAdminSession(); let tags = getTagsArray(inputId); if (tags.includes(tag)) { tags = tags.filter(t => t !== tag); btn.classList.remove('active'); } else { tags.push(tag); btn.classList.add('active'); } setTagsArray(inputId, tags); }
 function syncPresetHighlight(inputId, presetsId) { const tags = getTagsArray(inputId), wrap = el(presetsId); if (!wrap) return; wrap.querySelectorAll('.tag-preset-btn').forEach(btn => { btn.classList.toggle('active', tags.includes(btn.textContent.trim())); }); }
 
+// ── SHOWCASE ──
 function ytThumb(id) { return `https://img.youtube.com/vi/${id}/hqdefault.jpg`; }
 function ytThumbFallback(id) { return `https://img.youtube.com/vi/${id}/hqdefault.jpg`; }
 
@@ -102,6 +111,7 @@ function buildShowcase() {
     setTimeout(() => { const wrap = el('hero-track-wrap'); if (wrap) wrap.classList.add('visible'); }, 400);
 }
 
+// ── RENDER ──
 function cardHTML(c) {
     const thumb = c.thumb || (c.ytId ? ytThumb(c.ytId) : '');
     const fallback = c.ytId ? ytThumbFallback(c.ytId) : '';
@@ -145,6 +155,7 @@ function renderFilters() {
 
 function filterCards(tag, btn) { activeFilter = tag; document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); renderGrid(true); }
 
+// ── EXISTING LIST ──
 let sortableInstance = null;
 function renderExistingList() {
     const listEl = el('existing-list');
@@ -211,6 +222,7 @@ function updateStats() {
     el('stat-year').textContent = siteInfo.year || new Date().getFullYear();
 }
 
+// ── ADD / DELETE ──
 async function addCard() {
     const url = el('inp-url').value.trim(), title = el('inp-title').value.trim(), artist = el('inp-artist').value.trim();
     const tRaw = el('inp-tags').value.trim(), thumb = el('inp-thumb').value.trim(), feat = el('inp-featured').checked;
@@ -237,6 +249,7 @@ async function deleteCard(id) {
     toast('Work removed', 'success');
 }
 
+// ── MODAL ──
 function openModal(id) {
     if (document.body.classList.contains('edit-mode')) return;
     const c = cards.find(x => x.id === id); if (!c) return;
@@ -247,11 +260,14 @@ function openModal(id) {
 }
 function closeModal(e) { if (e && e.target !== el('modal')) return; el('modal').classList.remove('open'); el('modal-video-wrap').innerHTML = ''; document.body.style.overflow = ''; }
 
+// ── AUTO FETCH YT ──
 function onUrlInput(val) { clearTimeout(fetchTimer); const ytId = ytExtract(val); if (!ytId) { setFetchStatus('', ''); return; } setFetchStatus('loading', '⟳ Fetching info...'); fetchTimer = setTimeout(() => fetchYtInfo(ytId), 800); }
 async function fetchYtInfo(ytId) { try { const res = await fetch(`https://www.youtube.com/oembed?url=https://youtube.com/watch?v=${ytId}&format=json`); if (!res.ok) throw new Error(); const data = await res.json(); if (!el('inp-title').value.trim()) el('inp-title').value = data.title || ''; if (!el('inp-artist').value.trim()) el('inp-artist').value = data.author_name || ''; setFetchStatus('ok', '✓ Info fetched'); } catch { setFetchStatus('err', '⚠ Could not fetch info'); } }
 function setFetchStatus(type, msg) { const s = el('fetch-status'); s.textContent = msg; s.className = 'fetch-status' + (type ? ' ' + type : ''); }
 
+// ── DRAG MODE ──
 let gridSortable = null;
+
 function toggleEditMode() {
     const isActive = document.body.classList.toggle('edit-mode');
     const bar = el('edit-mode-bar');
@@ -308,6 +324,7 @@ async function saveGridOrder() {
     renderGrid(true);
 }
 
+// ── COLORS ───────────────────────────────────
 const COLOR_PRESETS = {
     lime: { text: '#f0f0f0', accent: '#c8ff00', accent2: '#ff3cac', bg: '#080810', surface: '#10101c' },
     cyan: { text: '#f0f0f0', accent: '#00ffee', accent2: '#ff3cac', bg: '#060c12', surface: '#0c1a22' },
@@ -390,27 +407,42 @@ function fillDesignForm() {
     }
 }
 
-// ── LOGO & FAVICON (STORAGE MURNI) ────────────────────────────
+// ── LOGO & FAVICON ────────────────────────────
 
+// Pending file objects (bukan base64, langsung File object)
 let pendingLogoFile = null;
 let pendingFaviconFile = null;
 
-async function uploadToSupabase(file, folderName) {
-    if (!file) return null;
-    
-    const fileExt = file.name.split('.').pop().toLowerCase();
-    const fileName = `${folderName}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+// Ambil MIME type yang benar dari file, support GIF, PNG, JPG, WEBP, SVG, ICO
+function getMimeType(file) {
+    if (file.type && file.type !== '') return file.type;
+    const ext = file.name.split('.').pop().toLowerCase();
+    const map = { gif: 'image/gif', png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', webp: 'image/webp', svg: 'image/svg+xml', ico: 'image/x-icon' };
+    return map[ext] || 'image/png';
+}
 
-    // Menggunakan file object secara langsung. Ini 100% native dan anti-error.
+function getFileExt(file) {
+    return file.name.split('.').pop().toLowerCase() || 'png';
+}
+
+async function uploadFileToSupabase(file, folderName) {
+    if (!file) return null;
+
+    const mimeType = getMimeType(file);
+    const ext = getFileExt(file);
+    const fileName = `${folderName}/${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`;
+
     const { data, error } = await sb.storage
         .from('portfolio-assets')
-        .upload(fileName, file, { 
-            cacheControl: '3600',
+        .upload(fileName, file, {
             upsert: true,
-            contentType: file.type || (fileExt === 'gif' ? 'image/gif' : 'image/png')
+            contentType: mimeType
         });
 
-    if (error) throw error;
+    if (error) {
+        console.error('Upload Error:', error);
+        throw error;
+    }
 
     const { data: publicUrlData } = sb.storage
         .from('portfolio-assets')
@@ -420,21 +452,29 @@ async function uploadToSupabase(file, folderName) {
 }
 
 function handleLogoUpload(input) {
-    if (!input.files || !input.files) return;
-    pendingLogoFile = input.files;
-    
-    // Gunakan URL sementara yang sangat cepat dan aman untuk preview
+    // FIX: ambil file[0], bukan files langsung
+    const file = input.files[0];
+    if (!file) return;
+
+    pendingLogoFile = file;
+
+    // Preview langsung dari File object (support GIF animasi)
+    const objectUrl = URL.createObjectURL(file);
+    const prev = el('logo-preview');
     const img = el('logo-preview-img');
-    if (img) {
-        img.src = URL.createObjectURL(pendingLogoFile);
-        el('logo-preview').style.display = 'block';
+    if (prev && img) {
+        img.src = objectUrl;
+        prev.style.display = 'block';
     }
     toast('Logo selected — click Save Logo & Favicon', '');
 }
 
 function handleFaviconUpload(input) {
-    if (!input.files || !input.files) return;
-    pendingFaviconFile = input.files;
+    // FIX: ambil file[0], bukan files langsung
+    const file = input.files[0];
+    if (!file) return;
+
+    pendingFaviconFile = file;
     toast('Favicon selected — click Save Logo & Favicon', '');
 }
 
@@ -442,7 +482,7 @@ async function saveLogoFavicon() {
     renewAdminSession();
 
     if (!pendingLogoFile && !pendingFaviconFile) {
-        toast('Pilih file baru dengan tombol Choose File', 'error');
+        toast('Silakan pilih gambar (Klik Choose File) terlebih dahulu', 'error');
         return;
     }
 
@@ -452,12 +492,12 @@ async function saveLogoFavicon() {
 
     try {
         if (pendingLogoFile) {
-            const logoUrl = await uploadToSupabase(pendingLogoFile, 'logos');
+            const logoUrl = await uploadFileToSupabase(pendingLogoFile, 'logos');
             if (logoUrl) siteInfo.logoData = logoUrl;
         }
 
         if (pendingFaviconFile) {
-            const favUrl = await uploadToSupabase(pendingFaviconFile, 'favicons');
+            const favUrl = await uploadFileToSupabase(pendingFaviconFile, 'favicons');
             if (favUrl) siteInfo.faviconData = favUrl;
         }
 
@@ -465,12 +505,12 @@ async function saveLogoFavicon() {
         if (error) throw error;
 
         applyLogoFavicon();
-        
-        // Membersihkan antarmuka secara brutal agar browser tidak nge-cache file hantu
+
+        // Bersihkan setelah sukses
+        el('logo-upload').value = '';
+        el('favicon-upload').value = '';
         pendingLogoFile = null;
         pendingFaviconFile = null;
-        if(el('logo-upload')) el('logo-upload').value = '';
-        if(el('favicon-upload')) el('favicon-upload').value = '';
 
         toast('Logo & Favicon uploaded and saved! ✓', 'success');
     } catch (err) {
@@ -504,7 +544,7 @@ function applyLogoFavicon() {
     }
 }
 
-// ── SITE INFO (Lainnya) ──
+// ── SITE INFO ──
 function applySiteInfo() {
     const s = siteInfo; if (!s || !Object.keys(s).length) return;
     if (s.colors) applyColors(s.colors);
@@ -575,6 +615,10 @@ function closeSiteEdit() {
 
 // ── INIT ──
 async function init() {
+    const logoUp = el('logo-upload'), favUp = el('favicon-upload');
+    if (logoUp) logoUp.value = '';
+    if (favUp) favUp.value = '';
+
     document.body.classList.add('loading');
     setLoadProgress(15, 'Connecting...');
     sb = window.supabase.createClient(SB_URL, SB_KEY);
