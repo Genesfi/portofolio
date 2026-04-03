@@ -431,6 +431,7 @@ function handleFaviconUpload(input) {
 }
 
 // 3. Fungsi Utama Save Logo & Favicon
+
 async function saveLogoFavicon() {
     renewAdminSession();
     
@@ -447,7 +448,6 @@ async function saveLogoFavicon() {
     btn.disabled = true;
 
     try {
-        // Upload file fisik ke Supabase Storage, bukan lagi mengubahnya jadi Base64
         if (logoFile) {
             const logoUrl = await uploadFileToSupabase(logoFile, 'logos');
             if (logoUrl) siteInfo.logoData = logoUrl;
@@ -458,19 +458,17 @@ async function saveLogoFavicon() {
             if (favUrl) siteInfo.faviconData = favUrl;
         }
 
-        // Simpan URL yang dihasilkan ke tabel mv_site
         const { error } = await sb.from('mv_site').upsert({ id: 1, data: siteInfo });
         if (error) throw error;
 
         applyLogoFavicon();
-        
-        // Bersihkan kotak input
         el('logo-upload').value = '';
         el('favicon-upload').value = '';
-        
         toast('Logo & Favicon uploaded and saved! ✓', 'success');
     } catch (err) {
-        toast('Error uploading file. Pastikan bucket "portfolio-assets" sudah dibuat.', 'error');
+        // INI YANG DIUBAH: Menampilkan pesan error ASLI dari sistem
+        console.error(err);
+        toast('Error: ' + err.message, 'error'); 
     } finally {
         btn.textContent = '💾 Save Logo & Favicon'; 
         btn.disabled = false;
