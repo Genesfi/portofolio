@@ -440,7 +440,7 @@ section {
     height: 100%;
     object-fit: cover;
     display: block;
-    transition: transform .5s cubic-bezier(.25, .46, .45, .94);
+    transition: transform .5s cubic-bezier(.25, .46, .45, .94), opacity .3s ease;
 }
 
 .mv-card:hover .mv-thumb {
@@ -457,6 +457,7 @@ section {
     flex-direction: column;
     justify-content: flex-end;
     padding: 20px;
+    z-index: 3;
 }
 
 .mv-card:hover .mv-overlay {
@@ -477,6 +478,7 @@ section {
     justify-content: center;
     opacity: 0;
     transition: all .3s;
+    z-index: 4;
 }
 
 .mv-play svg {
@@ -546,6 +548,65 @@ section {
     100% {
         background-position: -200% 0
     }
+}
+
+/* ── HOVER PREVIEW ── */
+.mv-preview-iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Shimmer saat preview loading */
+.mv-card.previewing::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background: linear-gradient(
+        90deg,
+        var(--surface) 25%,
+        rgba(200, 255, 0, 0.04) 50%,
+        var(--surface) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.2s ease-in-out infinite;
+}
+
+/* Thumbnail fade out saat previewing */
+.mv-card.previewing .mv-thumb {
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+/* Iframe fade in hanya setelah ready */
+.mv-card.preview-ready .mv-preview-iframe {
+    opacity: 1;
+}
+
+/* Sembunyikan shimmer setelah ready */
+.mv-card.preview-ready::before {
+    display: none;
+}
+
+/* Play button tetap muncul di atas preview */
+.mv-card.previewing .mv-play {
+    opacity: 1 !important;
+    transform: translate(-50%, -50%) scale(1) !important;
+    z-index: 4;
+    background: rgba(0, 0, 0, 0.65);
+    border: 2px solid var(--accent);
+    backdrop-filter: blur(4px);
+}
+
+.mv-card.previewing .mv-play svg {
+    fill: var(--accent);
 }
 
 /* MODAL */
@@ -1329,7 +1390,6 @@ footer {
     color: var(--accent);
 }
 
-
 /* ── LOADING SCREEN ── */
 #loading-screen {
     position: fixed;
@@ -1352,7 +1412,6 @@ footer {
 
 .loading-logo {
     width: clamp(200px, 40vw, 320px);
-    /* animation: logoPulse 1.8s ease-in-out infinite; */
 }
 
 @keyframes logoPulse {
@@ -1444,37 +1503,4 @@ body.loading footer {
         bottom: 0;
         max-height: 70vh
     }
-}
-
-/* HOVER PREVIEW */
-.mv-preview-iframe {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    border: none;
-    opacity: 0;
-    transition: opacity 0.4s ease;
-    pointer-events: none;
-    z-index: 1;
-}
-
-.mv-card.previewing .mv-preview-iframe {
-    opacity: 1;
-}
-
-.mv-card.previewing .mv-thumb {
-    opacity: 0;
-}
-
-.mv-card.previewing .mv-play {
-    opacity: 1 !important;
-    transform: translate(-50%, -50%) scale(1) !important;
-    z-index: 2;
-    background: rgba(0,0,0,0.7);
-    border: 2px solid var(--accent);
-}
-
-.mv-card.previewing .mv-play svg {
-    fill: var(--accent);
 }
