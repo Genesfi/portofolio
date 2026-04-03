@@ -462,19 +462,53 @@ function handleFaviconUpload(input) {
     reader.readAsDataURL(file);
 }
 
+// Fungsi pembantu untuk membaca file secara langsung saat tombol diklik
+const getBase64 = (file) => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = error => reject(error);
+});
+
 async function saveLogoFavicon() {
     renewAdminSession();
-    if (pendingLogo) siteInfo.logoData = pendingLogo;
-    if (pendingFavicon) siteInfo.faviconData = pendingFavicon;
-    if (!pendingLogo && !pendingFavicon) { toast('No new images selected', 'error'); return; }
+    
+    // Baca paksa dari kotak input (berjaga-jaga jika browser auto-fill dan onchange terlewat)
+    const logoInput = el('logo-upload').files;
+    const favInput = el('favicon-upload').files;
+
+    if (!logoInput && !favInput && !pendingLogo && !pendingFavicon) { 
+        toast('No new images selected', 'error'); 
+        return; 
+    }
+
     const btn = el('logo-save-btn');
     btn.textContent = 'Saving...'; btn.disabled = true;
-    const { error } = await sb.from('mv_site').upsert({ id: 1, data: siteInfo });
-    btn.textContent = '💾 Save Logo & Favicon'; btn.disabled = false;
-    if (error) { toast('Error: ' + error.message, 'error'); return; }
-    applyLogoFavicon();
-    pendingLogo = null; pendingFavicon = null;
-    toast('Logo & Favicon saved! ✓', 'success');
+
+    try {
+        // Jika ada file di input, proses menjadi format gambar
+        if (logoInput) siteInfo.logoData = await getBase64(logoInput);
+        else if (pendingLogo) siteInfo.logoData = pendingLogo;
+
+        if (favInput) siteInfo.faviconData = await getBase64(favInput);
+        else if (pendingFavicon) siteInfo.faviconData = pendingFavicon;
+
+        const { error } = await sb.from('mv_site').upsert({ id: 1, data: siteInfo });
+        if (error) throw error;
+
+        applyLogoFavicon();
+        pendingLogo = null; pendingFavicon = null;
+        
+        // Bersihkan kotak input setelah berhasil disave
+        el('logo-upload').value = ''; 
+        el('favicon-upload').value = '';
+        
+        toast('Logo & Favicon saved! ✓', 'success');
+    } catch (error) {
+        toast('Error: ' + error.message, 'error');
+    } finally {
+        btn.textContent = '💾 Save Logo & Favicon'; btn.disabled = false;
+    }
 }
 
 function applyLogoFavicon() {
