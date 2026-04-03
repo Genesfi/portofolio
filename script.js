@@ -412,27 +412,27 @@ function fillDesignForm() {
 async function uploadFileToSupabase(file, folderName) {
     if (!file) return null;
     
-    // TAMENG ANTI-ERROR: Amankan nama file dan pastikan tipe gambarnya (MIME Type) terdeteksi
-    let safeName = 'image';
-    let fileExt = 'png';
-    if (file.name && typeof file.name === 'string') {
-        const parts = file.name.split('.');
-        if (parts.length > 1) {
-            fileExt = parts.pop().toLowerCase();
-            safeName = parts.join('-').replace(/[^a-zA-Z0-9\-_]/g, '');
-        } else {
-            safeName = file.name.replace(/[^a-zA-Z0-9\-_]/g, '');
-        }
+    // BACA EKSTENSI DARI TIPE FILE ASLI (Paling Akurat)
+    let fileExt = 'png'; 
+    if (file.type && file.type.includes('/')) {
+        fileExt = file.type.split('/'); // contoh: 'image/gif' akan menjadi 'gif'
+    } else if (file.name && file.name.includes('.')) {
+        fileExt = file.name.split('.').pop().toLowerCase();
     }
 
-    const fileName = `${folderName}/${Date.now()}-${safeName}.${fileExt}`;
+    // Rapikan sedikit jika SVG atau JPEG
+    if (fileExt === 'svg+xml') fileExt = 'svg';
+    if (fileExt === 'jpeg') fileExt = 'jpg';
 
-    // Upload dengan menetapkan contentType (Ini yang bikin browser mau menampilkan gambarnya!)
+    // Bikin nama unik
+    const fileName = `${folderName}/${Date.now()}-logo.${fileExt}`;
+
+    // Upload dengan contentType yang sesuai agar browser mengenali format aslinya
     const { data, error } = await sb.storage
         .from('portfolio-assets')
         .upload(fileName, file, { 
             upsert: true,
-            contentType: file.type || 'image/' + fileExt 
+            contentType: file.type || `image/${fileExt}` 
         });
 
     if (error) {
