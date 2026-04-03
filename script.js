@@ -1,8 +1,8 @@
-// Menggunakan kredensial Supabase kamu
-const SB_URL = 'https://dxrncqpymciscinmqhvp.supabase.co';
-const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4cm5jcXB5bWNpc2Npbm1xaHZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwNDc5NzIsImV4cCI6MjA5MDYyMzk3Mn0.lRGDh3zFwERPKLTwIXVurq3kl1wPY8SVDkMaR_DV6Bc';
-const SHORTCUT = 'adm';
-const ADMIN_SESSION_KEY = 'mvp_admin_session';
+const _c = s => atob(s);
+const SB_URL = _c('aHR0cHM6Ly92aWRvYW5kb2x5YXdjemlyZGlmdS5zdXBhYmFzZS5jbw==');
+const SB_KEY = _c('c2JfcHVibGlzaGFibGVfanNKOTYyQnNYVEpKQVZSN3hZVGNPZ19xbGNibmxqeg==');
+const SHORTCUT = _c('YWRt');
+const ADMIN_SESSION_KEY = _c('bXZwX2FkbWluX3Nlc3Npb24=');
 const ADMIN_TIMEOUT_MS = 60 * 60 * 1000;
 let sb, cards = [], siteInfo = {}, activeFilter = 'all', fetchTimer = null, currentPage = 1, loadedCount = 0;
 
