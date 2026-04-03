@@ -1,8 +1,8 @@
-const _c = s => atob(s);
-const SB_URL = _c('aHR0cHM6Ly92aWRvYW5kb2x5YXdjemlyZGlmdS5zdXBhYmFzZS5jbw==');
-const SB_KEY = _c('c2JfcHVibGlzaGFibGVfanNKOTYyQnNYVEpKQVZSN3hZVGNPZ19xbGNibmxqeg==');
-const SHORTCUT = _c('YWRt');
-const ADMIN_SESSION_KEY = _c('bXZwX2FkbWluX3Nlc3Npb24=');
+// Menggunakan kredensial Supabase kamu
+const SB_URL = 'https://dxrncqpymciscinmqhvp.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4cm5jcXB5bWNpc2Npbm1xaHZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwNDc5NzIsImV4cCI6MjA5MDYyMzk3Mn0.lRGDh3zFwERPKLTwIXVurq3kl1wPY8SVDkMaR_DV6Bc';
+const SHORTCUT = 'adm';
+const ADMIN_SESSION_KEY = 'mvp_admin_session';
 const ADMIN_TIMEOUT_MS = 60 * 60 * 1000;
 let sb, cards = [], siteInfo = {}, activeFilter = 'all', fetchTimer = null, currentPage = 1, loadedCount = 0;
 
@@ -36,28 +36,19 @@ function switchTab(name, btn) {
 function requestAdmin() {
     if (isAdminActive()) { renewAdminSession(); el('admin-panel').classList.toggle('open'); return; }
     el('pw-error').style.display = 'none'; el('pw-email').value = ''; el('pw-input').value = ''; el('pw-btn').disabled = false;
-    try { const lock = JSON.parse(sessionStorage.getItem(_c('bG9ja291dA==')) || 'null'); if (lock && Date.now() < lock.until) { const mins = Math.ceil((lock.until - Date.now()) / 60000); el('pw-error').style.display = 'block'; el('pw-error').textContent = `🔒 Too many attempts. Try again in ${mins} min.`; el('pw-btn').disabled = true; } } catch (e) { }
     el('pw-modal').style.display = 'flex'; setTimeout(() => el('pw-email').focus(), 100);
 }
 
 async function checkPw() {
-    const MAX = 5, LOCK_MS = 15 * 60 * 1000, now = Date.now();
-    const lockKey = _c('bG9ja291dA=='), attKey = _c('YXR0ZW1wdHM=');
-    try { const lock = JSON.parse(sessionStorage.getItem(lockKey) || 'null'); if (lock && now < lock.until) { const mins = Math.ceil((lock.until - now) / 60000); el('pw-error').style.display = 'block'; el('pw-error').textContent = `🔒 Too many attempts. Try again in ${mins} min.`; el('pw-btn').disabled = true; return; } } catch (e) { }
     const email = el('pw-email').value.trim(), pass = el('pw-input').value;
     if (!email || !pass) { el('pw-error').style.display = 'block'; el('pw-error').textContent = '❌ Please enter email and password.'; return; }
     const btn = el('pw-btn'); btn.textContent = 'Signing in...'; btn.disabled = true;
     try {
         const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
         if (error || !data.user) throw new Error('fail');
-        sessionStorage.removeItem(attKey); sessionStorage.removeItem(lockKey);
         setAdminSession(true); el('pw-modal').style.display = 'none'; el('admin-panel').classList.add('open'); toast('Welcome back! ✓', 'success');
     } catch (e) {
-        let att = 0; try { att = parseInt(sessionStorage.getItem(attKey) || '0'); } catch (e) { }
-        att++; sessionStorage.setItem(attKey, att);
-        const rem = MAX - att;
-        if (att >= MAX) { sessionStorage.setItem(lockKey, JSON.stringify({ until: now + LOCK_MS })); sessionStorage.removeItem(attKey); el('pw-error').style.display = 'block'; el('pw-error').textContent = '🔒 Too many attempts. Locked for 15 minutes.'; btn.disabled = true; }
-        else { el('pw-error').style.display = 'block'; el('pw-error').textContent = `❌ Wrong credentials. ${rem} attempt${rem > 1 ? 's' : ''} left.`; btn.disabled = false; }
+        el('pw-error').style.display = 'block'; el('pw-error').textContent = `❌ Wrong credentials.`; btn.disabled = false;
         el('pw-input').value = ''; el('pw-input').focus();
     }
     btn.textContent = 'Sign In →';
@@ -70,6 +61,14 @@ function hideLoading() { const s = el('loading-screen'); if (!s) return; s.class
 // ── LOAD DATA ──
 async function loadCards() { const { data, error } = await sb.from('mv_works').select('*').order('sort_order').order('created_at'); if (error) { toast('Error: ' + error.message, 'error'); return; } cards = data || []; renderGrid(true); renderFilters(); updateStats(); buildShowcase(); if (el('tab-list')?.classList.contains('active')) renderExistingList(); }
 async function loadSiteInfo() { const { data } = await sb.from('mv_site').select('data').eq('id', 1).single(); if (data?.data) { siteInfo = data.data; applySiteInfo(); updateStats(); } }
+
+// ── UTILS ──
+function el(id) { return document.getElementById(id); }
+function setText(id, v) { if (v && el(id)) el(id).textContent = v; }
+function esc(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+function ytExtract(s) { if (!s) return null; const m = s.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/) || s.match(/^([a-zA-Z0-9_-]{11})$/); return m ? m : null; }
+let _tt;
+function toast(msg, type = '') { const t = el('toast'); t.textContent = msg; t.className = `toast ${type} show`; clearTimeout(_tt); _tt = setTimeout(() => t.classList.remove('show'), 3200); }
 
 // ── TAG PRESETS ──
 function getTagsArray(id) { return el(id).value.split(',').map(t => t.trim()).filter(Boolean); }
@@ -255,51 +254,7 @@ function onUrlInput(val) { clearTimeout(fetchTimer); const ytId = ytExtract(val)
 async function fetchYtInfo(ytId) { try { const res = await fetch(`https://www.youtube.com/oembed?url=https://youtube.com/watch?v=${ytId}&format=json`); if (!res.ok) throw new Error(); const data = await res.json(); if (!el('inp-title').value.trim()) el('inp-title').value = data.title || ''; if (!el('inp-artist').value.trim()) el('inp-artist').value = data.author_name || ''; setFetchStatus('ok', '✓ Info fetched'); } catch { setFetchStatus('err', '⚠ Could not fetch info'); } }
 function setFetchStatus(type, msg) { const s = el('fetch-status'); s.textContent = msg; s.className = 'fetch-status' + (type ? ' ' + type : ''); }
 
-// ── SITE INFO ──
-function applySiteInfo() {
-    const s = siteInfo; if (!s || !Object.keys(s).length) return;
-    if (s.colors) applyColors(s.colors);
-    applyLogoFavicon();
-    const tabTitle = s.siteTitle || s.brand || 'MV Portfolio'; document.title = tabTitle; if (el('page-title')) el('page-title').textContent = tabTitle;
-    if (s.brand) { el('nav-brand').innerHTML = s.brand.replace('.', '<span>.</span>'); el('footer-brand').innerHTML = s.brand.replace('.', '<span>.</span>'); }
-    setText('hero-label', s.label); setText('hero-sub', s.hsub); setText('about-p1', s.about1); setText('about-p2', s.about2); setText('footer-copy', s.copy);
-    if (s.htitle) { const lines = s.htitle.split('|'); el('hero-title').innerHTML = lines.map((l, i) => i === 0 ? l : i === 1 ? `<span class="accent">${l}</span>` : `<span class="stroke">${l}</span>`).join('<br>'); }
-    const socials = [{ key: 'yt', label: 'YouTube', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.7 15.5V8.5l6.3 3.5-6.3 3.5z"/></svg>', primary: true }, { key: 'tw', label: 'Twitter/X', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>', primary: false }, { key: 'discord', label: 'Discord', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057c.003.024.015.046.033.06a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>', primary: false }, { key: 'vgen', label: 'VGen', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>', primary: false }, { key: 'ig', label: 'Instagram', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>', primary: false }, { key: 'tiktok', label: 'TikTok', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.75a4.85 4.85 0 0 1-1.01-.06z"/></svg>', primary: false }];
-    const aboutWrap = el('about-social-btns'), footerWrap = el('footer-social-links');
-    if (aboutWrap) aboutWrap.innerHTML = socials.filter(s2 => s[s2.key]).map(s2 => `<a href="${s[s2.key]}" target="_blank" class="btn ${s2.primary ? 'btn-primary' : 'btn-ghost'}" style="padding:10px 20px;font-size:11px;display:inline-flex;align-items:center;gap:7px">${s2.icon} ${s2.label}</a>`).join('');
-    if (footerWrap) footerWrap.innerHTML = socials.filter(s2 => s[s2.key]).map(s2 => `<a href="${s[s2.key]}" target="_blank">${s2.label}</a>`).join('');
-}
-
-function fillSiteForm() {
-    const s = siteInfo;
-    ['brand', 'siteTitle', 'label', 'htitle', 'hsub', 'about1', 'about2', 'yt', 'tw', 'discord', 'vgen', 'ig', 'tiktok', 'copy', 'year'].forEach(k => { if (el('s-' + k)) el('s-' + k).value = s[k] || ''; });
-    if (el('s-perpage')) el('s-perpage').value = s.perPage || 12;
-    const mode = s.displayMode || 'all', radio = el('dm-' + mode); if (radio) radio.checked = true;
-}
-
-function previewMode(mode) { siteInfo.displayMode = mode; renderGrid(true); }
-
-async function saveSiteEdit() {
-    const mode = document.querySelector('input[name="display-mode"]:checked');
-    siteInfo = { brand: el('s-brand').value, siteTitle: el('s-siteTitle').value, label: el('s-label').value, htitle: el('s-htitle').value, hsub: el('s-hsub').value, about1: el('s-about1').value, about2: el('s-about2').value, yt: el('s-yt').value, tw: el('s-tw').value, discord: el('s-discord').value, vgen: el('s-vgen').value, ig: el('s-ig').value, tiktok: el('s-tiktok').value, copy: el('s-copy').value, year: el('s-year').value, displayMode: mode ? mode.value : 'all', perPage: parseInt(el('s-perpage')?.value) || 12, colors: siteInfo.colors, logoData: siteInfo.logoData, faviconData: siteInfo.faviconData };
-    const btn = el('site-save-btn'); btn.textContent = 'Saving...'; btn.disabled = true;
-    renewAdminSession();
-    const { error } = await sb.from('mv_site').upsert({ id: 1, data: siteInfo });
-    btn.textContent = 'Simpan Info Site →'; btn.disabled = false;
-    if (error) { toast('Error: ' + error.message, 'error'); return; }
-    applySiteInfo(); updateStats(); renderGrid(true); toast('Site info saved! ✓', 'success');
-}
-function closeSiteEdit() { el('site-edit-panel').classList.remove('open'); }
-
-// ── UTILS ──
-function el(id) { return document.getElementById(id); }
-function setText(id, v) { if (v && el(id)) el(id).textContent = v; }
-function esc(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
-function ytExtract(s) { if (!s) return null; const m = s.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/) || s.match(/^([a-zA-Z0-9_-]{11})$/); return m ? m : null; }
-let _tt;
-function toast(msg, type = '') { const t = el('toast'); t.textContent = msg; t.className = `toast ${type} show`; clearTimeout(_tt); _tt = setTimeout(() => t.classList.remove('show'), 3200); }
-
-// ── EDIT MODE (drag on grid) ──────────────────
+// ── DRAG MODE ──
 let gridSortable = null;
 
 function toggleEditMode() {
@@ -427,58 +382,102 @@ function resetColors() {
     toast('Reset to default — click Save Colors to keep it', '');
 }
 
-function fillDesignForm() {
-    if (siteInfo.colors) applyColors(siteInfo.colors);
-    if (siteInfo.logoData) {
-        const prev = el('logo-preview');
-        const img = el('logo-preview-img');
-        if (prev && img) { img.src = siteInfo.logoData; prev.style.display = 'block'; }
+// ── LOGO & FAVICON (PENGGUNAAN DATABASE STORAGE BUCKET) ────────────────────────────
+
+// 1. Fungsi Bantuan untuk Upload ke Supabase Storage
+async function uploadFileToSupabase(file, folderName) {
+    if (!file) return null;
+    
+    // Bikin nama file unik agar tidak bentrok
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${folderName}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+
+    // Upload ke bucket bernama 'portfolio-assets'
+    const { data, error } = await sb.storage
+        .from('portfolio-assets')
+        .upload(fileName, file, { upsert: true });
+
+    if (error) {
+        console.error('Upload Error:', error);
+        throw error;
     }
+
+    // Ambil URL public dari file yang baru diupload
+    const { data: publicUrlData } = sb.storage
+        .from('portfolio-assets')
+        .getPublicUrl(fileName);
+
+    return publicUrlData.publicUrl;
 }
 
-// ── LOGO & FAVICON ────────────────────────────
-let pendingLogo = null, pendingFavicon = null;
-
+// 2. Fungsi Preview Gambar sebelum di-Save
 function handleLogoUpload(input) {
-    const file = input.files; if (!file) return;
+    const file = input.files;
+    if (!file) return;
     const reader = new FileReader();
     reader.onload = (e) => {
-        pendingLogo = e.target.result;
         const prev = el('logo-preview');
         const img = el('logo-preview-img');
-        if (prev && img) { img.src = pendingLogo; prev.style.display = 'block'; }
-        toast('Logo ready — click Save Logo & Favicon', '');
+        if (prev && img) { img.src = e.target.result; prev.style.display = 'block'; }
+        toast('Logo selected — click Save Logo & Favicon', '');
     };
     reader.readAsDataURL(file);
 }
 
 function handleFaviconUpload(input) {
-    const file = input.files; if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        pendingFavicon = e.target.result;
-        toast('Favicon ready — click Save Logo & Favicon', '');
-    };
-    reader.readAsDataURL(file);
+    const file = input.files;
+    if (!file) return;
+    toast('Favicon selected — click Save Logo & Favicon', '');
 }
 
+// 3. Fungsi Utama Save Logo & Favicon
 async function saveLogoFavicon() {
     renewAdminSession();
-    // PESAN KESALAHAN YANG DIPERBAIKI (MODIFIKASI KECIL DARI ASLINYA)
-    if (!pendingLogo && !pendingFavicon) { toast('Silakan klik "Choose File" untuk memilih gambar', 'error'); return; }
     
+    const logoFile = el('logo-upload').files;
+    const favFile = el('favicon-upload').files;
+
+    if (!logoFile && !favFile) {
+        toast('Silakan pilih gambar (Klik Choose File) terlebih dahulu', 'error');
+        return;
+    }
+
     const btn = el('logo-save-btn');
-    btn.textContent = 'Saving...'; btn.disabled = true;
-    if (pendingLogo) siteInfo.logoData = pendingLogo;
-    if (pendingFavicon) siteInfo.faviconData = pendingFavicon;
-    const { error } = await sb.from('mv_site').upsert({ id: 1, data: siteInfo });
-    btn.textContent = '💾 Save Logo & Favicon'; btn.disabled = false;
-    if (error) { toast('Error: ' + error.message, 'error'); return; }
-    applyLogoFavicon();
-    pendingLogo = null; pendingFavicon = null;
-    toast('Logo & Favicon saved! ✓', 'success');
+    btn.textContent = 'Uploading & Saving...'; 
+    btn.disabled = true;
+
+    try {
+        // Upload file fisik ke Supabase Storage, bukan lagi mengubahnya jadi Base64
+        if (logoFile) {
+            const logoUrl = await uploadFileToSupabase(logoFile, 'logos');
+            if (logoUrl) siteInfo.logoData = logoUrl;
+        }
+        
+        if (favFile) {
+            const favUrl = await uploadFileToSupabase(favFile, 'favicons');
+            if (favUrl) siteInfo.faviconData = favUrl;
+        }
+
+        // Simpan URL yang dihasilkan ke tabel mv_site
+        const { error } = await sb.from('mv_site').upsert({ id: 1, data: siteInfo });
+        if (error) throw error;
+
+        applyLogoFavicon();
+        
+        // Bersihkan kotak input
+        el('logo-upload').value = '';
+        el('favicon-upload').value = '';
+        
+        toast('Logo & Favicon uploaded and saved! ✓', 'success');
+    } catch (err) {
+        toast('Error uploading file. Pastikan bucket "portfolio-assets" sudah dibuat.', 'error');
+    } finally {
+        btn.textContent = '💾 Save Logo & Favicon'; 
+        btn.disabled = false;
+    }
 }
 
+// 4. Menerapkan Logo di UI
 function applyLogoFavicon() {
     const loadingLogoImg = document.getElementById('loading-logo-img');
     const loadingLogoText = document.getElementById('loading-logo-text');
@@ -501,13 +500,77 @@ function applyLogoFavicon() {
     }
 }
 
+// ── SITE INFO (Lainnya) ──
+function applySiteInfo() {
+    const s = siteInfo; if (!s || !Object.keys(s).length) return;
+    if (s.colors) applyColors(s.colors);
+    applyLogoFavicon();
+    const tabTitle = s.siteTitle || s.brand || 'MV Portfolio'; document.title = tabTitle; if (el('page-title')) el('page-title').textContent = tabTitle;
+    if (s.brand) { el('nav-brand').innerHTML = s.brand.replace('.', '<span>.</span>'); el('footer-brand').innerHTML = s.brand.replace('.', '<span>.</span>'); }
+    setText('hero-label', s.label); setText('hero-sub', s.hsub); setText('about-p1', s.about1); setText('about-p2', s.about2); setText('footer-copy', s.copy);
+    if (s.htitle) { const lines = s.htitle.split('|'); el('hero-title').innerHTML = lines.map((l, i) => i === 0 ? l : i === 1 ? `<span class="accent">${l}</span>` : `<span class="stroke">${l}</span>`).join('<br>'); }
+    
+    const socials = [
+        { key: 'yt', label: 'YouTube', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.7 15.5V8.5l6.3 3.5-6.3 3.5z"/></svg>', primary: true }, 
+        { key: 'tw', label: 'Twitter/X', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>', primary: false }, 
+        { key: 'discord', label: 'Discord', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057c.003.024.015.046.033.06a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>', primary: false }, 
+        { key: 'vgen', label: 'VGen', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>', primary: false }, 
+        { key: 'ig', label: 'Instagram', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>', primary: false }, 
+        { key: 'tiktok', label: 'TikTok', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.75a4.85 4.85 0 0 1-1.01-.06z"/></svg>', primary: false }
+    ];
+    
+    const aboutWrap = el('about-social-btns'), footerWrap = el('footer-social-links');
+    if (aboutWrap) aboutWrap.innerHTML = socials.filter(s2 => s[s2.key]).map(s2 => `<a href="${s[s2.key]}" target="_blank" class="btn ${s2.primary ? 'btn-primary' : 'btn-ghost'}" style="padding:10px 20px;font-size:11px;display:inline-flex;align-items:center;gap:7px">${s2.icon} ${s2.label}</a>`).join('');
+    if (footerWrap) footerWrap.innerHTML = socials.filter(s2 => s[s2.key]).map(s2 => `<a href="${s[s2.key]}" target="_blank">${s2.label}</a>`).join('');
+}
+
+function fillSiteForm() {
+    const s = siteInfo;
+    ['brand', 'siteTitle', 'label', 'htitle', 'hsub', 'about1', 'about2', 'yt', 'tw', 'discord', 'vgen', 'ig', 'tiktok', 'copy', 'year'].forEach(k => { if (el('s-' + k)) el('s-' + k).value = s[k] || ''; });
+    if (el('s-perpage')) el('s-perpage').value = s.perPage || 12;
+    const mode = s.displayMode || 'all', radio = el('dm-' + mode); if (radio) radio.checked = true;
+}
+
+function previewMode(mode) { 
+    siteInfo.displayMode = mode; 
+    renderGrid(true); 
+}
+
+async function saveSiteEdit() {
+    const mode = document.querySelector('input[name="display-mode"]:checked');
+    siteInfo = { 
+        brand: el('s-brand').value, siteTitle: el('s-siteTitle').value, label: el('s-label').value, 
+        htitle: el('s-htitle').value, hsub: el('s-hsub').value, about1: el('s-about1').value, 
+        about2: el('s-about2').value, yt: el('s-yt').value, tw: el('s-tw').value, 
+        discord: el('s-discord').value, vgen: el('s-vgen').value, ig: el('s-ig').value, 
+        tiktok: el('s-tiktok').value, copy: el('s-copy').value, year: el('s-year').value, 
+        displayMode: mode ? mode.value : 'all', perPage: parseInt(el('s-perpage')?.value) || 12,
+        colors: siteInfo.colors, logoData: siteInfo.logoData, faviconData: siteInfo.faviconData
+    };
+    const btn = el('site-save-btn'); btn.textContent = 'Saving...'; btn.disabled = true;
+    renewAdminSession();
+    const { error } = await sb.from('mv_site').upsert({ id: 1, data: siteInfo });
+    btn.textContent = 'Simpan Info Site →'; btn.disabled = false;
+    if (error) { toast('Error: ' + error.message, 'error'); return; }
+    applySiteInfo(); updateStats(); renderGrid(true); toast('Site info saved! ✓', 'success');
+}
+
+function closeSiteEdit() { 
+    const panel = el('site-edit-panel');
+    if (panel) panel.classList.remove('open'); 
+}
+
+function fillDesignForm() {
+    if (siteInfo.colors) applyColors(siteInfo.colors);
+    if (siteInfo.logoData) {
+        const prev = el('logo-preview');
+        const img = el('logo-preview-img');
+        if (prev && img) { img.src = siteInfo.logoData; prev.style.display = 'block'; }
+    }
+}
+
 // ── INIT ──
 async function init() {
-    // MODIFIKASI: Bersihkan input file "hantu" visual pada muat ulang halaman
-    const logoUp = el('logo-upload'), favUp = el('favicon-upload');
-    if (logoUp) logoUp.value = '';
-    if (favUp) favUp.value = '';
-
     document.body.classList.add('loading');
     setLoadProgress(15, 'Connecting...');
     sb = window.supabase.createClient(SB_URL, SB_KEY);
