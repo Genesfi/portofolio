@@ -10,18 +10,37 @@ let sb, cards = [], siteInfo = {}, activeFilter = 'all', fetchTimer = null, curr
 // Key: ytId, Value: iframe element (dibuat saat loading screen masih muncul)
 const featuredPreloadMap = new Map();
 
+// Preload semua featured iframe, return Promise yang resolve saat
+// SEMUA iframe sudah onload — atau setelah MAX_WAIT_MS timeout (fallback).
 function preloadFeaturedIframes() {
+    const MAX_WAIT_MS = 5000; // maksimal tunggu 5 detik, lalu lanjut bagaimanapun
     const featuredCards = cards.filter(c => c.featured && c.ytId);
-    featuredCards.forEach(c => {
-        if (featuredPreloadMap.has(c.ytId)) return; // sudah ada, skip
-        const iframe = document.createElement('iframe');
-        iframe.allow = 'autoplay';
-        // Sembunyikan di luar viewport selama preload
-        iframe.style.cssText = 'position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;top:-9999px;left:-9999px;border:none;';
-        iframe.src = `https://www.youtube.com/embed/${c.ytId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${c.ytId}&rel=0&modestbranding=1&iv_load_policy=3&start=60`;
-        document.body.appendChild(iframe);
-        featuredPreloadMap.set(c.ytId, iframe);
+    if (!featuredCards.length) return Promise.resolve();
+
+    const promises = featuredCards.map(c => {
+        if (featuredPreloadMap.has(c.ytId)) return Promise.resolve();
+        return new Promise(resolve => {
+            const iframe = document.createElement('iframe');
+            iframe.allow = 'autoplay';
+            iframe.style.cssText = 'position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;top:-9999px;left:-9999px;border:none;';
+            iframe.src = `https://www.youtube.com/embed/${c.ytId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${c.ytId}&rel=0&modestbranding=1&iv_load_policy=3&start=60`;
+
+            const done = () => { iframe._mvReady = true; resolve(); };
+            iframe.onload = done;
+            // Fallback: kalau onload tidak muncul dalam MAX_WAIT_MS, resolve aja
+            const t = setTimeout(done, MAX_WAIT_MS);
+            iframe.onload = () => { clearTimeout(t); iframe._mvReady = true; resolve(); };
+
+            document.body.appendChild(iframe);
+            featuredPreloadMap.set(c.ytId, iframe);
+        });
     });
+
+    // Race: selesai semua ATAU timeout global 5 detik
+    return Promise.race([
+        Promise.all(promises),
+        new Promise(r => setTimeout(r, MAX_WAIT_MS))
+    ]);
 }
 
 // ── ADMIN SESSION ──
@@ -742,14 +761,11 @@ async function init() {
     setLoadProgress(60, 'Loading works...');
     await loadCards();
 
-    // ── PRELOAD FEATURED IFRAMES SEKARANG ──
-    // Loading screen masih tampil, manfaatkan waktu ini untuk warming up iframe
+    // ── PRELOAD FEATURED IFRAMES ──
+    // Tunggu sampai iframe featured benar-benar onload (atau max 5 detik)
+    // Loading screen masih tampil selama proses ini berlangsung
     setLoadProgress(75, 'Preloading previews...');
-    preloadFeaturedIframes();
-
-    // Beri waktu ~800ms untuk iframe mulai buffering sebelum loading screen hilang
-    // Ini adalah jendela berharga — iframe sudah di-create & src sudah di-set
-    await new Promise(r => setTimeout(r, 800));
+    await preloadFeaturedIframes();
 
     setLoadProgress(90, 'Almost there...');
 
