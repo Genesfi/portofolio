@@ -6,6 +6,24 @@ const ADMIN_SESSION_KEY = _c('bXZwX2FkbWluX3Nlc3Npb24=');
 const ADMIN_TIMEOUT_MS = 60 * 60 * 1000;
 let sb, cards = [], siteInfo = {}, activeFilter = 'all', fetchTimer = null, currentPage = 1, loadedCount = 0;
 
+// ── FEATURED PRELOAD CACHE ──
+// Key: ytId, Value: iframe element (dibuat saat loading screen masih muncul)
+const featuredPreloadMap = new Map();
+
+function preloadFeaturedIframes() {
+    const featuredCards = cards.filter(c => c.featured && c.ytId);
+    featuredCards.forEach(c => {
+        if (featuredPreloadMap.has(c.ytId)) return; // sudah ada, skip
+        const iframe = document.createElement('iframe');
+        iframe.allow = 'autoplay';
+        // Sembunyikan di luar viewport selama preload
+        iframe.style.cssText = 'position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;top:-9999px;left:-9999px;border:none;';
+        iframe.src = `https://www.youtube.com/embed/${c.ytId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${c.ytId}&rel=0&modestbranding=1&iv_load_policy=3&start=60`;
+        document.body.appendChild(iframe);
+        featuredPreloadMap.set(c.ytId, iframe);
+    });
+}
+
 // ── ADMIN SESSION ──
 function isAdminActive() { try { const s = JSON.parse(sessionStorage.getItem(ADMIN_SESSION_KEY) || 'null'); if (!s) return false; if (Date.now() - s.ts > ADMIN_TIMEOUT_MS) { sessionStorage.removeItem(ADMIN_SESSION_KEY); return false; } return true; } catch { return false; } }
 function setAdminSession(a) { if (a) sessionStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify({ ts: Date.now() })); else sessionStorage.removeItem(ADMIN_SESSION_KEY); }
@@ -144,7 +162,6 @@ function cardHTML(c) {
     const hasYt = !!c.ytId;
     const isFeatured = !!c.featured;
 
-    // Featured: tidak pakai hover handler, auto-play diurus oleh autoPlayFeatured()
     const hoverAttrs = (hasYt && !isFeatured)
         ? `onmouseenter="startPreview(this,'${c.ytId}')" onmouseleave="stopPreview(this)"`
         : '';
@@ -186,8 +203,9 @@ function renderGrid(resetPage) {
         grid.innerHTML = list.map(cardHTML).join('');
     }
 
-    // Auto-play semua featured card setelah DOM selesai render
-    setTimeout(() => autoPlayFeatured(), 800);
+    // Inject iframe yang sudah preloaded ke card featured
+    // Tidak ada delay — langsung inject karena iframe sudah warming up sejak loading screen
+    requestAnimationFrame(() => injectPreloadedFeatured());
 }
 
 function renderFilters() {
@@ -197,24 +215,65 @@ function renderFilters() {
 
 function filterCards(tag, btn) { activeFilter = tag; document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); renderGrid(true); }
 
-// ── AUTO PLAY FEATURED CARDS ──
+// ── INJECT PRELOADED FEATURED (tanpa delay, iframe sudah siap) ──
+function injectPreloadedFeatured() {
+    const featuredCardEls = document.querySelectorAll('.mv-card.featured');
+    featuredCardEls.forEach(card => {
+        const ytId = card.dataset.ytid;
+        if (!ytId) return;
+        if (card.classList.contains('previewing')) return;
+
+        const preloaded = featuredPreloadMap.get(ytId);
+        if (preloaded) {
+            // Ambil iframe dari cache, pindahkan ke dalam card
+            preloaded.removeAttribute('style');
+            preloaded.className = 'mv-preview-iframe';
+            card.insertBefore(preloaded, card.firstChild);
+            card.classList.add('previewing', 'featured-autoplay');
+            // Iframe sudah loading sejak tadi — tandai ready setelah onload
+            // Kalau sudah loaded sebelumnya, langsung ready
+            if (preloaded.contentWindow) {
+                // Cek apakah sudah loaded dengan flag custom
+                if (preloaded._mvReady) {
+                    card.classList.add('preview-ready');
+                } else {
+                    preloaded.onload = () => {
+                        preloaded._mvReady = true;
+                        card.classList.add('preview-ready');
+                    };
+                }
+            }
+            featuredPreloadMap.delete(ytId); // sudah dipindah, hapus dari map
+        } else {
+            // Fallback: tidak ada preload (misal card baru ditambah), buat iframe baru
+            autoPlayFeaturedCard(card, ytId);
+        }
+    });
+}
+
+// ── AUTO PLAY FEATURED (fallback untuk card yang tidak sempat preload) ──
+function autoPlayFeaturedCard(card, ytId) {
+    if (card.classList.contains('previewing')) return;
+    card.classList.add('previewing', 'featured-autoplay');
+    const iframe = document.createElement('iframe');
+    iframe.className = 'mv-preview-iframe';
+    iframe.allow = 'autoplay';
+    iframe.src = `https://www.youtube.com/embed/${ytId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${ytId}&rel=0&modestbranding=1&iv_load_policy=3&start=60`;
+    iframe.onload = () => {
+        iframe._mvReady = true;
+        card.classList.add('preview-ready');
+    };
+    card.insertBefore(iframe, card.firstChild);
+}
+
+// Fungsi lama dipertahankan untuk kompatibilitas (dipanggil dari realtime update)
 function autoPlayFeatured() {
     const featuredCards = document.querySelectorAll('.mv-card.featured');
     featuredCards.forEach(card => {
         const ytId = card.dataset.ytid;
         if (!ytId) return;
-        if (card.classList.contains('previewing')) return; // sudah jalan, skip
-
-        card.classList.add('previewing', 'featured-autoplay');
-
-        const iframe = document.createElement('iframe');
-        iframe.className = 'mv-preview-iframe';
-        iframe.allow = 'autoplay';
-        iframe.src = `https://www.youtube.com/embed/${ytId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${ytId}&rel=0&modestbranding=1&iv_load_policy=3&start=60`;
-
-        iframe.onload = () => card.classList.add('preview-ready');
-
-        card.insertBefore(iframe, card.firstChild);
+        if (card.classList.contains('previewing')) return;
+        autoPlayFeaturedCard(card, ytId);
     });
 }
 
@@ -394,7 +453,7 @@ const iframeCache = new Map();
 
 function startPreview(card, ytId) {
     if (!ytId || document.body.classList.contains('edit-mode')) return;
-    if (card.classList.contains('featured')) return; // featured sudah auto-play
+    if (card.classList.contains('featured')) return;
 
     if (!iframeCache.has(ytId)) {
         const preloadIframe = document.createElement('iframe');
@@ -424,7 +483,7 @@ function startPreview(card, ytId) {
 function stopPreview(card) {
     clearTimeout(previewTimer);
     if (!card) return;
-    if (card.classList.contains('featured-autoplay')) return; // jangan stop featured
+    if (card.classList.contains('featured-autoplay')) return;
 
     card.classList.remove('previewing', 'preview-ready');
     const iframe = card.querySelector('.mv-preview-iframe');
@@ -680,13 +739,25 @@ async function init() {
     sb = window.supabase.createClient(SB_URL, SB_KEY);
     setLoadProgress(35, 'Loading site info...');
     await loadSiteInfo();
-    setLoadProgress(65, 'Loading works...');
+    setLoadProgress(60, 'Loading works...');
     await loadCards();
+
+    // ── PRELOAD FEATURED IFRAMES SEKARANG ──
+    // Loading screen masih tampil, manfaatkan waktu ini untuk warming up iframe
+    setLoadProgress(75, 'Preloading previews...');
+    preloadFeaturedIframes();
+
+    // Beri waktu ~800ms untuk iframe mulai buffering sebelum loading screen hilang
+    // Ini adalah jendela berharga — iframe sudah di-create & src sudah di-set
+    await new Promise(r => setTimeout(r, 800));
+
     setLoadProgress(90, 'Almost there...');
+
     sb.channel('mv_realtime')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'mv_works' }, loadCards)
         .on('postgres_changes', { event: '*', schema: 'public', table: 'mv_site' }, loadSiteInfo)
         .subscribe();
+
     setTimeout(() => {
         setLoadProgress(100, 'Ready!');
         setTimeout(() => {
