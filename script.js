@@ -325,7 +325,7 @@ function autoPlayFeaturedCard(card, ytId) {
     const iframe = document.createElement('iframe');
     iframe.className = 'mv-preview-iframe';
     iframe.allow = 'autoplay';
-    iframe.src = `https://www.youtube.com/embed/${ytId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${ytId}&rel=0&modestbranding=1&iv_load_policy=3&start=60`;
+    iframe.src = `https://www.youtube.com/embed/${ytId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${ytId}&rel=0&modestbranding=1&iv_load_policy=3&start=60&disablekb=1&fs=0`;
     iframe.onload = () => {
         iframe._mvReady = true;
         card.classList.add('preview-ready');
