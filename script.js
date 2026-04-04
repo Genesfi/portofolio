@@ -6,6 +6,51 @@ const ADMIN_SESSION_KEY = _c('bXZwX2FkbWluX3Nlc3Npb24=');
 const ADMIN_TIMEOUT_MS = 60 * 60 * 1000;
 let sb, cards = [], siteInfo = {}, activeFilter = 'all', fetchTimer = null, currentPage = 1, loadedCount = 0;
 
+// ── AUTOPLAY STATE ──
+// Default ON, tersimpan di localStorage supaya preferensi user diingat
+let autoplayEnabled = (() => {
+    try { const v = localStorage.getItem('mv_autoplay'); return v === null ? true : v === '1'; } catch { return true; }
+})();
+
+function toggleAutoplay() {
+    autoplayEnabled = !autoplayEnabled;
+    try { localStorage.setItem('mv_autoplay', autoplayEnabled ? '1' : '0'); } catch {}
+    updateAutoplayBtn();
+    if (autoplayEnabled) {
+        // ON: inject / play semua featured yang belum jalan
+        injectPreloadedFeatured();
+        autoPlayFeatured();
+    } else {
+        // OFF: hentikan semua featured yang sedang play
+        stopAllFeatured();
+    }
+}
+
+function updateAutoplayBtn() {
+    const btn = el('autoplay-toggle'), label = el('autoplay-label');
+    if (!btn) return;
+    if (autoplayEnabled) {
+        btn.classList.add('active');
+        if (label) label.textContent = 'Autoplay';
+        btn.title = 'Autoplay ON — click to turn off';
+    } else {
+        btn.classList.remove('active');
+        if (label) label.textContent = 'Autoplay';
+        btn.title = 'Autoplay OFF — click to turn on';
+    }
+}
+
+function stopAllFeatured() {
+    document.querySelectorAll('.mv-card.featured-autoplay').forEach(card => {
+        const iframe = card.querySelector('.mv-preview-iframe');
+        if (iframe) iframe.remove();
+        card.classList.remove('previewing', 'preview-ready', 'featured-autoplay');
+    });
+    // Bersihkan juga preload map
+    featuredPreloadMap.forEach(iframe => iframe.remove());
+    featuredPreloadMap.clear();
+}
+
 // ── FEATURED PRELOAD CACHE ──
 // Key: ytId, Value: iframe element (dibuat saat loading screen masih muncul)
 const featuredPreloadMap = new Map();
@@ -13,7 +58,8 @@ const featuredPreloadMap = new Map();
 // Preload semua featured iframe, return Promise yang resolve saat
 // SEMUA iframe sudah onload — atau setelah MAX_WAIT_MS timeout (fallback).
 function preloadFeaturedIframes() {
-    const MAX_WAIT_MS = 5000; // maksimal tunggu 5 detik, lalu lanjut bagaimanapun
+    const MAX_WAIT_MS = 5000;
+    if (!autoplayEnabled) return Promise.resolve(); // skip kalau user matiin autoplay
     const featuredCards = cards.filter(c => c.featured && c.ytId);
     if (!featuredCards.length) return Promise.resolve();
 
@@ -236,6 +282,7 @@ function filterCards(tag, btn) { activeFilter = tag; document.querySelectorAll('
 
 // ── INJECT PRELOADED FEATURED (tanpa delay, iframe sudah siap) ──
 function injectPreloadedFeatured() {
+    if (!autoplayEnabled) return; // respect user preference
     const featuredCardEls = document.querySelectorAll('.mv-card.featured');
     featuredCardEls.forEach(card => {
         const ytId = card.dataset.ytid;
@@ -272,6 +319,7 @@ function injectPreloadedFeatured() {
 
 // ── AUTO PLAY FEATURED (fallback untuk card yang tidak sempat preload) ──
 function autoPlayFeaturedCard(card, ytId) {
+    if (!autoplayEnabled) return; // respect user preference
     if (card.classList.contains('previewing')) return;
     card.classList.add('previewing', 'featured-autoplay');
     const iframe = document.createElement('iframe');
@@ -778,6 +826,7 @@ async function init() {
         setLoadProgress(100, 'Ready!');
         setTimeout(() => {
             hideLoading();
+            updateAutoplayBtn();
             if (isAdminActive()) el('admin-panel').classList.add('open');
         }, 300);
     }, 200);
