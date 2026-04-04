@@ -69,7 +69,7 @@ function preloadFeaturedIframes() {
             const iframe = document.createElement('iframe');
             iframe.allow = 'autoplay';
             iframe.style.cssText = 'position:fixed;width:480px;height:270px;opacity:0;pointer-events:none;top:-9999px;left:-9999px;border:none;';
-            iframe.src = `https://www.youtube.com/embed/${c.ytId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${c.ytId}&rel=0&modestbranding=1&iv_load_policy=3&start=60`;
+            iframe.src = `https://www.youtube.com/embed/${c.ytId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${c.ytId}&rel=0&modestbranding=1&iv_load_policy=3&start=60&disablekb=1&fs=0`;
 
             const done = () => { iframe._mvReady = true; resolve(); };
             iframe.onload = done;
