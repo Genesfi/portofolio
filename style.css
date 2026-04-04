@@ -45,6 +45,26 @@ nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; a
 .nav-brand { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 0.1em; }
 .nav-brand span { color: var(--accent); }
 
+/* AUTOPLAY TOGGLE */
+.autoplay-toggle {
+    display: flex; align-items: center; gap: 7px;
+    padding: 6px 14px;
+    background: transparent;
+    border: 1px solid rgba(200, 255, 0, 0.2);
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+    cursor: pointer; transition: all 0.2s;
+    white-space: nowrap;
+}
+.autoplay-toggle:hover { border-color: var(--accent); color: var(--accent); }
+.autoplay-toggle.active { background: rgba(200, 255, 0, 0.1); border-color: var(--accent); color: var(--accent); }
+.autoplay-toggle.active .autoplay-icon { color: var(--accent); }
+.autoplay-toggle:not(.active) { border-color: rgba(240,240,240,0.1); color: var(--muted); }
+.autoplay-toggle:not(.active) .autoplay-icon { color: var(--muted); }
+.autoplay-label { display: inline; }
+@media (max-width: 480px) { .autoplay-label { display: none; } .autoplay-toggle { padding: 6px 10px; } }
+
 /* HERO */
 .hero { min-height: 100vh; display: flex; flex-direction: column; justify-content: flex-end; padding: 0 40px 60px; position: relative; overflow: hidden; }
 .hero-bg { position: absolute; inset: 0; background: radial-gradient(ellipse 60% 50% at 70% 40%, rgba(200, 255, 0, 0.06), transparent 60%), radial-gradient(ellipse 40% 40% at 30% 60%, rgba(255, 60, 172, 0.08), transparent 60%); }
