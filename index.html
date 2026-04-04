@@ -28,13 +28,18 @@
         <button onclick="exitEditMode()">✕ Exit</button>
     </div>
 
-    <nav>
+<nav>
         <ul class="nav-links">
             <li><a href="#works">Works</a></li>
             <li><a href="#about">About</a></li>
         </ul>
         <div class="nav-brand" id="nav-brand">MV<span>.</span>PORTFOLIO</div>
-        <div></div>
+        <button class="autoplay-toggle" id="autoplay-toggle" onclick="toggleAutoplay()" title="Toggle autoplay preview">
+            <span class="autoplay-icon">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            </span>
+            <span class="autoplay-label" id="autoplay-label">Autoplay</span>
+        </button>
     </nav>
 
     <section class="hero" id="home">
