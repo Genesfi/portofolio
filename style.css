@@ -185,6 +185,24 @@ section { padding: 80px 40px; }
     pointer-events: none; z-index: 1;
 }
 
+/* Block YouTube end screen overlay */
+.mv-card.featured-autoplay::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    background: transparent;
+    pointer-events: none;
+}
+
+.mv-card.featured-autoplay .mv-preview-iframe {
+    width: 105%;
+    height: 105%;
+    top: -2.5%;
+    left: -2.5%;
+    position: absolute;
+}
+
 /* Shimmer saat loading */
 .mv-card.previewing::before {
     content: ''; position: absolute; inset: 0; z-index: 0;
