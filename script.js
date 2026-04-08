@@ -105,7 +105,7 @@ function closeAdminPanel() {
 let keyBuf = '';
 document.addEventListener('keydown', e => {
     if (['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return;
-    if (e.key === 'Escape') { closeModal(); closeSiteEdit(); el('admin-panel').classList.remove('open'); el('pw-modal').style.display = 'none'; return; }
+    if (e.key === 'Escape') { closeModal(); closeSiteEdit(); closeAdminPanel(); el('pw-modal').style.display = 'none'; return; }
     keyBuf += e.key.toLowerCase();
     if (keyBuf.length > SHORTCUT.length) keyBuf = keyBuf.slice(-SHORTCUT.length);
     if (keyBuf === SHORTCUT) { keyBuf = ''; requestAdmin(); }
