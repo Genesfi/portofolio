@@ -95,6 +95,12 @@ function setAdminSession(a) { if (a) sessionStorage.setItem(ADMIN_SESSION_KEY, J
 function renewAdminSession() { if (isAdminActive()) setAdminSession(true); }
 setInterval(() => { if (!isAdminActive() && el('admin-panel')?.classList.contains('open')) { el('admin-panel').classList.remove('open'); toast('Admin session expired. Type "adm" to log in again.', 'error'); } }, 60 * 1000);
 
+function closeAdminPanel() {
+    document.getElementById('admin-panel').classList.remove('open');
+    sb.auth.signOut();
+    setAdminSession(false);
+}
+
 // ── SECRET SHORTCUT ──
 let keyBuf = '';
 document.addEventListener('keydown', e => {
