@@ -1,25 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title id="_c065a034d">MV Portfolio</title>
-    <link rel="icon" type="image/png" href=""> <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&family=Space+Mono&display=swap" rel="stylesheet">
+    <title id="page-title">MV Portfolio</title>
+    <link rel="icon" type="image/png" href="">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&family=Space+Mono&display=swap"
+        rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-    <div id="_c2667f3bd">
-<div class="_ca35a5d0b" id="_ca35a5d0b" style="display:none">MV PORTFOLIO</div>
-<img class="_c853ec812" id="_ca366d506" src="" alt="Loading..." style="display:none;">
-        
-        <div class="_c405d0ecc">
-            <div class="_c3b13fffc" id="_c3b13fffc"></div>
+    <div id="loading-screen">
+        <div class="loading-logo-text" id="loading-logo-text" style="display:none">MV PORTFOLIO</div>
+        <img class="loading-logo" id="loading-logo-img" src="" alt="Loading..." style="display:none;">
+
+        <div class="loading-bar-wrap">
+            <div class="loading-bar" id="loading-bar"></div>
         </div>
-        <div class="_c4cd7c66e" id="_c4cd7c66e">Loading portfolio...</div>
+        <div class="loading-text" id="loading-text">Loading portfolio...</div>
     </div>
 
     <div class="edit-mode-bar" id="edit-mode-bar">
@@ -28,177 +32,189 @@
         <button onclick="exitEditMode()">✕ Exit</button>
     </div>
 
-<nav>
-        <ul class="_cc6727362">
-            <li><a href="#_c8f13cb67">Works</a></li>
+    <nav>
+        <ul class="nav-links">
+            <li><a href="#works">Works</a></li>
             <li><a href="#about">About</a></li>
         </ul>
-        <div class="_c97815e39" id="_c97815e39">MV<span>.</span>PORTFOLIO</div>
-        <button class="_c726d9046" id="_c726d9046" onclick="toggleAutoplay()" title="Toggle autoplay preview">
-            <span class="_c97e850e3">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        <div class="nav-brand" id="nav-brand">MV<span>.</span>PORTFOLIO</div>
+        <button class="autoplay-toggle" id="autoplay-toggle" onclick="toggleAutoplay()" title="Toggle autoplay preview">
+            <span class="autoplay-icon">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+                    <polygon points="5 3 19 12 5 21 5 3" />
+                </svg>
             </span>
-            <span class="_c93d710ec" id="_c93d710ec">Autoplay</span>
+            <span class="autoplay-label" id="autoplay-label">Autoplay</span>
         </button>
     </nav>
 
-    <section class="_c0184220b" id="_c4e26b196">
-        <div class="_cdc10ce9b"></div>
-        <div class="_ce290547d"></div>
+    <section class="hero" id="home">
+        <div class="hero-bg"></div>
+        <div class="hero-grid"></div>
 
-        <div class="_c5a4d4ac9">
-            <div class="_c24334139" id="_c24334139">
-                <div class="_c9629e1d0 _c0f35637a" id="_cb8d0ecaa"></div>
-                <div class="_c9629e1d0 _c80dca432" id="_c862ccae1"></div>
-                <div class="_c9629e1d0 _c70d503fe" id="_cbac73707"></div>
+        <div class="hero-showcase">
+            <div class="hero-track-wrap" id="hero-track-wrap">
+                <div class="hero-track row-1" id="hero-row-1"></div>
+                <div class="hero-track row-2" id="hero-row-2"></div>
+                <div class="hero-track row-3" id="hero-row-3"></div>
             </div>
         </div>
         <div style="position:relative;z-index:1">
-            <p class="_c3ad52395" id="_c3ad52395">Music Video Director</p>
-            <h1 class="_cfee50768" id="_cfee50768">
-                YOUR<br><span class="_c8471ee7f">WORK</span><br><span class="_cbf856389">HERE</span>
+            <p class="hero-label" id="hero-label">Music Video Director</p>
+            <h1 class="hero-title" id="hero-title">
+                YOUR<br><span class="accent">WORK</span><br><span class="stroke">HERE</span>
             </h1>
-            <p class="_c2448543f" id="_c2448543f">Crafting visual stories that move. Music video direction & animation.</p>
-            <div class="_c5fcd9587">
-                <a href="#_c8f13cb67" class="_cc5dd7d7b _c7fa597ca">View Works</a>
-                <a href="#about" class="_cc5dd7d7b _c0dde536f">About</a>
+            <p class="hero-sub" id="hero-sub">Crafting visual stories that move. Music video direction & animation.</p>
+            <div class="hero-cta">
+                <a href="#works" class="btn btn-primary">View Works</a>
+                <a href="#about" class="btn btn-ghost">About</a>
             </div>
         </div>
     </section>
 
-    <section id="_c8f13cb67">
-        <div class="_ca2eb47a0">
-            <h2 class="_c85b32a54">Works</h2>
-            <span class="_c1807d67e" id="_c728d908e">00</span>
-            <div class="_ceb9674eb"></div>
+    <section id="works">
+        <div class="section-header">
+            <h2 class="section-title">Works</h2>
+            <span class="section-count" id="works-count">00</span>
+            <div class="section-line"></div>
         </div>
-        <div class="_c1d4523dd" id="_c489c4769">
-            <button class="_c5285a148 _c00393c9f" onclick="filterCards('all',this)">All</button>
+        <div class="filters" id="filter-bar">
+            <button class="filter-btn active" onclick="filterCards('all',this)">All</button>
         </div>
-        <div class="_c8a43e5b1" id="_c8a43e5b1">
-            <div class="_c909aa435 _c366a0259"></div>
-            <div class="_c909aa435 _c366a0259"></div>
-            <div class="_c909aa435 _c366a0259"></div>
-            <div class="_c909aa435 _c366a0259"></div>
+        <div class="mv-grid" id="mv-grid">
+            <div class="mv-card skeleton"></div>
+            <div class="mv-card skeleton"></div>
+            <div class="mv-card skeleton"></div>
+            <div class="mv-card skeleton"></div>
         </div>
     </section>
 
     <section id="about">
-        <div class="_c6ffc0591">
-            <div class="_cf0809351">
-                <div class="_ca2eb47a0" style="margin-bottom:24px">
-                    <h2 class="_c85b32a54">About</h2>
-                    <div class="_ceb9674eb"></div>
+        <div class="about-grid">
+            <div class="about-text">
+                <div class="section-header" style="margin-bottom:24px">
+                    <h2 class="section-title">About</h2>
+                    <div class="section-line"></div>
                 </div>
-                <p id="about-p1">Hi! I'm a music video director & animator creating vibrant visual worlds for artists.</p>
-                <p id="about-p2">Specializing in anime-style illustration, motion graphics, and lyric video production.</p>
+                <p id="about-p1">Hi! I'm a music video director & animator creating vibrant visual worlds for artists.
+                </p>
+                <p id="about-p2">Specializing in anime-style illustration, motion graphics, and lyric video production.
+                </p>
                 <div style="margin-top:28px;display:flex;gap:12px;flex-wrap:wrap">
-                    <div id="_cee045151" style="display:flex;gap:12px;flex-wrap:wrap"></div>
+                    <div id="about-social-btns" style="display:flex;gap:12px;flex-wrap:wrap"></div>
                 </div>
             </div>
-            <div class="_c25135374">
-                <div class="_c62180b6e">
-                    <div class="_c3318f0e7" id="_ca6a482b7">—</div>
-                    <div class="_cda60e515">Music Videos</div>
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-num" id="stat-mvs">—</div>
+                    <div class="stat-label">Music Videos</div>
                 </div>
-                <div class="_c62180b6e">
-                    <div class="_c3318f0e7" id="_c26040edd">—</div>
-                    <div class="_cda60e515">Since</div>
+                <div class="stat-box">
+                    <div class="stat-num" id="stat-year">—</div>
+                    <div class="stat-label">Since</div>
                 </div>
-                <div class="_c62180b6e">
-                    <div class="_c3318f0e7" id="_c81ea9002">—</div>
-                    <div class="_cda60e515">Artists</div>
+                <div class="stat-box">
+                    <div class="stat-num" id="stat-clients">—</div>
+                    <div class="stat-label">Artists</div>
                 </div>
-                <div class="_c62180b6e">
-                    <div class="_c3318f0e7" id="_c83af3848">—</div>
-                    <div class="_cda60e515">Genres</div>
+                <div class="stat-box">
+                    <div class="stat-num" id="stat-tags">—</div>
+                    <div class="stat-label">Genres</div>
                 </div>
             </div>
         </div>
     </section>
 
     <footer>
-        <div class="_c32091db6" id="_c32091db6">MV<span>.</span>PORTFOLIO</div>
-        <div class="_c1c1e43e8" id="_c9f13353a"></div>
-        <span class="_c35176635" id="_c35176635">© 2024 — All Rights Reserved</span>
+        <div class="footer-brand" id="footer-brand">MV<span>.</span>PORTFOLIO</div>
+        <div class="social-links" id="footer-social-links"></div>
+        <span class="footer-copy" id="footer-copy">© 2024 — All Rights Reserved</span>
     </footer>
 
-    <div class="_c0db5a849" id="_c385b1a01" onclick="closeModal(event)">
-        <div class="_c385b1a01">
-            <div class="_c6d70b6b0" id="_c2ef38e64"></div>
-            <div class="_cfd3e894f">
+    <div class="modal-backdrop" id="modal" onclick="closeModal(event)">
+        <div class="modal">
+            <div class="modal-video" id="modal-video-wrap"></div>
+            <div class="modal-meta">
                 <div>
-                    <div class="_c62f509e5" id="_c62f509e5"></div>
-                    <div class="_c1c680d07" id="_c1c680d07"></div>
-                    <div class="_c244d6cb5" id="_c244d6cb5"></div>
+                    <div class="modal-title" id="modal-title"></div>
+                    <div class="modal-artist" id="modal-artist"></div>
+                    <div class="modal-tags" id="modal-tags"></div>
                 </div>
-                <button class="_ca6256f3b" onclick="closeModal()">✕</button>
+                <button class="modal-close" onclick="closeModal()">✕</button>
             </div>
         </div>
     </div>
 
-    <div class="_c7f110ffa" id="_c7f110ffa">
-        <div class="_c9cc0a28b">
-            <h3>🔒 Hallo</h3>
-            <p>access the panel.</p>
-            <p class="_c9faa44f8" id="_c9faa44f8">❌ Invalid email or password.</p>
-            <input type="email" id="_cb44c2a0a" autocomplete="email" placeholder="Email..." style="margin-bottom:8px"
-                onkeydown="if(event.key==='Enter')document.getElementById('_c70526fd5').focus()">
-            <input type="password" id="_c70526fd5" autocomplete="current-password" placeholder="Password..."
+    <div class="pw-modal" id="pw-modal">
+        <div class="pw-inner">
+            <h3>Blank</h3>
+            <p> Hello </p>
+            <p class="pw-error" id="pw-error">❌.</p>
+            <input type="email" id="pw-email" autocomplete="email" placeholder="Email..." style="margin-bottom:8px"
+                onkeydown="if(event.key==='Enter')document.getElementById('pw-input').focus()">
+            <input type="password" id="pw-input" autocomplete="current-password" placeholder="Password..."
                 onkeydown="if(event.key==='Enter')checkPw()">
-            <button class="_ccbb22190" id="_ccbb22190" onclick="checkPw()">Sign In →</button>
+            <button class="pw-btn" id="pw-btn" onclick="checkPw()">Gas →</button>
         </div>
     </div>
 
-    <div class="_c0c7440b0" id="_c0c7440b0">
-        <div class="_c497cb31d">
-            <div class="_c87e1f785">Panel</div>
-            <button class="_c05d67796" onclick="closeAdminPanel()">✕</button>
+    <div class="admin-panel" id="admin-panel">
+        <div class="admin-header">
+            <div class="admin-title">Panel</div>
+            <button class="admin-close-btn" onclick="closeAdminPanel()">✕</button>
         </div>
-        <div class="_c2a01bf50">Hello</div>
+        <div class="admin-hint">jir</div>
 
-        <div class="_c54793e45">
-            <button class="tab-btn _c00393c9f" onclick="switchTab('add',this)">+ Tambah</button>
+        <div class="admin-tabs">
+            <button class="tab-btn active" onclick="switchTab('add',this)">+ Tambah</button>
             <button class="tab-btn" onclick="switchTab('list',this)">📋 Kelola</button>
             <button class="tab-btn" onclick="switchTab('site',this)">✏ Site</button>
             <button class="tab-btn" onclick="switchTab('design',this)">🎨 Design</button>
         </div>
 
-        <div class="tab-pane _c00393c9f" id="tab-add">
-            <div class="_cc3c79506" autocomplete="off">
+        <div class="tab-pane active" id="tab-add">
+            <div class="admin-form" autocomplete="off">
                 <input type="text" style="display:none" aria-hidden="true">
                 <input type="password" style="display:none" aria-hidden="true">
-                <div class="_c786b9fdf">
+                <div class="form-row">
                     <label>YouTube URL atau Video ID</label>
-                    <input type="text" id="_cdc13562f" readonly onfocus="this.removeAttribute('readonly')" placeholder="Paste link YT → judul otomatis terisi" oninput="onUrlInput(this.value)">
-                    <span class="_c1cbec14e" id="_c1cbec14e"></span>
+                    <input type="text" id="inp-url" readonly onfocus="this.removeAttribute('readonly')"
+                        placeholder="Paste link YT → judul otomatis terisi" oninput="onUrlInput(this.value)">
+                    <span class="fetch-status" id="fetch-status"></span>
                 </div>
-                <div class="_c786b9fdf">
+                <div class="form-row">
                     <label>Judul <span style="color:var(--accent);font-size:9px">(otomatis, bisa diedit)</span></label>
-                    <input type="text" id="_ce2934e9c" readonly onfocus="this.removeAttribute('readonly')" placeholder="Judul lagu / MV">
+                    <input type="text" id="inp-title" readonly onfocus="this.removeAttribute('readonly')"
+                        placeholder="Judul lagu / MV">
                 </div>
                 <div>
                     <label>Artis / Channel</label>
-                    <input type="text" id="_cd7c14bd1" readonly onfocus="this.removeAttribute('readonly')" placeholder="Nama artis">
+                    <input type="text" id="inp-artist" readonly onfocus="this.removeAttribute('readonly')"
+                        placeholder="Nama artis">
                 </div>
                 <div>
                     <label>Tags</label>
-                    <div class="_c1af462fc" id="_cae9c6f36">
-                        <button type="button" class="_c7f5050f1" onclick="togglePresetTag('_ccd7b7167','Simple MV',this)">Simple MV</button>
-                        <button type="button" class="_c7f5050f1" onclick="togglePresetTag('_ccd7b7167','Semi Complex',this)">Semi Complex</button>
-                        <button type="button" class="_c7f5050f1" onclick="togglePresetTag('_ccd7b7167','Complex',this)">Complex</button>
+                    <div class="tag-presets" id="add-tag-presets">
+                        <button type="button" class="tag-preset-btn"
+                            onclick="togglePresetTag('inp-tags','Simple MV',this)">Simple MV</button>
+                        <button type="button" class="tag-preset-btn"
+                            onclick="togglePresetTag('inp-tags','Semi Complex',this)">Semi Complex</button>
+                        <button type="button" class="tag-preset-btn"
+                            onclick="togglePresetTag('inp-tags','Complex',this)">Complex</button>
                     </div>
-                    <input type="text" id="_ccd7b7167" readonly onfocus="this.removeAttribute('readonly')" placeholder="Ketik tag custom..." oninput="syncPresetHighlight('_ccd7b7167','_cae9c6f36')">
+                    <input type="text" id="inp-tags" readonly onfocus="this.removeAttribute('readonly')"
+                        placeholder="Ketik tag custom..." oninput="syncPresetHighlight('inp-tags','add-tag-presets')">
                 </div>
                 <div>
                     <label>Custom Thumbnail URL</label>
-                    <input type="text" id="_cafd57f97" readonly onfocus="this.removeAttribute('readonly')" placeholder="Kosongkan = thumbnail YT otomatis">
+                    <input type="text" id="inp-thumb" readonly onfocus="this.removeAttribute('readonly')"
+                        placeholder="Kosongkan = thumbnail YT otomatis">
                 </div>
-                <div class="_c4ed24456">
-                    <input type="checkbox" id="_c42964a40">
-                    <label for="_c42964a40" style="margin:0;font-size:11px">Featured (tampil besar)</label>
+                <div class="checkbox-row">
+                    <input type="checkbox" id="inp-featured">
+                    <label for="inp-featured" style="margin:0;font-size:11px">Featured (tampil besar)</label>
                 </div>
-                <button class="_cf9d92d8f" id="_c3a2635ae" onclick="addCard()">+ Tambah ke Portofolio</button>
+                <button class="admin-add-btn" id="add-btn" onclick="addCard()">+ Tambah ke Portofolio</button>
             </div>
         </div>
 
@@ -209,26 +225,32 @@
                     ✦ Drag Reorder on Page
                 </button>
             </div>
-            <div class="_c5fa42dd0" id="_c5fa42dd0">
+            <div class="existing-list" id="existing-list">
                 <div style="color:var(--muted);font-size:12px;font-family:'Space Mono',monospace">Loading...</div>
             </div>
         </div>
 
         <div class="tab-pane" id="tab-site">
-            <div class="_cc3c79506">
-                 <div style="background:var(--bg);border:1px solid rgba(200,255,0,.15);padding:14px;margin-bottom:4px">
+            <div class="admin-form">
+                <div style="background:var(--bg);border:1px solid rgba(200,255,0,.15);padding:14px;margin-bottom:4px">
                     <label style="color:var(--accent);margin-bottom:10px;display:block">Mode Tampil Karya</label>
                     <div style="display:flex;flex-direction:column;gap:8px">
-                        <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:12px;color:var(--text)">
-                            <input type="radio" name="display-mode" id="dm-all" value="all" style="width:auto;margin-top:2px" onchange="previewMode('all')">
+                        <label
+                            style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:12px;color:var(--text)">
+                            <input type="radio" name="display-mode" id="dm-all" value="all"
+                                style="width:auto;margin-top:2px" onchange="previewMode('all')">
                             <div><strong>Tampil Semua</strong></div>
                         </label>
-                        <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:12px;color:var(--text)">
-                            <input type="radio" name="display-mode" id="dm-pagination" value="pagination" style="width:auto;margin-top:2px" onchange="previewMode('pagination')">
+                        <label
+                            style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:12px;color:var(--text)">
+                            <input type="radio" name="display-mode" id="dm-pagination" value="pagination"
+                                style="width:auto;margin-top:2px" onchange="previewMode('pagination')">
                             <div><strong>Pagination</strong></div>
                         </label>
-                        <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:12px;color:var(--text)">
-                            <input type="radio" name="display-mode" id="dm-loadmore" value="loadmore" style="width:auto;margin-top:2px" onchange="previewMode('loadmore')">
+                        <label
+                            style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:12px;color:var(--text)">
+                            <input type="radio" name="display-mode" id="dm-loadmore" value="loadmore"
+                                style="width:auto;margin-top:2px" onchange="previewMode('loadmore')">
                             <div><strong>Load More</strong></div>
                         </label>
                     </div>
@@ -243,36 +265,46 @@
                 <div style="background:var(--bg);border:1px solid rgba(200,255,0,.1);padding:14px;margin-bottom:4px">
                     <label style="color:var(--accent);margin-bottom:10px;display:block">Social Media Links</label>
                     <div style="display:flex;align-items:center;gap:8px">
-                        <span style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);width:80px">YouTube</span>
+                        <span
+                            style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);width:80px">YouTube</span>
                         <input type="text" id="s-yt" placeholder="https://youtube.com/@..." style="flex:1">
                     </div>
-                     <div style="display:flex;align-items:center;gap:8px">
-                        <span style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);width:80px">Twitter</span>
+                    <div style="display:flex;align-items:center;gap:8px">
+                        <span
+                            style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);width:80px">Twitter</span>
                         <input type="text" id="s-tw" placeholder="https://twitter.com/..." style="flex:1">
                     </div>
                 </div>
-                <button class="_cf9d92d8f" id="_c79ab6801" onclick="saveSiteEdit()" style="margin-top:8px">Simpan Info Site →</button>
+                <button class="admin-add-btn" id="site-save-btn" onclick="saveSiteEdit()" style="margin-top:8px">Simpan
+                    Info Site →</button>
             </div>
         </div>
 
-      <div class="tab-pane" id="tab-design">
-            <div class="_cc3c79506">
+        <div class="tab-pane" id="tab-design">
+            <div class="admin-form">
                 <div style="background:var(--bg);border:1px solid rgba(200,255,0,.15);padding:14px;margin-bottom:4px">
                     <label style="color:var(--accent);margin-bottom:10px;display:block">Logo & Favicon</label>
                     <div style="display:flex;flex-direction:column;gap:10px">
                         <div>
                             <label>Upload Logo (tampil di loading screen)</label>
-                            <input type="file" id="_cc24e1102" accept="image/*" onchange="handleLogoUpload(this)" style="width:100%;background:var(--bg);border:1px solid rgba(240,240,240,.1);color:var(--text);padding:8px;font-size:12px;">
-                            <div id="_cdaed90c1" style="margin-top:8px;display:none">
-                                <img id="_ca1b04f71" style="max-width:100%;max-height:80px;object-fit:contain;background:rgba(255,255,255,.05);padding:8px;">
-                                <button onclick="deleteLogo()" style="display:block;margin-top:6px;padding:5px 14px;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.08em;background:rgba(255,60,60,.08);border:1px solid rgba(255,60,60,.3);color:#ff6060;cursor:pointer;transition:all .2s" onmouseenter="this.style.background='rgba(255,60,60,.18)'" onmouseleave="this.style.background='rgba(255,60,60,.08)'">✕ Hapus Logo</button>
+                            <input type="file" id="logo-upload" accept="image/*" onchange="handleLogoUpload(this)"
+                                style="width:100%;background:var(--bg);border:1px solid rgba(240,240,240,.1);color:var(--text);padding:8px;font-size:12px;">
+                            <div id="logo-preview" style="margin-top:8px;display:none">
+                                <img id="logo-preview-img"
+                                    style="max-width:100%;max-height:80px;object-fit:contain;background:rgba(255,255,255,.05);padding:8px;">
+                                <button onclick="deleteLogo()"
+                                    style="display:block;margin-top:6px;padding:5px 14px;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.08em;background:rgba(255,60,60,.08);border:1px solid rgba(255,60,60,.3);color:#ff6060;cursor:pointer;transition:all .2s"
+                                    onmouseenter="this.style.background='rgba(255,60,60,.18)'"
+                                    onmouseleave="this.style.background='rgba(255,60,60,.08)'">✕ Hapus Logo</button>
                             </div>
                         </div>
                         <div>
                             <label>Upload Favicon (icon di tab browser)</label>
-                            <input type="file" id="_c28e010a7" accept="image/*" onchange="handleFaviconUpload(this)" style="width:100%;background:var(--bg);border:1px solid rgba(240,240,240,.1);color:var(--text);padding:8px;font-size:12px;">
+                            <input type="file" id="favicon-upload" accept="image/*" onchange="handleFaviconUpload(this)"
+                                style="width:100%;background:var(--bg);border:1px solid rgba(240,240,240,.1);color:var(--text);padding:8px;font-size:12px;">
                         </div>
-                        <button class="_cf9d92d8f" onclick="saveLogoFavicon()" id="_cf72674fb">💾 Save Logo & Favicon</button>
+                        <button class="admin-add-btn" onclick="saveLogoFavicon()" id="logo-save-btn">💾 Save Logo &
+                            Favicon</button>
                     </div>
                 </div>
 
@@ -281,40 +313,70 @@
                     <label style="margin-bottom:8px;display:block">Custom Colors</label>
                     <div style="display:flex;flex-direction:column;gap:10px">
                         <div style="display:flex;align-items:center;gap:10px">
-                            <span style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);width:100px;flex-shrink:0">Text Color</span>
-                            <input type="color" id="color-text" value="#f0f0f0" oninput="previewColor('text',this.value)" style="width:44px;height:32px;border:none;background:none;cursor:pointer;padding:0;">
-                            <input type="text" id="color-text-hex" value="#f0f0f0" oninput="previewColorHex('text',this)" style="flex:1;background:var(--bg);border:1px solid rgba(240,240,240,.1);color:var(--text);padding:6px 10px;font-family:'Space Mono',monospace;font-size:11px;outline:none;">
+                            <span
+                                style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);width:100px;flex-shrink:0">Text
+                                Color</span>
+                            <input type="color" id="color-text" value="#f0f0f0"
+                                oninput="previewColor('text',this.value)"
+                                style="width:44px;height:32px;border:none;background:none;cursor:pointer;padding:0;">
+                            <input type="text" id="color-text-hex" value="#f0f0f0"
+                                oninput="previewColorHex('text',this)"
+                                style="flex:1;background:var(--bg);border:1px solid rgba(240,240,240,.1);color:var(--text);padding:6px 10px;font-family:'Space Mono',monospace;font-size:11px;outline:none;">
                         </div>
                         <div style="display:flex;align-items:center;gap:10px">
-                            <span style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);width:100px;flex-shrink:0">Accent (Main)</span>
-                            <input type="color" id="color-accent" value="#c8ff00" oninput="previewColor('_c8471ee7f',this.value)" style="width:44px;height:32px;border:none;background:none;cursor:pointer;padding:0;">
-                            <input type="text" id="color-accent-hex" value="#c8ff00" oninput="previewColorHex('_c8471ee7f',this)" style="flex:1;background:var(--bg);border:1px solid rgba(240,240,240,.1);color:var(--text);padding:6px 10px;font-family:'Space Mono',monospace;font-size:11px;outline:none;">
+                            <span
+                                style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);width:100px;flex-shrink:0">Accent
+                                (Main)</span>
+                            <input type="color" id="color-accent" value="#c8ff00"
+                                oninput="previewColor('accent',this.value)"
+                                style="width:44px;height:32px;border:none;background:none;cursor:pointer;padding:0;">
+                            <input type="text" id="color-accent-hex" value="#c8ff00"
+                                oninput="previewColorHex('accent',this)"
+                                style="flex:1;background:var(--bg);border:1px solid rgba(240,240,240,.1);color:var(--text);padding:6px 10px;font-family:'Space Mono',monospace;font-size:11px;outline:none;">
                         </div>
                         <div style="display:flex;align-items:center;gap:10px">
-                            <span style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);width:100px;flex-shrink:0">Accent 2 (Pink)</span>
-                            <input type="color" id="color-accent2" value="#ff3cac" oninput="previewColor('accent2',this.value)" style="width:44px;height:32px;border:none;background:none;cursor:pointer;padding:0;">
-                            <input type="text" id="color-accent2-hex" value="#ff3cac" oninput="previewColorHex('accent2',this)" style="flex:1;background:var(--bg);border:1px solid rgba(240,240,240,.1);color:var(--text);padding:6px 10px;font-family:'Space Mono',monospace;font-size:11px;outline:none;">
+                            <span
+                                style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);width:100px;flex-shrink:0">Accent
+                                2 (Pink)</span>
+                            <input type="color" id="color-accent2" value="#ff3cac"
+                                oninput="previewColor('accent2',this.value)"
+                                style="width:44px;height:32px;border:none;background:none;cursor:pointer;padding:0;">
+                            <input type="text" id="color-accent2-hex" value="#ff3cac"
+                                oninput="previewColorHex('accent2',this)"
+                                style="flex:1;background:var(--bg);border:1px solid rgba(240,240,240,.1);color:var(--text);padding:6px 10px;font-family:'Space Mono',monospace;font-size:11px;outline:none;">
                         </div>
                         <div style="display:flex;align-items:center;gap:10px">
-                            <span style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);width:100px;flex-shrink:0">Background</span>
-                            <input type="color" id="color-bg" value="#080810" oninput="previewColor('bg',this.value)" style="width:44px;height:32px;border:none;background:none;cursor:pointer;padding:0;">
-                            <input type="text" id="color-bg-hex" value="#080810" oninput="previewColorHex('bg',this)" style="flex:1;background:var(--bg);border:1px solid rgba(240,240,240,.1);color:var(--text);padding:6px 10px;font-family:'Space Mono',monospace;font-size:11px;outline:none;">
+                            <span
+                                style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);width:100px;flex-shrink:0">Background</span>
+                            <input type="color" id="color-bg" value="#080810" oninput="previewColor('bg',this.value)"
+                                style="width:44px;height:32px;border:none;background:none;cursor:pointer;padding:0;">
+                            <input type="text" id="color-bg-hex" value="#080810" oninput="previewColorHex('bg',this)"
+                                style="flex:1;background:var(--bg);border:1px solid rgba(240,240,240,.1);color:var(--text);padding:6px 10px;font-family:'Space Mono',monospace;font-size:11px;outline:none;">
                         </div>
                         <div style="display:flex;align-items:center;gap:10px">
-                            <span style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);width:100px;flex-shrink:0">Surface</span>
-                            <input type="color" id="color-surface" value="#10101c" oninput="previewColor('surface',this.value)" style="width:44px;height:32px;border:none;background:none;cursor:pointer;padding:0;">
-                            <input type="text" id="color-surface-hex" value="#10101c" oninput="previewColorHex('surface',this)" style="flex:1;background:var(--bg);border:1px solid rgba(240,240,240,.1);color:var(--text);padding:6px 10px;font-family:'Space Mono',monospace;font-size:11px;outline:none;">
+                            <span
+                                style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);width:100px;flex-shrink:0">Surface</span>
+                            <input type="color" id="color-surface" value="#10101c"
+                                oninput="previewColor('surface',this.value)"
+                                style="width:44px;height:32px;border:none;background:none;cursor:pointer;padding:0;">
+                            <input type="text" id="color-surface-hex" value="#10101c"
+                                oninput="previewColorHex('surface',this)"
+                                style="flex:1;background:var(--bg);border:1px solid rgba(240,240,240,.1);color:var(--text);padding:6px 10px;font-family:'Space Mono',monospace;font-size:11px;outline:none;">
                         </div>
                     </div>
-                    <button class="_cf9d92d8f" onclick="saveColors()" id="color-save-btn" style="margin-top:12px">💾 Save Colors</button>
-                    <button onclick="resetColors()" style="width:100%;margin-top:6px;background:transparent;border:1px solid rgba(240,240,240,.1);color:var(--muted);padding:8px;font-family:'Space Mono',monospace;font-size:11px;cursor:pointer;">↺ Reset to Default</button>
+                    <button class="admin-add-btn" onclick="saveColors()" id="color-save-btn" style="margin-top:12px">💾
+                        Save Colors</button>
+                    <button onclick="resetColors()"
+                        style="width:100%;margin-top:6px;background:transparent;border:1px solid rgba(240,240,240,.1);color:var(--muted);padding:8px;font-family:'Space Mono',monospace;font-size:11px;cursor:pointer;">↺
+                        Reset to Default</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="_cff3fb2b1" id="_cff3fb2b1"></div>
+    <div class="toast" id="toast"></div>
 
     <script src="script.js"></script>
 </body>
+
 </html>
