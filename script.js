@@ -109,7 +109,7 @@ function _0xee861363() {
 setInterval(() => {
   if ((!_0xf9ace250() && _0xebe0492e("_c0c7440b0")?.classList.contains('open'))) {
     _0xebe0492e("_c0c7440b0").classList.remove('open');
-    _0xab4ea441('Admin session expired. Type "adm" to log in again.', 'error');
+    _0xab4ea441('jir.', 'error');
   }
 }, (60 * 1000));
 function closeAdminPanel() {
