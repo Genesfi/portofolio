@@ -286,8 +286,8 @@ footer { border-top: 1px solid rgba(240, 240, 240, .06); padding: 32px 40px; dis
 .social-links a:hover { color: var(--accent); }
 
 /* ADMIN PANEL */
-.admin-panel { position: fixed; bottom: 24px; right: 24px; z-index: 150; width: 400px; background: var(--surface); border: 1px solid rgba(200, 255, 0, .25); padding: 24px; display: none; max-height: 88vh; overflow-y: auto; box-shadow: 0 8px 40px rgba(0, 0, 0, .6); }
-.admin-panel.open { display: block; }
+.jkw-jk { position: fixed; bottom: 24px; right: 24px; z-index: 150; width: 400px; background: var(--surface); border: 1px solid rgba(200, 255, 0, .25); padding: 24px; display: none; max-height: 88vh; overflow-y: auto; box-shadow: 0 8px 40px rgba(0, 0, 0, .6); }
+.jkw-jk.open { display: block; }
 .admin-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
 .admin-title { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: .08em; color: var(--accent); }
 .admin-close-btn { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 20px; }
@@ -402,5 +402,5 @@ body.loading nav, body.loading section, body.loading footer { visibility: hidden
     nav { padding: 14px 20px }
     section { padding: 60px 20px }
     .hero { padding: 0 20px 40px }
-    .admin-panel { width: calc(100vw - 32px); right: 16px; bottom: 0; max-height: 70vh }
+    .jkw-jk { width: calc(100vw - 32px); right: 16px; bottom: 0; max-height: 70vh }
 }
