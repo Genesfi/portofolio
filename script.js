@@ -23,7 +23,7 @@ function toggleAutoplay() {
   _0x02f18240 = !_0x02f18240;
   try {
     localStorage.setItem('mv_autoplay', _0x02f18240 ? '1' : '0');
-  } catch {}
+  } catch { }
   _0x0997ce04();
   if (_0x02f18240) {
     _0x305c92d0();
@@ -101,7 +101,7 @@ function _0xf9ace250() {
 function _0x5cd29776(_0x005ba54a) {
   if (_0x005ba54a) sessionStorage.setItem(_0x8b60712b, JSON.stringify({
     ts: Date.now()
-  }));else sessionStorage.removeItem(_0x8b60712b);
+  })); else sessionStorage.removeItem(_0x8b60712b);
 }
 function _0xee861363() {
   if (_0xf9ace250()) _0x5cd29776(true);
@@ -109,7 +109,7 @@ function _0xee861363() {
 setInterval(() => {
   if ((!_0xf9ace250() && _0xebe0492e("_c0c7440b0")?.classList.contains('open'))) {
     _0xebe0492e("_c0c7440b0").classList.remove('open');
-    _0xab4ea441('jir.', 'error');
+    _0xab4ea441('jir', 'error');
   }
 }, (60 * 1000));
 function closeAdminPanel() {
@@ -161,7 +161,7 @@ function _0x28270241() {
       _0xebe0492e("_c9faa44f8").textContent = `🔒 Too many attempts. Try again in ${_0xeb37fa7e} min.`;
       _0xebe0492e("_ccbb22190").disabled = true;
     }
-  } catch (e) {}
+  } catch (e) { }
   _0xebe0492e("_c7f110ffa").style.display = 'flex';
   setTimeout(() => _0xebe0492e("_cb44c2a0a").focus(), 100);
 }
@@ -180,7 +180,7 @@ async function checkPw() {
       _0xebe0492e("_ccbb22190").disabled = true;
       return;
     }
-  } catch (e) {}
+  } catch (e) { }
   const email = _0xebe0492e("_cb44c2a0a").value.trim(),
     _0xe9f2ec1b = _0xebe0492e("_c70526fd5").value;
   if ((!email || !_0xe9f2ec1b)) {
@@ -210,7 +210,7 @@ async function checkPw() {
     let _0x5c9b319c = 0;
     try {
       _0x5c9b319c = parseInt((sessionStorage.getItem(_0x7bcc574d) || '0'));
-    } catch (e) {}
+    } catch (e) { }
     _0x5c9b319c++;
     sessionStorage.setItem(_0x7bcc574d, _0x5c9b319c);
     const _0xb82b2819 = (_0xa2e7d16a - _0x5c9b319c);
@@ -448,7 +448,7 @@ function _0xebfd6a7c(_0x1fe702fb) {
       _0x1baec7df.appendChild(bar);
     }
   } else if ((_0xf9a08bfa === 'loadmore')) {
-    if (_0x1fe702fb) _0x1595694c = perPage;else _0x1595694c = Math.max(_0x1595694c, perPage);
+    if (_0x1fe702fb) _0x1595694c = perPage; else _0x1595694c = Math.max(_0x1595694c, perPage);
     const slice = _0xbdafb2be.slice(0, _0x1595694c);
     _0x1baec7df.innerHTML = slice.map(_0x62a428f9).join('');
     if ((_0x1595694c < _0xbdafb2be.length)) {
@@ -1097,13 +1097,13 @@ function _0xe3da5d33() {
     }
     try {
       localStorage.setItem('mv_logo_url', _0x62a79faf.logoData);
-    } catch (e) {}
+    } catch (e) { }
   } else {
     if (_0xe7f2eaee) _0xe7f2eaee.style.display = 'none';
     if (_0x9e9fbd34) _0x9e9fbd34.style.display = 'block';
     try {
       localStorage.removeItem('mv_logo_url');
-    } catch (e) {}
+    } catch (e) { }
   }
   if (_0x62a79faf.faviconData) {
     let _0xc0bb8172 = document.querySelector('link[rel="icon"]');
@@ -1150,8 +1150,8 @@ function _0x1a431888() {
   }
   _0xd735bc3f("_c3ad52395", s.label);
   _0xd735bc3f("_c2448543f", s.hsub);
-  _0xd735bc3f("_c5420d1ba", s.about1);
-  _0xd735bc3f("_c1351450c", s.about2);
+  _0xd735bc3f("about-p1", s.about1);
+  _0xd735bc3f("about-p2", s.about2);
   _0xd735bc3f("_c35176635", s.copy);
   if ((s.htitle && (typeof s.htitle === 'string'))) {
     const _0xbc438edf = s.htitle.split('|');
@@ -1188,7 +1188,7 @@ function _0x1a431888() {
     icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.75a4.85 4.85 0 0 1-1.01-.06z"/></svg>',
     primary: false
   }];
-  const _0xfb0078b8 = _0xebe0492e("_cee045151"),
+  const _0xfb0078b8 = _0xebe0492e("about-social-btns"),
     _0x59402495 = _0xebe0492e("_c9f13353a");
   if (_0xfb0078b8) _0xfb0078b8.innerHTML = _0xe8861a36.filter(_0x4eabe9d9 => s[_0x4eabe9d9.key]).map(s2 => `<a href="${s[s2.key]}" target="_blank" class="_cc5dd7d7b ${s2.primary ? "_c7fa597ca" : "_c0dde536f"}" style="padding:10px 20px;font-size:11px;display:inline-flex;align-items:center;gap:7px">${s2.icon} ${s2.label}</a>`).join('');
   if (_0x59402495) _0x59402495.innerHTML = _0xe8861a36.filter(s2 => s[s2.key]).map(s2 => `<a href="${s[s2.key]}" target="_blank">${s2.label}</a>`).join('');
