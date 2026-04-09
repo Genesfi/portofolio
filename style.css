@@ -263,7 +263,7 @@ section { padding: 80px 40px; }
 ._ca6256f3b:hover { color: var(--accent2); }
 
 
-#_cc13929f5 { background: var(--surface); border-top: 1px solid rgba(200, 255, 0, .06); }
+#about { background: var(--surface); border-top: 1px solid rgba(200, 255, 0, .06); }
 ._c6ffc0591 { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
 @media(max-width:768px) { ._c6ffc0591 { grid-template-columns: 1fr; } }
 ._cf0809351 p { color: rgba(240, 240, 240, .7); line-height: 1.8; margin-bottom: 16px; }
