@@ -205,7 +205,7 @@ async function checkPw() {
     _0x0bbfe0be(true);
     _0x8cbf6036("_c93d2a225").style.display = 'none';
     _0x8cbf6036("_c5f03bd80").classList.add('open');
-    _0xe90d247c('Welcome back! ✓', 'success');
+    _0xe90d247c('Wack! ✓', 'success');
   } catch (e) {
     let _0xd51d12ae = 0;
     try {
