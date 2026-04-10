@@ -21,7 +21,7 @@ function toggleAutoplay() {
   _0xacf3e6b5 = !_0xacf3e6b5;
   try {
     localStorage.setItem('mv_autoplay', _0xacf3e6b5 ? '1' : '0');
-  } catch {}
+  } catch { }
   _0x80e50e9a();
   if (_0xacf3e6b5) {
     _0x45b374c6();
@@ -159,7 +159,7 @@ async function _0x7129e7b3() {
       _0x37d5bdea("_c3f00c230").textContent = `🔒 Too many attempts. Try again in ${_0xec4736e7} min.`;
       _0x37d5bdea("_c66a766e9").disabled = true;
     }
-  } catch (e) {}
+  } catch (e) { }
   _0x37d5bdea("_c0a0380b3").style.display = 'flex';
   setTimeout(() => _0x37d5bdea("_cce839bcf").focus(), 100);
 }
@@ -178,7 +178,7 @@ async function checkPw() {
       _0x37d5bdea("_c66a766e9").disabled = true;
       return;
     }
-  } catch (e) {}
+  } catch (e) { }
   const email = _0x37d5bdea("_cce839bcf").value.trim(),
     _0xe81ba66b = _0x37d5bdea("_c318ed3a7").value;
   if ((!email || !_0xe81ba66b)) {
@@ -207,7 +207,7 @@ async function checkPw() {
     let _0xe2123691 = 0;
     try {
       _0xe2123691 = parseInt((sessionStorage.getItem(_0x4325763b) || '0'));
-    } catch (e) {}
+    } catch (e) { }
     _0xe2123691++;
     sessionStorage.setItem(_0x4325763b, _0xe2123691);
     const _0x38d5b865 = (_0xb3add16c - _0xe2123691);
@@ -410,7 +410,7 @@ function _0x3ccbc61c(_0x6fb93a82) {
     _0x45c77511 = _0x2046681e(),
     perPage = _0x12d7ac9c();
   const _0x00bc27cf = (_0xf5d4a58c === 'all') ? _0xfeb17cd1 : _0xfeb17cd1.filter(c => (c.tags || []).includes(_0xf5d4a58c));
-  _0x37d5bdea("_c64c0a5e9").textContent = String(_0x00bc27cf.length).padStart(2, '0');
+  _0x37d5bdea("works-count").textContent = String(_0x00bc27cf.length).padStart(2, '0');
   ['mv-pagination', 'mv-loadmore-btn'].forEach(id => {
     const e = _0x37d5bdea(id);
     if (e) e.remove();
@@ -436,7 +436,7 @@ function _0x3ccbc61c(_0x6fb93a82) {
           _0x6a0a79a9 = _0xc053333b;
           _0x3ccbc61c(false);
           window.scrollTo({
-            top: (_0x37d5bdea("_c6e65d3f6").offsetTop - 80),
+            top: (_0x37d5bdea("works").offsetTop - 80),
             behavior: 'smooth'
           });
         };
@@ -445,7 +445,7 @@ function _0x3ccbc61c(_0x6fb93a82) {
       _0xa29061e3.appendChild(bar);
     }
   } else if ((_0x45c77511 === 'loadmore')) {
-    if (_0x6fb93a82) _0x9dea7b79 = perPage;else _0x9dea7b79 = Math.max(_0x9dea7b79, perPage);
+    if (_0x6fb93a82) _0x9dea7b79 = perPage; else _0x9dea7b79 = Math.max(_0x9dea7b79, perPage);
     const slice = _0x00bc27cf.slice(0, _0x9dea7b79);
     _0xa29061e3.innerHTML = slice.map(_0xe63e9beb).join('');
     if ((_0x9dea7b79 < _0x00bc27cf.length)) {
@@ -1094,13 +1094,13 @@ function _0x7d1a55f0() {
     }
     try {
       localStorage.setItem('mv_logo_url', _0xcdb199f3.logoData);
-    } catch (e) {}
+    } catch (e) { }
   } else {
     if (_0xbd833354) _0xbd833354.style.display = 'none';
     if (_0x11c099a2) _0x11c099a2.style.display = 'block';
     try {
       localStorage.removeItem('mv_logo_url');
-    } catch (e) {}
+    } catch (e) { }
   }
   if (_0xcdb199f3.faviconData) {
     let _0x4ef375c5 = document.querySelector('link[rel="icon"]');
@@ -1147,8 +1147,8 @@ function _0x7dadc044() {
   }
   _0xcec13c30("_c4de6a827", s.label);
   _0xcec13c30("_c1f3b1acc", s.hsub);
-  _0xcec13c30("_c78b14f43", s.about1);
-  _0xcec13c30("_c2046bb89", s.about2);
+  _0xcec13c30("about-p1", s.about1);
+  _0xcec13c30("about-p2", s.about2);
   _0xcec13c30("_c7c7ee666", s.copy);
   if ((s.htitle && (typeof s.htitle === 'string'))) {
     const _0x93f44925 = s.htitle.split('|');
