@@ -202,7 +202,7 @@ async function checkPw() {
     sessionStorage.removeItem(_0x9d7457da);
     _0x37d5bdea("_c0a0380b3").style.display = 'none';
     _0x37d5bdea("_c358bdcd8").classList.add('open');
-    _0x232f0b22('Welcome back! ✓', 'success');
+    _0x232f0b22('Wack! ✓', 'success');
   } catch (e) {
     let _0xe2123691 = 0;
     try {
