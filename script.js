@@ -96,7 +96,7 @@ async function _0x2327b324() {
 async function _0x7426dbc2() {
   const _0xba7da3da = await _0x2327b324();
   if (!_0xba7da3da) {
-    _0x232f0b22(''.', 'error');
+    _0x232f0b22('.', 'error');
     closeAdminPanel();
     throw new Error('Unauthorized');
   }
