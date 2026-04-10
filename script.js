@@ -187,7 +187,7 @@ async function checkPw() {
     return;
   }
   const btn = _0x37d5bdea("_c66a766e9");
-  btn.textContent = 'Signing in...';
+  btn.textContent = 'Gassss in...';
   btn.disabled = true;
   try {
     const {
@@ -227,7 +227,7 @@ async function checkPw() {
     _0x37d5bdea("_c318ed3a7").value = '';
     _0x37d5bdea("_c318ed3a7").focus();
   }
-  btn.textContent = 'Sign In →';
+  btn.textContent = 'Gas In →';
 }
 function _0xb6b6ecd8(_0xce69447f, text) {
   const _0x978765de = _0x37d5bdea("_ce706d8a3"),
